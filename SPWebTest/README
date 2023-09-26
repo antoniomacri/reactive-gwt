@@ -1,5 +1,0 @@
-Special notes:
-
-Web app must be compiled to function in Dev Mode and the following line must be modified in appengine-web.xml:
-
-		<exclude path="**.gwt.rpc" /> to <include path="**.gwt.rpc" /> on line 19
