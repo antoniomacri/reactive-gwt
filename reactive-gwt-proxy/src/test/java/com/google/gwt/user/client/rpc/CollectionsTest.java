@@ -63,7 +63,7 @@ public class CollectionsTest extends RpcTestBase<CollectionsTestService, Collect
     @Deployment(testable = false)
     @SuppressWarnings("unused")
     public static WebArchive getTestArchive() {
-        return buildTestArchive(CollectionsTestServiceImpl.class, CollectionsTestServiceImpl.RELATIVE_PATH,
+        return buildTestArchive(CollectionsTestService.class, CollectionsTestServiceImpl.class,
                 "AppModule.nocache.js",
                 "C8776E5A8CA1AD668AB257B71EBC3F11.cache.js",
                 "compilation-mappings.txt",

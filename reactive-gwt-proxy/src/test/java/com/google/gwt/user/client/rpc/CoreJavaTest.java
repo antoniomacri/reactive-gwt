@@ -42,7 +42,7 @@ public class CoreJavaTest extends RpcTestBase<CoreJavaTestService, CoreJavaTestS
     @Deployment(testable = false)
     @SuppressWarnings("unused")
     public static WebArchive getTestArchive() {
-        return buildTestArchive(CoreJavaTestServiceImpl.class, "corejava",
+        return buildTestArchive(CoreJavaTestService.class, CoreJavaTestServiceImpl.class,
                 "AppModule.nocache.js",
                 "DD41F2E9EE38B6CC75CBEB6AD11D073C.cache.js",
                 "compilation-mappings.txt",

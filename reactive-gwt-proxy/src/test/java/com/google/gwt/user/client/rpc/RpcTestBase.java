@@ -16,6 +16,7 @@
 package com.google.gwt.user.client.rpc;
 
 import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.ibm.icu.util.TimeZone;
 import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -43,21 +44,31 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(ArquillianExtension.class)
 public abstract class RpcTestBase<T extends RemoteService, TAsync> {
 
-    protected static WebArchive buildTestArchive(Class<? extends RemoteService> klass, String serviceRelativePath, String... resources) {
+    protected static WebArchive buildTestArchive(
+            Class<? extends RemoteService> serviceInterfaceKlass,
+            Class<? extends RemoteServiceServlet> serviceImplKlass,
+            String... resources
+    ) {
+
+        RemoteServiceRelativePath serviceRelativePathAnnotation = serviceInterfaceKlass.getDeclaredAnnotation(RemoteServiceRelativePath.class);
+        if (serviceRelativePathAnnotation == null) {
+            throw new RuntimeException("Class %s is not annotated with @RemoteServiceRelativePath".formatted(serviceInterfaceKlass));
+        }
+
         var archive = ShrinkWrap.create(WebArchive.class, "client-test.war")
-                .addClass(klass)
+                .addClass(serviceImplKlass)
                 .setWebXML(new StringAsset(Descriptors.create(WebAppDescriptor.class)
                         .version("3.0")
                         .createServlet()
-                        .servletClass(klass.getName())
+                        .servletClass(serviceImplKlass.getName())
                         .servletName("servlet-name").up()
                         .createServletMapping()
                         .servletName("servlet-name")
-                        .urlPattern("/AppRoot/AppModule/" + serviceRelativePath).up()
+                        .urlPattern("/AppRoot/AppModule/" + serviceRelativePathAnnotation.value()).up()
                         .exportAsString()));
 
         for (String resource : resources) {
-            archive = archive.addAsWebResource(serviceRelativePath + "/" + resource, "AppRoot/AppModule/" + resource);
+            archive = archive.addAsWebResource(serviceRelativePathAnnotation.value() + "/" + resource, "AppRoot/AppModule/" + resource);
         }
 
         return archive;

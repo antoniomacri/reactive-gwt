@@ -65,8 +65,6 @@ import java.util.Vector;
 public class CollectionsTestServiceImpl extends RemoteServiceServlet implements
         CollectionsTestService {
 
-    public static final String RELATIVE_PATH = "collections";
-
     private static String toString(Object[] values) {
         return Arrays.asList(values).toString();
     }

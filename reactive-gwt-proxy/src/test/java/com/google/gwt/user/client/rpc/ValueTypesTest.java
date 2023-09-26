@@ -42,7 +42,7 @@ public class ValueTypesTest extends RpcTestBase<ValueTypesTestService, ValueType
     @Deployment(testable = false)
     @SuppressWarnings("unused")
     public static WebArchive getTestArchive() {
-        return buildTestArchive(ValueTypesTestServiceImpl.class, "valuetypes",
+        return buildTestArchive(ValueTypesTestService.class, ValueTypesTestServiceImpl.class,
                 "AppModule.nocache.js",
                 "70D388D29300BB59D229D3DFFAF15FE7.cache.js",
                 "compilation-mappings.txt",
