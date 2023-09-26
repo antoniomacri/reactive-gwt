@@ -80,7 +80,7 @@ public abstract class RpcTestBase<T extends RemoteService, TAsync> {
     }
 
     @BeforeEach
-    public void setUp() {
+    public final void setUp() {
         SyncProxy.setBaseURL(base + "AppRoot/AppModule/");
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
