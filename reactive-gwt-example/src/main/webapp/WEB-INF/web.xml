@@ -6,7 +6,7 @@
 	<!-- Servlets -->
 	<servlet>
 		<servlet-name>greetServlet</servlet-name>
-		<servlet-class>com.gdevelop.gwt.syncrpc.spawebtest.server.GreetingServiceImpl</servlet-class>
+		<servlet-class>com.github.antoniomacri.reactivegwt.example.spawebtest.server.GreetingServiceImpl</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>greetServlet</servlet-name>
@@ -15,7 +15,7 @@
 	
 	<servlet>
 		<servlet-name>cookieServlet</servlet-name>
-		<servlet-class>com.gdevelop.gwt.syncrpc.spawebtest.server.CookieServiceImpl</servlet-class>
+		<servlet-class>com.github.antoniomacri.reactivegwt.example.spawebtest.server.CookieServiceImpl</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>cookieServlet</servlet-name>
@@ -23,7 +23,7 @@
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>TestLargePayload</servlet-name>
-		<servlet-class>com.gdevelop.gwt.syncrpc.spawebtest.server.LargePayloadServiceImpl</servlet-class>
+		<servlet-class>com.github.antoniomacri.reactivegwt.example.spawebtest.server.LargePayloadServiceImpl</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>TestLargePayload</servlet-name>
@@ -31,14 +31,14 @@
 	</servlet-mapping>
 		<servlet>
 		<servlet-name>TestProfile</servlet-name>
-		<servlet-class>com.gdevelop.gwt.syncrpc.spawebtest.server.ProfileServiceImpl</servlet-class>
+		<servlet-class>com.github.antoniomacri.reactivegwt.example.spawebtest.server.ProfileServiceImpl</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>TestProfile</servlet-name>
 		<url-pattern>/spawebtest/rpcsuite/profile</url-pattern>
 	</servlet-mapping>
 	<listener>
-    	<listener-class>com.gdevelop.gwt.syncrpc.spawebtest.server.SessionsTracker</listener-class>
+    	<listener-class>com.github.antoniomacri.reactivegwt.example.spawebtest.server.SessionsTracker</listener-class>
 	</listener>
 	<!-- GWT Services to Host -->
 	<servlet>
