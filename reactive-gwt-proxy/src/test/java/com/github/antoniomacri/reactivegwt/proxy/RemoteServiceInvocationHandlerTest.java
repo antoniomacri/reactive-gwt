@@ -4,44 +4,40 @@
  */
 package com.github.antoniomacri.reactivegwt.proxy;
 
+import com.github.antoniomacri.reactivegwt.proxy.test.MissingTestServiceAsync;
 import com.github.antoniomacri.reactivegwt.proxy.test.TestService;
 import com.github.antoniomacri.reactivegwt.proxy.test.TestServiceAsync;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-import com.github.antoniomacri.reactivegwt.proxy.test.MissingTestServiceAsync;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Fail.fail;
 
 /**
  * @author Preethum
  * @since 0.5
- *
  */
-public class RemoteServiceInvocationHandlerTest extends TestCase {
+public class RemoteServiceInvocationHandlerTest {
 
-	private class TestMissingProxyAsync implements MissingTestServiceAsync {
-	}
+    private class TestMissingProxyAsync implements MissingTestServiceAsync {
+    }
 
-	private class TestProxy implements TestService {
-	}
+    private class TestProxy implements TestService {
+    }
 
-	private class TestProxyAsync implements TestServiceAsync {
-	}
+    private class TestProxyAsync implements TestServiceAsync {
+    }
 
-	public void testDetermineProxyServiceBaseInterface()
-			throws ClassNotFoundException {
-		assertEquals("Wrong service class", TestService.class,
-				RemoteServiceInvocationHandler
-				.determineProxyServiceBaseInterface(new TestProxy()));
-		assertEquals(
-				"Wrong service class for async",
-				TestService.class,
-				RemoteServiceInvocationHandler
-				.determineProxyServiceBaseInterface(new TestProxyAsync()));
-		try {
-			RemoteServiceInvocationHandler
-			.determineProxyServiceBaseInterface(new TestMissingProxyAsync());
-			fail("Should have thrown exception unfound class");
-		} catch (ClassNotFoundException cnfe) {
-
-		}
-	}
+    @Test
+    public void testDetermineProxyServiceBaseInterface() throws ClassNotFoundException {
+        assertThat(RemoteServiceInvocationHandler.determineProxyServiceBaseInterface(new TestProxy()))
+                .as("Wrong service class").isEqualTo(TestService.class);
+        assertThat(RemoteServiceInvocationHandler.determineProxyServiceBaseInterface(new TestProxyAsync()))
+                .as("Wrong service class for async").isEqualTo(TestService.class);
+        try {
+            RemoteServiceInvocationHandler.determineProxyServiceBaseInterface(new TestMissingProxyAsync());
+            fail("Should have thrown exception unfound class");
+        } catch (ClassNotFoundException cnfe) {
+            // ignored
+        }
+    }
 }
