@@ -15,7 +15,7 @@
  */
 package com.google.gwt.user.client.rpc;
 
-import com.gdevelop.gwt.syncrpc.SyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
 import com.google.gwt.core.shared.SerializableThrowable;
 import com.google.gwt.event.shared.UmbrellaException;
 

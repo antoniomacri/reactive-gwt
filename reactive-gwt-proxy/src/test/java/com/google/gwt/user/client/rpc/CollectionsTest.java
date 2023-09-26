@@ -33,7 +33,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import com.gdevelop.gwt.syncrpc.SyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
 import com.google.gwt.user.client.rpc.TestSetFactory.MarkerTypeArrayList;
 import com.google.gwt.user.client.rpc.TestSetFactory.MarkerTypeArraysAsList;
 import com.google.gwt.user.client.rpc.TestSetFactory.MarkerTypeEmptyKey;

@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 
 import junit.framework.TestCase;
 
-import com.gdevelop.gwt.syncrpc.SyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
 
 /**
  * Base class for RPC tests.

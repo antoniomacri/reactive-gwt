@@ -18,7 +18,7 @@ package com.google.gwt.user.client.rpc;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import com.gdevelop.gwt.syncrpc.SyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
 
 /**
  * Test transfer of value types over RPC.

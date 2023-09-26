@@ -17,7 +17,7 @@ package com.google.gwt.user.client.rpc;
 
 import junit.framework.AssertionFailedError;
 
-import com.gdevelop.gwt.syncrpc.SyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
 import com.google.gwt.user.client.rpc.TypeCheckedObjectsTestSetFactory.TypeCheckedFieldClass;
 import com.google.gwt.user.client.rpc.TypeCheckedObjectsTestSetFactory.TypeCheckedNestedLists;
 import com.google.gwt.user.client.rpc.TypeCheckedObjectsTestSetFactory.TypeCheckedSuperClass;

@@ -19,7 +19,7 @@ package com.google.gwt.user.client.rpc;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
-import com.gdevelop.gwt.syncrpc.SyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
 
 /**
  * Test cases for Java core emulation classes in GWT RPC.

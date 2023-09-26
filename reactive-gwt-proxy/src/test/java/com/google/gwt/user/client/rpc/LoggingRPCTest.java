@@ -19,7 +19,7 @@ package com.google.gwt.user.client.rpc;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import com.gdevelop.gwt.syncrpc.SyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
 
 /**
  * Test cases for Generic Collections in GWT RPC.

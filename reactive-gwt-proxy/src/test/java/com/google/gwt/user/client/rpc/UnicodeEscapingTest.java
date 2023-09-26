@@ -18,7 +18,7 @@ package com.google.gwt.user.client.rpc;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.gdevelop.gwt.syncrpc.SyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
 import com.google.gwt.junit.DoNotRunWith;
 import com.google.gwt.junit.Platform;
 import com.google.gwt.user.client.rpc.UnicodeEscapingService.InvalidCharacterException;

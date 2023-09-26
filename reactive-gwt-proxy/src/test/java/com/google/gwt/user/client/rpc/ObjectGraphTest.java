@@ -15,7 +15,7 @@
  */
 package com.google.gwt.user.client.rpc;
 
-import com.gdevelop.gwt.syncrpc.SyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
 import com.google.gwt.user.client.rpc.TestSetFactory.SerializableDoublyLinkedNode;
 import com.google.gwt.user.client.rpc.TestSetFactory.SerializableGraphWithCFS;
 import com.google.gwt.user.client.rpc.TestSetFactory.SerializablePrivateNoArg;

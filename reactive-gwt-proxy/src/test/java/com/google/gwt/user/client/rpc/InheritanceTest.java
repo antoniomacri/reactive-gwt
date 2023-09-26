@@ -15,7 +15,7 @@
  */
 package com.google.gwt.user.client.rpc;
 
-import com.gdevelop.gwt.syncrpc.SyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
 import com.google.gwt.user.client.rpc.InheritanceTestSetFactory.AnonymousClassInterface;
 import com.google.gwt.user.client.rpc.InheritanceTestSetFactory.Circle;
 import com.google.gwt.user.client.rpc.InheritanceTestSetFactory.SerializableClass;
