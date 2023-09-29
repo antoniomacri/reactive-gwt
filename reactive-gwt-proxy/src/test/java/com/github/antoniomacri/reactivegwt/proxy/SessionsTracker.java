@@ -1,8 +1,4 @@
-package com.github.antoniomacri.reactivegwt.example.spawebtest.server;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+package com.github.antoniomacri.reactivegwt.proxy;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -12,6 +8,9 @@ import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Modified from

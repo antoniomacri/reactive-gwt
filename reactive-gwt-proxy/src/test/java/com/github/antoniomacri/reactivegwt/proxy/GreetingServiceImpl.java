@@ -1,11 +1,8 @@
-package com.github.antoniomacri.reactivegwt.example.spawebtest.server;
+package com.github.antoniomacri.reactivegwt.proxy;
+
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import java.util.ArrayList;
-
-import com.github.antoniomacri.reactivegwt.example.spawebtest.client.GreetingService;
-import com.github.antoniomacri.reactivegwt.example.spawebtest.shared.FieldVerifier;
-import com.github.antoniomacri.reactivegwt.example.spawebtest.shared.T1;
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
  * The server side implementation of the RPC service.
@@ -56,9 +53,6 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 				+ ".<br><br>It looks like you are using:<br>" + userAgent;
 	}
 
-	/**
-	 * @see com.blueesoteric.testbed.client.GreetingService#greetServerWithUser(java.lang.String)
-	 */
 	@Override
 	public T1 greetServer2(String name) throws IllegalArgumentException {
 		T1 t1 = new T1();

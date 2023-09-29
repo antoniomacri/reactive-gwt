@@ -1,11 +1,9 @@
-package com.github.antoniomacri.reactivegwt.example.spawebtest.server;
+package com.github.antoniomacri.reactivegwt.proxy;
+
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.github.antoniomacri.reactivegwt.example.spawebtest.client.LargePayloadService;
-import com.github.antoniomacri.reactivegwt.example.spawebtest.shared.UserInfo;
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 @SuppressWarnings("serial")
 public class LargePayloadServiceImpl extends RemoteServiceServlet implements

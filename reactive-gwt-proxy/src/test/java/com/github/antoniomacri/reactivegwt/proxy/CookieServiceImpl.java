@@ -2,16 +2,14 @@
  * Jan 9, 2015 Copyright Blue Esoteric Web Development, LLC
  * Contact: P.Prith@BlueEsoteric.com
  */
-package com.github.antoniomacri.reactivegwt.example.spawebtest.server;
+package com.github.antoniomacri.reactivegwt.proxy;
 
-import java.util.ArrayList;
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
-import com.github.antoniomacri.reactivegwt.example.spawebtest.client.CookieService;
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import java.util.ArrayList;
 
 /**
  * @author Preethum
@@ -43,7 +41,7 @@ public class CookieServiceImpl extends RemoteServiceServlet implements
 	 */
 	@Override
 	public void generateCookiesOnServer() {
-		for (String cVal : CookieService.COOKIE_VALS) {
+		for (String cVal : COOKIE_VALS) {
 			Cookie userCookie = new Cookie(cVal, cVal);
 			getThreadLocalResponse().addCookie(userCookie);
 		}

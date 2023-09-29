@@ -2,11 +2,11 @@
  * Jan 9, 2015 Copyright Blue Esoteric Web Development, LLC
  * Contact: P.Prith@BlueEsoteric.com
  */
-package com.github.antoniomacri.reactivegwt.example.spawebtest.client;
-
-import java.util.ArrayList;
+package com.github.antoniomacri.reactivegwt.proxy;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+
+import java.util.ArrayList;
 
 /**
  * @author Preethum

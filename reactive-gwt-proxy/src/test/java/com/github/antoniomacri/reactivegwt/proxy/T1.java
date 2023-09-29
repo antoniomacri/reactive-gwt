@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package com.github.antoniomacri.reactivegwt.example.spawebtest.shared;
+package com.github.antoniomacri.reactivegwt.proxy;
 
 import java.io.Serializable;
 

@@ -1,9 +1,8 @@
-package com.github.antoniomacri.reactivegwt.example.spawebtest.client;
+package com.github.antoniomacri.reactivegwt.proxy;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import java.util.ArrayList;
-
-import com.github.antoniomacri.reactivegwt.example.spawebtest.shared.T1;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * The async counterpart of <code>GreetingService</code>.

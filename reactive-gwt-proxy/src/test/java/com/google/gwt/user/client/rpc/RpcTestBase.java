@@ -32,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.net.URL;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,32 +44,50 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ExtendWith(ArquillianExtension.class)
 public abstract class RpcTestBase<T extends RemoteService, TAsync> {
+    private static final String MODULE_RELATIVE_PATH = "AppRoot/AppModule/";
+
+    private static <T> Consumer<T> noop() {
+        return ignored -> {
+        };
+    }
 
     protected static WebArchive buildTestArchive(
             Class<? extends RemoteService> serviceInterfaceKlass,
             Class<? extends RemoteServiceServlet> serviceImplKlass,
             String... resources
     ) {
+        return buildTestArchive(serviceInterfaceKlass, serviceImplKlass, noop(), resources);
+    }
 
+    protected static WebArchive buildTestArchive(
+            Class<? extends RemoteService> serviceInterfaceKlass,
+            Class<? extends RemoteServiceServlet> serviceImplKlass,
+            Consumer<WebAppDescriptor> webAppDescriptorConsumer,
+            String... resources
+    ) {
         RemoteServiceRelativePath serviceRelativePathAnnotation = serviceInterfaceKlass.getDeclaredAnnotation(RemoteServiceRelativePath.class);
         if (serviceRelativePathAnnotation == null) {
             throw new RuntimeException("Class %s is not annotated with @RemoteServiceRelativePath".formatted(serviceInterfaceKlass));
         }
 
+        var webAppDescriptor = Descriptors.create(WebAppDescriptor.class)
+                .version("3.0")
+                .createServlet()
+                .servletClass(serviceImplKlass.getName())
+                .servletName("servlet-name").up()
+                .createServletMapping()
+                .servletName("servlet-name")
+                .urlPattern(MODULE_RELATIVE_PATH + serviceRelativePathAnnotation.value())
+                .up();
+
+        webAppDescriptorConsumer.accept(webAppDescriptor);
+
         var archive = ShrinkWrap.create(WebArchive.class, "client-test.war")
                 .addClass(serviceImplKlass)
-                .setWebXML(new StringAsset(Descriptors.create(WebAppDescriptor.class)
-                        .version("3.0")
-                        .createServlet()
-                        .servletClass(serviceImplKlass.getName())
-                        .servletName("servlet-name").up()
-                        .createServletMapping()
-                        .servletName("servlet-name")
-                        .urlPattern("/AppRoot/AppModule/" + serviceRelativePathAnnotation.value()).up()
-                        .exportAsString()));
+                .setWebXML(new StringAsset(webAppDescriptor.exportAsString()));
 
         for (String resource : resources) {
-            archive = archive.addAsWebResource(serviceRelativePathAnnotation.value() + "/" + resource, "AppRoot/AppModule/" + resource);
+            archive = archive.addAsWebResource(serviceRelativePathAnnotation.value() + "/" + resource, MODULE_RELATIVE_PATH + resource);
         }
 
         return archive;
@@ -92,11 +111,15 @@ public abstract class RpcTestBase<T extends RemoteService, TAsync> {
 
     @BeforeEach
     public final void setUp() {
-        SyncProxy.setBaseURL(base + "AppRoot/AppModule/");
+        SyncProxy.setBaseURL(getModuleBaseURL());
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
         this.latch = new CountDownLatch(1);
-        this.service = SyncProxy.create(serviceClass);
+        this.service = getService();
+    }
+
+    protected String getModuleBaseURL() {
+        return base + MODULE_RELATIVE_PATH;
     }
 
     @AfterEach
@@ -104,6 +127,11 @@ public abstract class RpcTestBase<T extends RemoteService, TAsync> {
         if (latch != null) {
             assertThat(latch.await(timeoutSeconds, TimeUnit.SECONDS)).isTrue();
         }
+    }
+
+
+    protected TAsync getService() {
+        return SyncProxy.create(serviceClass);
     }
 
     protected <V> AsyncCallback<V> createCallback(Consumer<V> asserts) {
@@ -120,5 +148,30 @@ public abstract class RpcTestBase<T extends RemoteService, TAsync> {
                 asserts.accept(result);
             }
         };
+    }
+
+    protected <R> void waitForServiceCall(Consumer<AsyncCallback<R>> call) {
+        var l = new CountDownLatch(1);
+        call.accept(createCallback(ignored -> l.countDown()));
+        try {
+            l.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected <R> R getFromServiceCall(Consumer<AsyncCallback<R>> call) {
+        var l = new CountDownLatch(1);
+        AtomicReference<R> resultRef = new AtomicReference<>();
+        call.accept(createCallback(result -> {
+            resultRef.set(result);
+            l.countDown();
+        }));
+        try {
+            l.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return resultRef.get();
     }
 }

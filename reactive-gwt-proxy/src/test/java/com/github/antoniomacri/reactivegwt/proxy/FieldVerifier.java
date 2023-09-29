@@ -1,4 +1,4 @@
-package com.github.antoniomacri.reactivegwt.example.spawebtest.shared;
+package com.github.antoniomacri.reactivegwt.proxy;
 
 /**
  * <p>

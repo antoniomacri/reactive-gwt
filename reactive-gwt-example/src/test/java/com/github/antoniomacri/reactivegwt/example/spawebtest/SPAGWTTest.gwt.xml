@@ -12,12 +12,8 @@
 	<source path='client' />
 	<source path='shared' />
 	<!-- Specify the path to any remote services. -->
-	<servlet path="/spawebtest/greet"
-		class="com.github.antoniomacri.reactivegwt.example.spawebtest.server.GreetingServiceImpl" />
 	<servlet path="/rpcsuite/profile"
 		class="com.github.antoniomacri.reactivegwt.example.spawebtest.server.ProfileServiceImpl" />
-	<servlet path="/rpcsuite/largePayload"
-		class="com.github.antoniomacri.reactivegwt.example.spawebtest.server.LargePayloadServiceImpl" />
 	<servlet path="/spawebtest/rpcsuite/enums"
 		class="com.google.gwt.user.server.rpc.EnumsTestServiceImpl" />
 	<servlet path="/spawebtest/customfieldserializers"
@@ -36,6 +32,4 @@
 		class="com.google.gwt.user.server.rpc.UnicodeEscapingServiceImpl" />
 	<servlet path="/spawebtest/xsrftestservice"
 		class="com.google.gwt.user.server.rpc.XsrfTestServiceImpl" />
-	<servlet path="/spawebtest/valuetypes"
-		class="com.google.gwt.user.server.rpc.ValueTypesTestServiceImpl" />
 </module>
