@@ -20,12 +20,7 @@ public class LargePayloadTest extends RpcTestBase<LargePayloadService, LargePayl
     @Deployment(testable = false)
     @SuppressWarnings("unused")
     public static WebArchive getTestArchive() {
-        return buildTestArchive(LargePayloadService.class, LargePayloadServiceImpl.class,
-                "AppModule.nocache.js",
-                "compilation-mappings.txt",
-                "F83AB096F59DFCD9C057EC445A39B591.cache.js",
-                "82ECDF2E24525C71AA8598ADF979BF4D.gwt.rpc"
-        );
+        return buildTestArchive(LargePayloadService.class, LargePayloadServiceImpl.class);
     }
 
 

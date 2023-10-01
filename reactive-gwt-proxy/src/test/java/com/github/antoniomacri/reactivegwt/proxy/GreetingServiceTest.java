@@ -25,12 +25,7 @@ public class GreetingServiceTest extends RpcTestBase<GreetingService, GreetingSe
     @Deployment(testable = false)
     @SuppressWarnings("unused")
     public static WebArchive getTestArchive() {
-        return buildTestArchive(GreetingService.class, GreetingServiceImpl.class,
-                "AppModule.nocache.js",
-                "compilation-mappings.txt",
-                "4FC9FD9C1D092581165226358B18582E.cache.js",
-                "D9C552D5C6525477AE503FD5A458DBE9.gwt.rpc"
-        );
+        return buildTestArchive(GreetingService.class, GreetingServiceImpl.class);
     }
 
 

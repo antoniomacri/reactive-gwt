@@ -16,7 +16,6 @@
 
 package com.google.gwt.user.client.rpc;
 
-import com.google.gwt.user.server.rpc.CollectionsTestServiceImpl;
 import com.google.gwt.user.server.rpc.CoreJavaTestServiceImpl;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
@@ -42,12 +41,7 @@ public class CoreJavaTest extends RpcTestBase<CoreJavaTestService, CoreJavaTestS
     @Deployment(testable = false)
     @SuppressWarnings("unused")
     public static WebArchive getTestArchive() {
-        return buildTestArchive(CoreJavaTestService.class, CoreJavaTestServiceImpl.class,
-                "AppModule.nocache.js",
-                "DD41F2E9EE38B6CC75CBEB6AD11D073C.cache.js",
-                "compilation-mappings.txt",
-                "E5B982CE4D10194FA6077F74B63B92E0.gwt.rpc"
-        );
+        return buildTestArchive(CoreJavaTestService.class, CoreJavaTestServiceImpl.class);
     }
 
     private static MathContext createMathContext() {

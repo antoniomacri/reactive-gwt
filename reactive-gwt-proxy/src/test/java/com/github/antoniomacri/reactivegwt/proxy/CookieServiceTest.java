@@ -32,13 +32,7 @@ public class CookieServiceTest extends RpcTestBase<CookieService, CookieServiceA
     @Deployment(testable = false)
     @SuppressWarnings("unused")
     public static WebArchive getTestArchive() {
-        return buildTestArchive(CookieService.class, CookieServiceImpl.class,
-                webDescriptor -> webDescriptor.createListener().listenerClass(SessionsTracker.class.getName()),
-                "AppModule.nocache.js",
-                "compilation-mappings.txt",
-                "3CBB5766248E5FBBA141EAF2E36E6A43.cache.js",
-                "F043C83E0D5E3BA5CA7927541693DACC.gwt.rpc"
-        );
+        return buildTestArchive(CookieService.class, CookieServiceImpl.class, SessionsTracker.class);
     }
 
 
