@@ -4,7 +4,7 @@
  */
 package com.github.antoniomacri.reactivegwt.proxy;
 
-import com.google.gwt.user.client.rpc.RpcTestBase;
+import com.google.gwt.user.client.rpc.RpcAsyncTestBase;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>
  * Modified by Antonio Macrì to perform tests against an embedded Jetty with the GWT servlet.
  */
-public class GreetingServiceTest extends RpcTestBase<GreetingService, GreetingServiceAsync> {
+public class GreetingServiceTest extends RpcAsyncTestBase<GreetingService, GreetingServiceAsync> {
 
     @Deployment(testable = false)
     @SuppressWarnings("unused")

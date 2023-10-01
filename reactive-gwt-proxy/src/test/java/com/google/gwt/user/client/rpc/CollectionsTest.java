@@ -58,7 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>
  * Modified by Antonio Macrì to perform tests against an embedded Jetty with the GWT servlet.
  */
-public class CollectionsTest extends RpcTestBase<CollectionsTestService, CollectionsTestServiceAsync> {
+public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, CollectionsTestServiceAsync> {
 
     @Deployment(testable = false)
     @SuppressWarnings("unused")

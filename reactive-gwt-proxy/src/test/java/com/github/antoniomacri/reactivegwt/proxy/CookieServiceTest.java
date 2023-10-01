@@ -5,7 +5,7 @@
 package com.github.antoniomacri.reactivegwt.proxy;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.RpcTestBase;
+import com.google.gwt.user.client.rpc.RpcAsyncTestBase;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.jupiter.api.AfterEach;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>
  * Modified by Antonio Macrì to perform tests against an embedded Jetty with the GWT servlet.
  */
-public class CookieServiceTest extends RpcTestBase<CookieService, CookieServiceAsync> {
+public class CookieServiceTest extends RpcAsyncTestBase<CookieService, CookieServiceAsync> {
 
     @Deployment(testable = false)
     @SuppressWarnings("unused")
