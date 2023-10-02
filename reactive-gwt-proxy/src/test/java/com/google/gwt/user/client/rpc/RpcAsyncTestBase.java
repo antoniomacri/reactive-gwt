@@ -32,7 +32,6 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
 
     @BeforeEach
     public final void setUpAsyncTestBase() {
-        this.latch = new CountDownLatch(1);
         this.service = getService();
     }
 
@@ -49,6 +48,7 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
     }
 
     protected <V> AsyncCallback<V> createCallback(Consumer<V> asserts) {
+        this.latch = new CountDownLatch(1);
         return new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -60,6 +60,23 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
             public void onSuccess(V result) {
                 latch.countDown();
                 asserts.accept(result);
+            }
+        };
+    }
+
+    protected <V> AsyncCallback<V> createCallback(AsyncCallback<V> callback) {
+        this.latch = new CountDownLatch(1);
+        return new AsyncCallback<>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                latch.countDown();
+                callback.onFailure(caught);
+            }
+
+            @Override
+            public void onSuccess(V result) {
+                latch.countDown();
+                callback.onSuccess(result);
             }
         };
     }

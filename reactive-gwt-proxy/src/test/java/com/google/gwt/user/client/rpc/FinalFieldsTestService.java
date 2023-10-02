@@ -21,6 +21,7 @@ import java.io.Serializable;
 /**
  * TestService to test final fields serialization in RPC.
  */
+@RemoteServiceRelativePath("finalfields")
 public interface FinalFieldsTestService extends RemoteService {
 
   /**

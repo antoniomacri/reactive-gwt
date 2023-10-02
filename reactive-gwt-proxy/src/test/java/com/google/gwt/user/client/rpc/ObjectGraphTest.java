@@ -1,222 +1,132 @@
-///*
-// * Copyright 2008 Google Inc.
-// *
-// * Licensed under the Apache License, Version 2.0 (the "License"); you may not
-// * use this file except in compliance with the License. You may obtain a copy of
-// * the License at
-// *
-// * http://www.apache.org/licenses/LICENSE-2.0
-// *
-// * Unless required by applicable law or agreed to in writing, software
-// * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-// * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-// * License for the specific language governing permissions and limitations under
-// * the License.
-// */
-//package com.google.gwt.user.client.rpc;
-//
-//import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
-//import com.google.gwt.user.client.rpc.TestSetFactory.SerializableDoublyLinkedNode;
-//import com.google.gwt.user.client.rpc.TestSetFactory.SerializableGraphWithCFS;
-//import com.google.gwt.user.client.rpc.TestSetFactory.SerializablePrivateNoArg;
-//import com.google.gwt.user.client.rpc.TestSetFactory.SerializableWithTwoArrays;
-//import com.google.gwt.user.client.rpc.impl.AbstractSerializationStream;
-//
-///**
-// * TODO: document me.
-// *
-// * Modified by P.Prith in 0.5 to utilize Local App Engine server for service
-// * through SyncProxy against Test in GWT 2.7.0
-// */
-//public class ObjectGraphTest extends RpcTestBase {
-//
-//	private ObjectGraphTestServiceAsync objectGraphTestService;
-//
-//	protected boolean expectedObfuscationState() {
-//		return false;
-//	}
-//
-//	private ObjectGraphTestServiceAsync getServiceAsync() {
-//		if (this.objectGraphTestService == null) {
-//			this.objectGraphTestService = SyncProxy
-//					.create(ObjectGraphTestService.class);
-//			((ServiceDefTarget) this.objectGraphTestService)
-//					.setServiceEntryPoint(getModuleBaseURL() + "objectgraphs");
-//		}
-//		return this.objectGraphTestService;
-//	}
-//
-//	/**
-//	 * @see com.google.gwt.user.client.rpc.RpcTestBase#setUp()
-//	 */
-//	@Override
-//	protected void setUp() throws Exception {
-//		super.setUp();
-//		SyncProxy.suppressRelativePathWarning(true);
-//	}
-//
-//	public void testAcyclicGraph() {
-//		ObjectGraphTestServiceAsync service = getServiceAsync();
-//		delayTestFinishForRpc();
-//		service.echo_AcyclicGraph(TestSetFactory.createAcyclicGraph(),
-//				new AsyncCallback() {
-//					@Override
-//					public void onFailure(Throwable caught) {
-//						TestSetValidator.rethrowException(caught);
-//					}
-//
-//					@Override
-//					public void onSuccess(Object result) {
-//						assertNotNull(result);
-//						assertTrue(TestSetValidator
-//								.isValidAcyclicGraph((SerializableDoublyLinkedNode) result));
-//						finishTest();
-//					}
-//				});
-//	}
-//
-//	public void testComplexCyclicGraph() {
-//		ObjectGraphTestServiceAsync service = getServiceAsync();
-//		delayTestFinishForRpc();
-//		service.echo_ComplexCyclicGraph(
-//				TestSetFactory.createComplexCyclicGraph(), new AsyncCallback() {
-//					@Override
-//					public void onFailure(Throwable caught) {
-//						TestSetValidator.rethrowException(caught);
-//					}
-//
-//					@Override
-//					public void onSuccess(Object result) {
-//						assertNotNull(result);
-//						assertTrue(TestSetValidator
-//								.isValidComplexCyclicGraph((SerializableDoublyLinkedNode) result));
-//						finishTest();
-//					}
-//				});
-//	}
-//
-//	public void testComplexCyclicGraph2() {
-//		ObjectGraphTestServiceAsync service = getServiceAsync();
-//		final SerializableDoublyLinkedNode node = TestSetFactory
-//				.createComplexCyclicGraph();
-//		delayTestFinishForRpc();
-//		service.echo_ComplexCyclicGraph(node, node, new AsyncCallback() {
-//			@Override
-//			public void onFailure(Throwable caught) {
-//				TestSetValidator.rethrowException(caught);
-//			}
-//
-//			@Override
-//			public void onSuccess(Object result) {
-//				assertNotNull(result);
-//				assertTrue(TestSetValidator
-//						.isValidComplexCyclicGraph((SerializableDoublyLinkedNode) result));
-//				finishTest();
-//			}
-//		});
-//	}
-//
-//	public void testComplexCyclicGraphWithCFS() {
-//		ObjectGraphTestServiceAsync service = getServiceAsync();
-//		delayTestFinishForRpc();
-//		service.echo_ComplexCyclicGraphWithCFS(
-//				TestSetFactory.createComplexCyclicGraphWithCFS(),
-//				new AsyncCallback<SerializableGraphWithCFS>() {
-//					@Override
-//					public void onFailure(Throwable caught) {
-//						TestSetValidator.rethrowException(caught);
-//					}
-//
-//					@Override
-//					public void onSuccess(SerializableGraphWithCFS result) {
-//						assertNotNull(result);
-//						assertTrue(TestSetValidator
-//								.isValidComplexCyclicGraphWithCFS(result));
-//						finishTest();
-//					}
-//				});
-//	}
-//
-//	public void testDoublyReferencedArray() {
-//		ObjectGraphTestServiceAsync service = getServiceAsync();
-//		final SerializableWithTwoArrays node = TestSetFactory
-//				.createDoublyReferencedArray();
-//		delayTestFinishForRpc();
-//		service.echo_SerializableWithTwoArrays(node, new AsyncCallback() {
-//			@Override
-//			public void onFailure(Throwable caught) {
-//				TestSetValidator.rethrowException(caught);
-//			}
-//
-//			@Override
-//			public void onSuccess(Object result) {
-//				assertNotNull(result);
-//				assertTrue(TestSetValidator
-//						.isValid((SerializableWithTwoArrays) result));
-//				finishTest();
-//			}
-//		});
-//	}
-//
-//	public void testElision() throws SerializationException {
-//		ObjectGraphTestServiceAsync async = getServiceAsync();
-//
-//		SerializationStreamWriter writer = ((SerializationStreamFactory) async)
-//				.createStreamWriter();
-//		AbstractSerializationStream stream = (AbstractSerializationStream) writer;
-//		assertEquals(
-//				"Missing flag",
-//				expectedObfuscationState(),
-//				stream.hasFlags(AbstractSerializationStream.FLAG_ELIDE_TYPE_NAMES));
-//
-//		SerializableDoublyLinkedNode node = new SerializableDoublyLinkedNode();
-//		writer.writeObject(node);
-//		String s = writer.toString();
-//
-//		// Don't use class.getName() due to conflict with removal of type names
-//		assertEquals("Checking for SerializableDoublyLinkedNode",
-//				expectedObfuscationState(),
-//				!s.contains("SerializableDoublyLinkedNode"));
-//	}
-//
-//	public void testPrivateNoArg() {
-//		ObjectGraphTestServiceAsync service = getServiceAsync();
-//		final SerializablePrivateNoArg node = TestSetFactory
-//				.createPrivateNoArg();
-//		delayTestFinishForRpc();
-//		service.echo_PrivateNoArg(node, new AsyncCallback() {
-//			@Override
-//			public void onFailure(Throwable caught) {
-//				TestSetValidator.rethrowException(caught);
-//			}
-//
-//			@Override
-//			public void onSuccess(Object result) {
-//				assertNotNull(result);
-//				assertTrue(TestSetValidator
-//						.isValid((SerializablePrivateNoArg) result));
-//				finishTest();
-//			}
-//		});
-//	}
-//
-//	public void testTrivialCyclicGraph() {
-//		ObjectGraphTestServiceAsync service = getServiceAsync();
-//		delayTestFinishForRpc();
-//		service.echo_TrivialCyclicGraph(
-//				TestSetFactory.createTrivialCyclicGraph(), new AsyncCallback() {
-//					@Override
-//					public void onFailure(Throwable caught) {
-//						TestSetValidator.rethrowException(caught);
-//					}
-//
-//					@Override
-//					public void onSuccess(Object result) {
-//						assertNotNull(result);
-//						assertTrue(TestSetValidator
-//								.isValidTrivialCyclicGraph((SerializableDoublyLinkedNode) result));
-//						finishTest();
-//					}
-//				});
-//	}
-//}
+/*
+ * Copyright 2008 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.google.gwt.user.client.rpc;
+
+import com.google.gwt.user.client.rpc.TestSetFactory.SerializableDoublyLinkedNode;
+import com.google.gwt.user.client.rpc.TestSetFactory.SerializablePrivateNoArg;
+import com.google.gwt.user.client.rpc.TestSetFactory.SerializableWithTwoArrays;
+import com.google.gwt.user.client.rpc.impl.AbstractSerializationStream;
+import com.google.gwt.user.server.rpc.ObjectGraphTestServiceImpl;
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/**
+ * TODO: document me.
+ * <p>
+ * Taken from GWT sources. Modified by Antonio Macrì to perform tests against
+ * an embedded Jetty with the GWT servlet.
+ */
+public class ObjectGraphTest extends RpcAsyncTestBase<ObjectGraphTestService, ObjectGraphTestServiceAsync> {
+
+    @Deployment(testable = false)
+    @SuppressWarnings("unused")
+    public static WebArchive getTestArchive() {
+        return buildTestArchive(ObjectGraphTestService.class, ObjectGraphTestServiceImpl.class);
+    }
+
+
+    public ObjectGraphTest() {
+        super(ObjectGraphTestService.class);
+    }
+
+
+    @Test
+    public void testAcyclicGraph() {
+        service.echo_AcyclicGraph(TestSetFactory.createAcyclicGraph(), createCallback(result -> {
+            assertNotNull(result);
+            assertTrue(TestSetValidator.isValidAcyclicGraph((SerializableDoublyLinkedNode) result));
+        }));
+    }
+
+    @Test
+    public void testComplexCyclicGraph() {
+        service.echo_ComplexCyclicGraph(TestSetFactory.createComplexCyclicGraph(), createCallback(result -> {
+            assertNotNull(result);
+            assertTrue(TestSetValidator.isValidComplexCyclicGraph((SerializableDoublyLinkedNode) result));
+        }));
+    }
+
+    @Test
+    public void testComplexCyclicGraphWithCFS() {
+        service.echo_ComplexCyclicGraphWithCFS(TestSetFactory.createComplexCyclicGraphWithCFS(), createCallback(result -> {
+            assertNotNull(result);
+            assertTrue(TestSetValidator.isValidComplexCyclicGraphWithCFS(result));
+        }));
+    }
+
+    @Test
+    public void testComplexCyclicGraph2() {
+        final SerializableDoublyLinkedNode node = TestSetFactory.createComplexCyclicGraph();
+        service.echo_ComplexCyclicGraph(node, node, createCallback(result -> {
+            assertNotNull(result);
+            assertTrue(TestSetValidator.isValidComplexCyclicGraph((SerializableDoublyLinkedNode) result));
+        }));
+    }
+
+    @Test
+    public void testDoublyReferencedArray() {
+        final SerializableWithTwoArrays node = TestSetFactory.createDoublyReferencedArray();
+        service.echo_SerializableWithTwoArrays(node, createCallback(result -> {
+            assertNotNull(result);
+            assertTrue(TestSetValidator.isValid((SerializableWithTwoArrays) result));
+        }));
+    }
+
+    @Test
+    public void testElision() throws SerializationException {
+        SerializationStreamWriter writer = ((SerializationStreamFactory) service).createStreamWriter();
+        AbstractSerializationStream stream = (AbstractSerializationStream) writer;
+        assertThat(stream.hasFlags(AbstractSerializationStream.FLAG_ELIDE_TYPE_NAMES))
+                .as("Missing flag")
+                .isEqualTo(expectedObfuscationState());
+
+        SerializableDoublyLinkedNode node = new SerializableDoublyLinkedNode();
+        writer.writeObject(node);
+        String s = writer.toString();
+
+        // Don't use class.getName() due to conflict with removal of type names
+        assertThat(!s.contains("SerializableDoublyLinkedNode"))
+                .as("Checking for SerializableDoublyLinkedNode")
+                .isEqualTo(expectedObfuscationState());
+    }
+
+    @Test
+    public void testPrivateNoArg() {
+        final SerializablePrivateNoArg node = TestSetFactory.createPrivateNoArg();
+        service.echo_PrivateNoArg(node, createCallback(result -> {
+            assertNotNull(result);
+            assertTrue(TestSetValidator.isValid((SerializablePrivateNoArg) result));
+        }));
+    }
+
+    @Test
+    public void testTrivialCyclicGraph() {
+        service.echo_TrivialCyclicGraph(TestSetFactory.createTrivialCyclicGraph(), createCallback(result -> {
+            assertNotNull(result);
+            assertTrue(TestSetValidator.isValidTrivialCyclicGraph((SerializableDoublyLinkedNode) result));
+        }));
+    }
+
+
+    protected boolean expectedObfuscationState() {
+        return false;
+    }
+}

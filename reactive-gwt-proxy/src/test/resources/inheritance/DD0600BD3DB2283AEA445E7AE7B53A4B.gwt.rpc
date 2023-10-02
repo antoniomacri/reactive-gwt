@@ -1,0 +1,19 @@
+@FinalFields, false
+com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException, true, true, true, true, com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException/3936916533, 3936916533
+com.google.gwt.user.client.rpc.InheritanceTestServiceSubtype, false, false, false, false, _, 3779682323
+com.google.gwt.user.client.rpc.InheritanceTestSetFactory$AbstractClass, true, true, false, false, com.google.gwt.user.client.rpc.InheritanceTestSetFactory$AbstractClass/3951651970, 3951651970
+com.google.gwt.user.client.rpc.InheritanceTestSetFactory$AnonymousClassInterfaceImplementor, true, true, true, true, com.google.gwt.user.client.rpc.InheritanceTestSetFactory$AnonymousClassInterfaceImplementor/3241321484, 3241321484
+com.google.gwt.user.client.rpc.InheritanceTestSetFactory$Circle, true, true, true, true, com.google.gwt.user.client.rpc.InheritanceTestSetFactory$Circle/4156977102, 4156977102
+com.google.gwt.user.client.rpc.InheritanceTestSetFactory$JavaSerializableBaseClass, true, false, true, false, com.google.gwt.user.client.rpc.InheritanceTestSetFactory$JavaSerializableBaseClass/837881336, 837881336
+com.google.gwt.user.client.rpc.InheritanceTestSetFactory$JavaSerializableClass, true, true, true, true, com.google.gwt.user.client.rpc.InheritanceTestSetFactory$JavaSerializableClass/3361533206, 3361533206
+com.google.gwt.user.client.rpc.InheritanceTestSetFactory$MySerializableInterfaceSubtypeImplementor, true, true, false, false, com.google.gwt.user.client.rpc.InheritanceTestSetFactory$MySerializableInterfaceSubtypeImplementor/3686893733, 3686893733
+com.google.gwt.user.client.rpc.InheritanceTestSetFactory$SerializableClass, true, true, true, true, com.google.gwt.user.client.rpc.InheritanceTestSetFactory$SerializableClass/3345847485, 3345847485
+com.google.gwt.user.client.rpc.InheritanceTestSetFactory$SerializableClassWithTransientField, true, true, true, true, com.google.gwt.user.client.rpc.InheritanceTestSetFactory$SerializableClassWithTransientField/2673490537, 2673490537
+com.google.gwt.user.client.rpc.InheritanceTestSetFactory$SerializableSubclass, true, true, true, true, com.google.gwt.user.client.rpc.InheritanceTestSetFactory$SerializableSubclass/2390570266, 2390570266
+com.google.gwt.user.client.rpc.InheritanceTestSetFactory$Shape, true, false, true, false, com.google.gwt.user.client.rpc.InheritanceTestSetFactory$Shape/2982978508, 2982978508
+com.google.gwt.user.client.rpc.RpcTokenException, true, true, false, false, com.google.gwt.user.client.rpc.RpcTokenException/2345075298, 2345075298
+com.google.gwt.user.client.rpc.XsrfToken, false, false, true, true, com.google.gwt.user.client.rpc.XsrfToken/4254043109, 4254043109
+java.lang.Exception, true, false, true, false, java.lang.Exception/1920171873, 1920171873
+java.lang.RuntimeException, true, false, true, false, java.lang.RuntimeException/515124647, 515124647
+java.lang.String, true, true, true, true, java.lang.String/2004016611, 2004016611
+java.lang.Throwable, true, false, true, false, java.lang.Throwable/2953622131, 2953622131

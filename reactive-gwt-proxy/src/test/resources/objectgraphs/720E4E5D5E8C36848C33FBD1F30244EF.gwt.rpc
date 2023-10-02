@@ -1,0 +1,15 @@
+@FinalFields, false
+com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException, true, true, true, true, com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException/3936916533, 3936916533
+com.google.gwt.user.client.rpc.ObjectGraphTestService, false, false, false, false, _, 3163691083
+com.google.gwt.user.client.rpc.RpcTokenException, true, true, false, false, com.google.gwt.user.client.rpc.RpcTokenException/2345075298, 2345075298
+com.google.gwt.user.client.rpc.TestSetFactory$SerializableDoublyLinkedNode, true, true, true, true, com.google.gwt.user.client.rpc.TestSetFactory$SerializableDoublyLinkedNode/3985212287, 3985212287
+com.google.gwt.user.client.rpc.TestSetFactory$SerializableGraphWithCFS, true, true, true, true, com.google.gwt.user.client.rpc.TestSetFactory$SerializableGraphWithCFS/219371845, 219371845
+com.google.gwt.user.client.rpc.TestSetFactory$SerializablePrivateNoArg, true, true, true, true, com.google.gwt.user.client.rpc.TestSetFactory$SerializablePrivateNoArg/38532494, 38532494
+com.google.gwt.user.client.rpc.TestSetFactory$SerializableWithTwoArrays, true, true, true, true, com.google.gwt.user.client.rpc.TestSetFactory$SerializableWithTwoArrays/3447986964, 3447986964
+com.google.gwt.user.client.rpc.XsrfToken, false, false, true, true, com.google.gwt.user.client.rpc.XsrfToken/4254043109, 4254043109
+java.lang.Exception, true, false, true, false, java.lang.Exception/1920171873, 1920171873
+java.lang.RuntimeException, true, false, true, false, java.lang.RuntimeException/515124647, 515124647
+java.lang.String, true, true, true, true, java.lang.String/2004016611, 2004016611
+[Ljava.lang.String;, true, true, true, true, [Ljava.lang.String;/2600011424, 2600011424
+java.lang.Throwable, true, false, true, false, java.lang.Throwable/2953622131, 2953622131
+java.util.ArrayList, true, true, true, true, java.util.ArrayList/4159755760, 4159755760
