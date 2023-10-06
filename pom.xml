@@ -27,6 +27,7 @@
     </developers>
 
     <modules>
+        <module>reactive-gwt-processor</module>
         <module>reactive-gwt-proxy</module>
     </modules>
 
