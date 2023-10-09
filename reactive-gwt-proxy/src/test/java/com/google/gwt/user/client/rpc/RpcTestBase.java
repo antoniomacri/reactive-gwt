@@ -18,7 +18,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.EventListener;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Base class for RPC tests.
@@ -43,7 +45,7 @@ public abstract class RpcTestBase {
             Class<? extends RemoteServiceServlet> serviceImplClass,
             Class<? extends EventListener> listenerClass
     ) {
-        return buildTestArchive(serviceInterfaceClass, serviceImplClass, listenerClass, null);
+        return buildTestArchive(serviceInterfaceClass, serviceImplClass, null, listenerClass);
     }
 
     protected static WebArchive buildTestArchive(
@@ -51,31 +53,47 @@ public abstract class RpcTestBase {
             Class<? extends RemoteServiceServlet> serviceImplClass,
             String remoteServiceRelativePath
     ) {
-        return buildTestArchive(serviceInterfaceClass, serviceImplClass, null, remoteServiceRelativePath);
+        return buildTestArchive(serviceInterfaceClass, serviceImplClass, remoteServiceRelativePath, null);
+    }
+
+    protected static WebArchive buildTestArchive(
+            Class<? extends RemoteService> serviceInterfaceClass,
+            Class<? extends RemoteServiceServlet> serviceImplClass,
+            String remoteServiceRelativePath,
+            Class<? extends EventListener> listenerClass
+    ) {
+        return buildTestArchive(serviceInterfaceClass, Map.of(
+                serviceImplClass, Optional.ofNullable(remoteServiceRelativePath)
+        ), listenerClass);
+    }
+
+    protected static WebArchive buildTestArchive(
+            Class<? extends RemoteService> serviceInterfaceClass,
+            Map<Class<? extends RemoteServiceServlet>, Optional<String>> serviceImplClasses
+    ) {
+        return buildTestArchive(serviceInterfaceClass, serviceImplClasses, null);
     }
 
 
     protected static WebArchive buildTestArchive(
             Class<? extends RemoteService> serviceInterfaceClass,
-            Class<? extends RemoteServiceServlet> serviceImplClass,
-            Class<? extends EventListener> listenerClass,
-            String remoteServiceRelativePathArg
+            Map<Class<? extends RemoteServiceServlet>, Optional<String>> serviceImplClasses,
+            Class<? extends EventListener> listenerClass
     ) {
-        String remoteServiceRelativePath;
-        if (remoteServiceRelativePathArg != null) {
-            remoteServiceRelativePath = remoteServiceRelativePathArg;
-        } else {
-            var serviceRelativePathAnnotation = serviceInterfaceClass.getDeclaredAnnotation(RemoteServiceRelativePath.class);
-            if (serviceRelativePathAnnotation == null) {
-                throw new RuntimeException("Class %s is not annotated with @RemoteServiceRelativePath".formatted(serviceInterfaceClass));
-            }
-            remoteServiceRelativePath = serviceRelativePathAnnotation.value();
-        }
-
         var archive = ShrinkWrap.create(WebArchive.class, "client-test.war");
         var webAppDescriptor = Descriptors.create(WebAppDescriptor.class).version("3.0");
 
-        addServletWithResources(archive, webAppDescriptor, serviceImplClass, remoteServiceRelativePath);
+        serviceImplClasses.forEach((serviceImplClass, remoteServiceRelativePathArg) -> {
+            String remoteServiceRelativePath = remoteServiceRelativePathArg.orElseGet(() -> {
+                var serviceRelativePathAnnotation = serviceInterfaceClass.getDeclaredAnnotation(RemoteServiceRelativePath.class);
+                if (serviceRelativePathAnnotation == null) {
+                    throw new RuntimeException("Class %s is not annotated with @RemoteServiceRelativePath".formatted(serviceInterfaceClass));
+                }
+                return serviceRelativePathAnnotation.value();
+            });
+            addServletWithResources(archive, webAppDescriptor, serviceImplClass, remoteServiceRelativePath);
+        });
+
         if (listenerClass != null) {
             webAppDescriptor.createListener().listenerClass(listenerClass.getName());
         }
@@ -95,10 +113,12 @@ public abstract class RpcTestBase {
 
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         try (var stream = classLoader.getResourceAsStream(serviceRelativePath)) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)));
-            bufferedReader.lines().forEach(resource ->
-                    archive.addAsWebResource(serviceRelativePath + "/" + resource, MODULE_RELATIVE_PATH + resource)
-            );
+            if (stream != null) {
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)));
+                bufferedReader.lines().forEach(resource ->
+                        archive.addAsWebResource(serviceRelativePath + "/" + resource, MODULE_RELATIVE_PATH + resource)
+                );
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
