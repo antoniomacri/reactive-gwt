@@ -35,24 +35,47 @@ public abstract class RpcTestBase {
             Class<? extends RemoteService> serviceInterfaceClass,
             Class<? extends RemoteServiceServlet> serviceImplClass
     ) {
-        return buildTestArchive(serviceInterfaceClass, serviceImplClass, null);
+        return buildTestArchive(serviceInterfaceClass, serviceImplClass, null, null);
     }
-
 
     protected static WebArchive buildTestArchive(
             Class<? extends RemoteService> serviceInterfaceClass,
             Class<? extends RemoteServiceServlet> serviceImplClass,
             Class<? extends EventListener> listenerClass
     ) {
-        var serviceRelativePathAnnotation = serviceInterfaceClass.getDeclaredAnnotation(RemoteServiceRelativePath.class);
-        if (serviceRelativePathAnnotation == null) {
-            throw new RuntimeException("Class %s is not annotated with @RemoteServiceRelativePath".formatted(serviceInterfaceClass));
+        return buildTestArchive(serviceInterfaceClass, serviceImplClass, listenerClass, null);
+    }
+
+    protected static WebArchive buildTestArchive(
+            Class<? extends RemoteService> serviceInterfaceClass,
+            Class<? extends RemoteServiceServlet> serviceImplClass,
+            String remoteServiceRelativePath
+    ) {
+        return buildTestArchive(serviceInterfaceClass, serviceImplClass, null, remoteServiceRelativePath);
+    }
+
+
+    protected static WebArchive buildTestArchive(
+            Class<? extends RemoteService> serviceInterfaceClass,
+            Class<? extends RemoteServiceServlet> serviceImplClass,
+            Class<? extends EventListener> listenerClass,
+            String remoteServiceRelativePathArg
+    ) {
+        String remoteServiceRelativePath;
+        if (remoteServiceRelativePathArg != null) {
+            remoteServiceRelativePath = remoteServiceRelativePathArg;
+        } else {
+            var serviceRelativePathAnnotation = serviceInterfaceClass.getDeclaredAnnotation(RemoteServiceRelativePath.class);
+            if (serviceRelativePathAnnotation == null) {
+                throw new RuntimeException("Class %s is not annotated with @RemoteServiceRelativePath".formatted(serviceInterfaceClass));
+            }
+            remoteServiceRelativePath = serviceRelativePathAnnotation.value();
         }
 
         var archive = ShrinkWrap.create(WebArchive.class, "client-test.war");
         var webAppDescriptor = Descriptors.create(WebAppDescriptor.class).version("3.0");
 
-        addServletWithResources(archive, webAppDescriptor, serviceImplClass, serviceRelativePathAnnotation.value());
+        addServletWithResources(archive, webAppDescriptor, serviceImplClass, remoteServiceRelativePath);
         if (listenerClass != null) {
             webAppDescriptor.createListener().listenerClass(listenerClass.getName());
         }

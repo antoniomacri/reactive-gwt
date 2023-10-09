@@ -39,12 +39,12 @@ public class ObjectGraphTest extends RpcAsyncTestBase<ObjectGraphTestService, Ob
     @Deployment(testable = false)
     @SuppressWarnings("unused")
     public static WebArchive getTestArchive() {
-        return buildTestArchive(ObjectGraphTestService.class, ObjectGraphTestServiceImpl.class);
+        return buildTestArchive(ObjectGraphTestService.class, ObjectGraphTestServiceImpl.class, "objectgraphs");
     }
 
 
     public ObjectGraphTest() {
-        super(ObjectGraphTestService.class);
+        super(ObjectGraphTestService.class, "objectgraphs");
     }
 
 

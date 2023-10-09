@@ -21,40 +21,39 @@ import java.io.Serializable;
 /**
  * TestService to test final fields serialization in RPC.
  */
-@RemoteServiceRelativePath("finalfields")
 public interface FinalFieldsTestService extends RemoteService {
 
-  /**
-   * The class used in RPC serialization.
-   */
-  public class FinalFieldsNode implements Serializable {
+    /**
+     * The class used in RPC serialization.
+     */
+    public class FinalFieldsNode implements Serializable {
 
-    public final int i;
-    public final String str;
-    public final float[] f;
+        public final int i;
+        public final String str;
+        public final float[] f;
 
-    public FinalFieldsNode() {
-      this.i = 5;
-      this.str = "A";
-      this.f = new float[3];
+        public FinalFieldsNode() {
+            this.i = 5;
+            this.str = "A";
+            this.f = new float[3];
+        }
+
+        public FinalFieldsNode(int i, String str, int f_len) {
+            this.i = i;
+            this.str = str;
+            this.f = new float[f_len];
+        }
     }
 
-    public FinalFieldsNode(int i, String str, int f_len) {
-      this.i = i;
-      this.str = str;
-      this.f = new float[f_len];
+    /**
+     * Exception specific to testing of GWT final fields in RPC.
+     */
+    final class FinalFieldsException extends Exception {
+        public FinalFieldsException() {
+        }
     }
-  }
 
-  /**
-   * Exception specific to testing of GWT final fields in RPC.
-   */
-  final class FinalFieldsException extends Exception {
-    public FinalFieldsException() {
-    }
-  }
+    FinalFieldsNode transferObject(FinalFieldsNode node) throws FinalFieldsException;
 
-  FinalFieldsNode transferObject(FinalFieldsNode node) throws FinalFieldsException;
-
-  int returnI(FinalFieldsNode node);
+    int returnI(FinalFieldsNode node);
 }

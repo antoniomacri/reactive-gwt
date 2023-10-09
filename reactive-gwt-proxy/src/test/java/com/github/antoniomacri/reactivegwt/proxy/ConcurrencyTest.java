@@ -2,6 +2,7 @@ package com.github.antoniomacri.reactivegwt.proxy;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.rpc.ValueTypesTestService;
 import com.google.gwt.user.client.rpc.ValueTypesTestServiceAsync;
 import com.ibm.icu.util.TimeZone;
@@ -28,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ConcurrencyTest {
     private static final Logger log = LoggerFactory.getLogger(ConcurrencyTest.class);
+    protected static final String MODULE_RELATIVE_PATH = "AppRoot/AppModule/";
     private static final int ITERATIONS = 100;
 
     WireMockServer wm;
@@ -40,16 +42,17 @@ public class ConcurrencyTest {
                 .containerThreads(50 + ITERATIONS)); // add a margin
         wm.start();
 
-        serveStaticFile("/AppRoot/AppModule/AppModule.nocache.js", "valuetypes/AppModule.nocache.js");
-        serveStaticFile("/AppRoot/AppModule/70D388D29300BB59D229D3DFFAF15FE7.cache.js", "valuetypes/70D388D29300BB59D229D3DFFAF15FE7.cache.js");
-        serveStaticFile("/AppRoot/AppModule/compilation-mappings.txt", "valuetypes/compilation-mappings.txt");
-        serveStaticFile("/AppRoot/AppModule/830F71E6019A18DF7715476EFEFF802A.gwt.rpc", "valuetypes/830F71E6019A18DF7715476EFEFF802A.gwt.rpc");
+        serveStaticFile("/" + MODULE_RELATIVE_PATH + "AppModule.nocache.js", "valuetypes/AppModule.nocache.js");
+        serveStaticFile("/" + MODULE_RELATIVE_PATH + "70D388D29300BB59D229D3DFFAF15FE7.cache.js", "valuetypes/70D388D29300BB59D229D3DFFAF15FE7.cache.js");
+        serveStaticFile("/" + MODULE_RELATIVE_PATH + "compilation-mappings.txt", "valuetypes/compilation-mappings.txt");
+        serveStaticFile("/" + MODULE_RELATIVE_PATH + "830F71E6019A18DF7715476EFEFF802A.gwt.rpc", "valuetypes/830F71E6019A18DF7715476EFEFF802A.gwt.rpc");
 
-        wm.stubFor(post("/AppRoot/AppModule/valuetypes").willReturn(aResponse()
+        wm.stubFor(post("/" + MODULE_RELATIVE_PATH + "valuetypes").willReturn(aResponse()
                 .withBody("//OK[13.0,[],0,7]")
                 .withFixedDelay(1000)));
 
-        SyncProxy.setBaseURL(wm.baseUrl() + "/AppRoot/AppModule/");
+        SyncProxy.suppressRelativePathWarning(true);
+        SyncProxy.setBaseURL(getModuleBaseURL());
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
@@ -60,14 +63,14 @@ public class ConcurrencyTest {
     }
 
     @AfterEach
-    public void afterEach() throws InterruptedException {
+    public final void afterEach() {
         wm.shutdownServer();
     }
 
 
     @Test
     public void test() throws InterruptedException {
-        ValueTypesTestServiceAsync service = SyncProxy.create(ValueTypesTestService.class);
+        ValueTypesTestServiceAsync service = getService();
         CountDownLatch latch = new CountDownLatch(ITERATIONS);
         List<Throwable> exceptions = new ArrayList<>();
 
@@ -97,5 +100,16 @@ public class ConcurrencyTest {
 
         assertThat(latch.await(2, TimeUnit.SECONDS)).isTrue();
         assertThat(exceptions).isEmpty();
+    }
+
+
+    protected String getModuleBaseURL() {
+        return wm.baseUrl() + "/" + MODULE_RELATIVE_PATH;
+    }
+
+    private ValueTypesTestServiceAsync getService() {
+        ValueTypesTestServiceAsync service = SyncProxy.create(ValueTypesTestService.class);
+        ((ServiceDefTarget) service).setServiceEntryPoint(getModuleBaseURL() + "valuetypes");
+        return service;
     }
 }

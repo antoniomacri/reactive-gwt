@@ -15,11 +15,9 @@
  */
 package com.google.gwt.user.client.rpc;
 
-import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
 import com.google.gwt.user.server.rpc.ValueTypesTestServiceImpl;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -42,17 +40,12 @@ public class ValueTypesTest extends RpcAsyncTestBase<ValueTypesTestService, Valu
     @Deployment(testable = false)
     @SuppressWarnings("unused")
     public static WebArchive getTestArchive() {
-        return buildTestArchive(ValueTypesTestService.class, ValueTypesTestServiceImpl.class);
+        return buildTestArchive(ValueTypesTestService.class, ValueTypesTestServiceImpl.class, "valuetypes");
     }
+
 
     public ValueTypesTest() {
-        super(ValueTypesTestService.class);
-    }
-
-
-    @BeforeEach
-    public void setUpWarning() {
-        SyncProxy.suppressRelativePathWarning(true);
+        super(ValueTypesTestService.class, "valuetypes");
     }
 
 

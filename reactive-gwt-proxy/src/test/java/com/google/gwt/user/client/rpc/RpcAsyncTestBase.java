@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends RpcTestBase {
 
     private final Class<T> serviceClass;
+    private final String remoteServiceRelativePath;
     private CountDownLatch latch;
 
     protected TAsync service;
@@ -28,11 +29,21 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
 
     protected RpcAsyncTestBase(Class<T> serviceClass) {
         this.serviceClass = serviceClass;
+        this.remoteServiceRelativePath = null;
+    }
+
+    protected RpcAsyncTestBase(Class<T> serviceClass, String remoteServiceRelativePath) {
+        this.serviceClass = serviceClass;
+        this.remoteServiceRelativePath = remoteServiceRelativePath;
+        SyncProxy.suppressRelativePathWarning(true);
     }
 
     @BeforeEach
     public final void setUpAsyncTestBase() {
         this.service = getService();
+        if (remoteServiceRelativePath != null) {
+            ((ServiceDefTarget) service).setServiceEntryPoint(getModuleBaseURL() + remoteServiceRelativePath);
+        }
     }
 
     @AfterEach

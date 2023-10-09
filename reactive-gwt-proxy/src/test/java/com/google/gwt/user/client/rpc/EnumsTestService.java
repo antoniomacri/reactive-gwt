@@ -20,7 +20,6 @@ import java.io.Serializable;
 /**
  * RemoteService used to test the use of enums over RPC.
  */
-@RemoteServiceRelativePath("enums")
 public interface EnumsTestService extends RemoteService {
     /**
      * Exception thrown when the enumeration state from the client makes it to the

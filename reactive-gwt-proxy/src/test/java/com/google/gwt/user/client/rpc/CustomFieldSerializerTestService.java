@@ -22,7 +22,6 @@ import com.google.gwt.user.client.rpc.CustomFieldSerializerTestSetFactory.Serial
  * {@link CustomFieldSerializerTest CustomFieldSerializerTest}
  * unit test.
  */
-@RemoteServiceRelativePath("customfieldserializers")
 public interface CustomFieldSerializerTestService extends RemoteService {
     ManuallySerializedClass echo(ManuallySerializedClass manuallySerializableClass);
 

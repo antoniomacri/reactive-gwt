@@ -1,12 +1,12 @@
 /*
  * Copyright 2007 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -21,60 +21,59 @@ import java.math.BigInteger;
 /**
  * Test sending value types via RPC.
  */
-@RemoteServiceRelativePath("valuetypes")
 public interface ValueTypesTestService extends RemoteService {
-  byte echo(byte value);
+    byte echo(byte value);
 
-  char echo(char value);
+    char echo(char value);
 
-  double echo(double value);
+    double echo(double value);
 
-  float echo(float value);
+    float echo(float value);
 
-  int echo(int value);
+    int echo(int value);
 
-  long echo(long value);
+    long echo(long value);
 
-  short echo(short value);
+    short echo(short value);
 
-  BigDecimal echo(BigDecimal value);
+    BigDecimal echo(BigDecimal value);
 
-  BigInteger echo(BigInteger value);
+    BigInteger echo(BigInteger value);
 
-  SerializableGenericWrapperType<Void> echo(
-      SerializableGenericWrapperType<Void> value);
+    SerializableGenericWrapperType<Void> echo(
+            SerializableGenericWrapperType<Void> value);
 
-  String echo(String value);
+    String echo(String value);
 
-  boolean echo_FALSE(boolean value);
+    boolean echo_FALSE(boolean value);
 
-  byte echo_MAX_VALUE(byte value);
+    byte echo_MAX_VALUE(byte value);
 
-  char echo_MAX_VALUE(char value);
+    char echo_MAX_VALUE(char value);
 
-  double echo_MAX_VALUE(double value);
+    double echo_MAX_VALUE(double value);
 
-  float echo_MAX_VALUE(float value);
+    float echo_MAX_VALUE(float value);
 
-  int echo_MAX_VALUE(int value);
+    int echo_MAX_VALUE(int value);
 
-  long echo_MAX_VALUE(long value);
+    long echo_MAX_VALUE(long value);
 
-  short echo_MAX_VALUE(short value);
+    short echo_MAX_VALUE(short value);
 
-  byte echo_MIN_VALUE(byte value);
+    byte echo_MIN_VALUE(byte value);
 
-  char echo_MIN_VALUE(char value);
+    char echo_MIN_VALUE(char value);
 
-  double echo_MIN_VALUE(double value);
+    double echo_MIN_VALUE(double value);
 
-  float echo_MIN_VALUE(float value);
+    float echo_MIN_VALUE(float value);
 
-  int echo_MIN_VALUE(int value);
+    int echo_MIN_VALUE(int value);
 
-  long echo_MIN_VALUE(long value);
+    long echo_MIN_VALUE(long value);
 
-  short echo_MIN_VALUE(short value);
+    short echo_MIN_VALUE(short value);
 
-  boolean echo_TRUE(boolean value);
+    boolean echo_TRUE(boolean value);
 }

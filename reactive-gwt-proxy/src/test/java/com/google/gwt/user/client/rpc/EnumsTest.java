@@ -40,12 +40,12 @@ public class EnumsTest extends RpcAsyncTestBase<EnumsTestService, EnumsTestServi
     @Deployment(testable = false)
     @SuppressWarnings("unused")
     public static WebArchive getTestArchive() {
-        return buildTestArchive(EnumsTestService.class, EnumsTestServiceImpl.class);
+        return buildTestArchive(EnumsTestService.class, EnumsTestServiceImpl.class, "enums");
     }
 
 
     public EnumsTest() {
-        super(EnumsTestService.class);
+        super(EnumsTestService.class, "enums");
     }
 
 

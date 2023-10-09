@@ -37,12 +37,12 @@ public class FinalFieldsTest extends RpcAsyncTestBase<FinalFieldsTestService, Fi
     @Deployment(testable = false)
     @SuppressWarnings("unused")
     public static WebArchive getTestArchive() {
-        return buildTestArchive(FinalFieldsTestService.class, FinalFieldsTestServiceImpl.class);
+        return buildTestArchive(FinalFieldsTestService.class, FinalFieldsTestServiceImpl.class, "finalfields");
     }
 
 
     public FinalFieldsTest() {
-        super(FinalFieldsTestService.class);
+        super(FinalFieldsTestService.class, "finalfields");
     }
 
 

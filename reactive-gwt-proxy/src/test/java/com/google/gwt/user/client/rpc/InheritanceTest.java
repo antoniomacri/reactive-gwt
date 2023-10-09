@@ -44,12 +44,12 @@ public class InheritanceTest extends RpcAsyncTestBase<InheritanceTestServiceSubt
     @Deployment(testable = false)
     @SuppressWarnings("unused")
     public static WebArchive getTestArchive() {
-        return buildTestArchive(InheritanceTestServiceSubtype.class, InheritanceTestServiceImpl.class);
+        return buildTestArchive(InheritanceTestServiceSubtype.class, InheritanceTestServiceImpl.class, "inheritance");
     }
 
 
     public InheritanceTest() {
-        super(InheritanceTestServiceSubtype.class);
+        super(InheritanceTestServiceSubtype.class, "inheritance");
     }
 
 

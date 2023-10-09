@@ -15,12 +15,10 @@
  */
 package com.google.gwt.user.client.rpc;
 
-import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
 import com.google.gwt.user.client.rpc.CustomFieldSerializerTestSetFactory.SerializableSubclass;
 import com.google.gwt.user.server.rpc.CustomFieldSerializerTestServiceImpl;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,18 +42,12 @@ public class CustomFieldSerializerTest extends RpcAsyncTestBase<CustomFieldSeria
     @Deployment(testable = false)
     @SuppressWarnings("unused")
     public static WebArchive getTestArchive() {
-        return buildTestArchive(CustomFieldSerializerTestService.class, CustomFieldSerializerTestServiceImpl.class);
+        return buildTestArchive(CustomFieldSerializerTestService.class, CustomFieldSerializerTestServiceImpl.class, "customfieldserializers");
     }
 
 
     public CustomFieldSerializerTest() {
-        super(CustomFieldSerializerTestService.class);
-    }
-
-
-    @BeforeEach
-    public void setUp() throws Exception {
-        SyncProxy.suppressRelativePathWarning(true);
+        super(CustomFieldSerializerTestService.class, "customfieldserializers");
     }
 
 
