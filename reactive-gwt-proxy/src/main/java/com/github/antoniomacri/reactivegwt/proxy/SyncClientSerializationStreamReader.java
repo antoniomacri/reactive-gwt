@@ -528,7 +528,7 @@ AbstractSerializationStreamReader {
 			// Class<?> instanceClass =
 			// Class.forName(serializedInstRef.getName(),
 			// false, null);
-			Class<?> instanceClass = Class.forName(serializedInstRef.getName());
+			Class<?> instanceClass = ClassLoading.loadClass(serializedInstRef.getName());
 
 			assert this.serializationPolicy != null;
 

@@ -65,7 +65,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
                 return clazz;
             }
             if (clazz.getName().endsWith(SyncProxy.ASYNC_POSTFIX)) {
-                return Class.forName(clazz.getName().replace(
+                return ClassLoading.loadClass(clazz.getName().replace(
                         SyncProxy.ASYNC_POSTFIX, ""));
             }
             // if (!ServiceDefTarget.class.equals(clazz)
@@ -343,7 +343,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
                 System.arraycopy(paramTypes, 0, syncParamTypes, 0, paramCount);
                 Class<?> clazz;
                 try {
-                    clazz = Class.forName(serviceIntfName);
+                    clazz = ClassLoading.loadClass(serviceIntfName);
                 } catch (ClassNotFoundException e) {
                     throw new InvocationException(
                             "There is no sync version of " + serviceIntfName

@@ -59,7 +59,7 @@ public class SyncProxy {
 		Class<ServiceIntfAsync> asyncServiceIntf;
 
 		try {
-			asyncServiceIntf = (Class<ServiceIntfAsync>) Class.forName(serviceIntf.getName() + ASYNC_POSTFIX);
+			asyncServiceIntf = (Class<ServiceIntfAsync>) ClassLoading.loadClass(serviceIntf.getName() + ASYNC_POSTFIX);
 		} catch (ClassNotFoundException e) {
 			throw new SyncProxyException(serviceIntf, InfoType.SERVICE_BASE);
 		}
@@ -96,7 +96,8 @@ public class SyncProxy {
 	public static <ServiceIntf> ServiceIntf createProxy(Class<ServiceIntf> serviceIntf, ProxySettings settings) {
 		logger.config("Setting up Proxy: " + serviceIntf.getName());
 		defaultUnsetSettings(serviceIntf, settings);
-		return (ServiceIntf) Proxy.newProxyInstance(SyncProxy.class.getClassLoader(), new Class[] { serviceIntf,
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		return (ServiceIntf) Proxy.newProxyInstance(classLoader, new Class[] { serviceIntf,
 			ServiceDefTarget.class, HasRpcToken.class, SerializationStreamFactory.class, HasProxySettings.class },
 			new RemoteServiceInvocationHandler(settings));
 	}
@@ -180,7 +181,7 @@ public class SyncProxy {
 			// of the Async one
 			String className = serviceIntf.getName();
 			try {
-				baseServiceIntf = Class.forName(className.substring(0, className.length() - ASYNC_POSTFIX.length()));
+				baseServiceIntf = ClassLoading.loadClass(className.substring(0, className.length() - ASYNC_POSTFIX.length()));
 			} catch (ClassNotFoundException e) {
 				throw new SyncProxyException(baseServiceIntf, InfoType.SERVICE_BASE, e);
 			}
@@ -247,7 +248,7 @@ public class SyncProxy {
 			// of the Async one
 			String className = serviceIntf.getName();
 			try {
-				Class<?> clazz = Class.forName(className.substring(0, className.length() - 5));
+				Class<?> clazz = ClassLoading.loadClass(className.substring(0, className.length() - 5));
 				relativePathAnn = clazz.getAnnotation(RemoteServiceRelativePath.class);
 			} catch (ClassNotFoundException e) {
 				throw new RuntimeException(e);
@@ -431,7 +432,8 @@ public class SyncProxy {
 				throw new RuntimeException(e);
 			}
 		}
-		ServiceIntf i = (ServiceIntf) Proxy.newProxyInstance(SyncProxy.class.getClassLoader(), new Class[] {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		ServiceIntf i = (ServiceIntf) Proxy.newProxyInstance(classLoader, new Class[] {
 			serviceIntf, ServiceDefTarget.class, HasRpcToken.class, SerializationStreamFactory.class },
 			new RemoteServiceInvocationHandler(serverBaseUrl, remoteServiceRelativePath, policyName, cookieManager,
 					waitForInvocation));
