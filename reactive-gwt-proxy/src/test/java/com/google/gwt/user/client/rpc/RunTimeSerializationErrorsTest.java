@@ -21,6 +21,7 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.user.server.rpc.MixedSerializableEchoServiceImpl;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Fail.fail;
@@ -62,6 +63,7 @@ public class RunTimeSerializationErrorsTest extends RpcAsyncTestBase<MixedSerial
     }
 
     @Test
+    @Tag("NotSupported")
     public void testBadSerialization2() {
         final boolean[] callbackFired = new boolean[]{false};
 
@@ -83,6 +85,7 @@ public class RunTimeSerializationErrorsTest extends RpcAsyncTestBase<MixedSerial
     }
 
     @Test
+    @Tag("NotSupported")
     public void testBadSerialization3() throws RequestException {
         final boolean[] callbackFired = new boolean[]{false};
 

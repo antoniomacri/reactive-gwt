@@ -23,11 +23,12 @@ import com.google.gwt.user.client.rpc.EnumsTestService.Subclassing;
 import com.google.gwt.user.server.rpc.EnumsTestServiceImpl;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * Tests enums over RPC.
@@ -54,7 +55,7 @@ public class EnumsTest extends RpcAsyncTestBase<EnumsTestService, EnumsTestServi
      */
     @Test
     public void testBasicEnums() {
-        getService().echo(Basic.A, createCallback(result -> {
+        service.echo(Basic.A, createCallback(result -> {
             assertThat(result).isNotNull();
             assertEquals(Basic.A, result);
         }));
@@ -65,10 +66,11 @@ public class EnumsTest extends RpcAsyncTestBase<EnumsTestService, EnumsTestServi
      * over RPC and that the client state does not change.
      */
     @Test
+    @Tag("IllegalAccess")
     public void testComplexEnums() {
         Complex a = Complex.A;
         a.value = "client";
-        getService().echo(Complex.A, createCallback(result -> {
+        service.echo(Complex.A, createCallback(result -> {
             assertThat(result).isNotNull();
             assertEquals(Complex.A, result);
 
@@ -82,7 +84,7 @@ public class EnumsTest extends RpcAsyncTestBase<EnumsTestService, EnumsTestServi
      */
     @Test
     public void testNull() {
-        getService().echo((Basic) null, createCallback(result -> {
+        service.echo((Basic) null, createCallback(result -> {
             assertThat(result).isNull();
         }));
     }
@@ -92,7 +94,7 @@ public class EnumsTest extends RpcAsyncTestBase<EnumsTestService, EnumsTestServi
      */
     @Test
     public void testSubclassingEnums() {
-        getService().echo(Subclassing.A, createCallback(result -> {
+        service.echo(Subclassing.A, createCallback(result -> {
             assertThat(result).isNotNull();
             assertEquals(Subclassing.A, result);
         }));
@@ -105,7 +107,7 @@ public class EnumsTest extends RpcAsyncTestBase<EnumsTestService, EnumsTestServi
     public void testFieldEnumWrapperClass() {
         FieldEnumWrapper wrapper = new FieldEnumWrapper();
         wrapper.setFieldEnum(FieldEnum.X);
-        getService().echo(wrapper, createCallback(result -> {
+        service.echo(wrapper, createCallback(result -> {
             assertThat(result).isNotNull();
             FieldEnum fieldEnum = result.getFieldEnum();
             /*
@@ -114,16 +116,7 @@ public class EnumsTest extends RpcAsyncTestBase<EnumsTestService, EnumsTestServi
              * which will bias the test.  We want to assert that the
              * EnumOrdinalizer properly prevents ordinalization of FieldEnum.
              */
-            assertTrue(FieldEnum.X == fieldEnum);
+            assertSame(FieldEnum.X, fieldEnum);
         }));
-    }
-
-
-    private static void rethrowException(Throwable caught) {
-        if (caught instanceof RuntimeException) {
-            throw (RuntimeException) caught;
-        } else {
-            throw new RuntimeException(caught);
-        }
     }
 }

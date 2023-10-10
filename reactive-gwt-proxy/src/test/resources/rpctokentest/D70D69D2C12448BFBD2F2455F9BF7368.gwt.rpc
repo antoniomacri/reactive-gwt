@@ -1,6 +1,8 @@
 @FinalFields, false
 com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException, true, true, true, true, com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException/3936916533, 3936916533
 com.google.gwt.user.client.rpc.RpcTokenException, true, true, false, false, com.google.gwt.user.client.rpc.RpcTokenException/2345075298, 2345075298
+com.google.gwt.user.client.rpc.RpcTokenTest$AnotherTestRpcToken, true, true, true, true, com.google.gwt.user.client.rpc.RpcTokenTest$AnotherTestRpcToken/532457997, 532457997
+com.google.gwt.user.client.rpc.RpcTokenTest$TestRpcToken, true, true, true, true, com.google.gwt.user.client.rpc.RpcTokenTest$TestRpcToken/357917310, 357917310
 com.google.gwt.user.client.rpc.RpcTokenTestService, false, false, false, false, _, 1848188648
 com.google.gwt.user.client.rpc.XsrfToken, true, true, true, true, com.google.gwt.user.client.rpc.XsrfToken/4254043109, 4254043109
 java.lang.Exception, true, false, true, false, java.lang.Exception/1920171873, 1920171873

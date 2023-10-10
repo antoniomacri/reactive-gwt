@@ -22,6 +22,7 @@ import com.google.gwt.user.client.rpc.FinalFieldsTestService.FinalFieldsNode;
 import com.google.gwt.user.server.rpc.FinalFieldsTestServiceImpl;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -47,6 +48,7 @@ public class FinalFieldsTest extends RpcAsyncTestBase<FinalFieldsTestService, Fi
 
 
     @Test
+    @Tag("NotSupported")
     @WithProperties(@Property(name = "rpc.XserializeFinalFields", value = "true"))
     public void testFinalFields() {
         FinalFieldsNode node = new FinalFieldsNode(4, "C", 9);

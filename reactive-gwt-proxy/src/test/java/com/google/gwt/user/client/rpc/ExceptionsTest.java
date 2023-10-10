@@ -20,6 +20,7 @@ import com.google.gwt.event.shared.UmbrellaException;
 import com.google.gwt.user.server.rpc.ExceptionsTestServiceImpl;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,6 +69,7 @@ public class ExceptionsTest extends RpcAsyncTestBase<ExceptionsTestService, Exce
     }
 
     @Test
+    @Tag("IllegalAccess")
     public void testUmbrellaException() {
         final UmbrellaException expected = TestSetFactory.createUmbrellaException();
         service.echo(expected, createCallback(result -> {

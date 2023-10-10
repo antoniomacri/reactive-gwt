@@ -34,6 +34,7 @@ import com.google.gwt.user.client.rpc.core.java.util.LinkedHashMap_CustomFieldSe
 import com.google.gwt.user.server.rpc.CollectionsTestServiceImpl;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -158,6 +159,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     }
 
     @Test
+    @Tag("IllegalAccess")
     public void testEmptyEnumMap() {
         final EnumMap<MarkerTypeEnum, MarkerTypeEnumMapValue> expected = TestSetFactory.createEmptyEnumMap();
         service.echoEmptyEnumMap(expected, createCallback(result -> {
@@ -203,6 +205,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     }
 
     @Test
+    @Tag("IllegalAccess")
     public void testEnumMap() {
         final EnumMap<MarkerTypeEnum, MarkerTypeEnumMapValue> expected = TestSetFactory.createEnumMap();
         service.echo(expected, createCallback(result -> {
@@ -212,6 +215,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     }
 
     @Test
+    @Tag("IllegalAccess")
     public void testEnumMapEnumKey() {
         final EnumMap<MarkerTypeEnum, MarkerTypeEnumMapValue> expected = TestSetFactory.createEnumMapEnumKey();
         service.echoEnumKey(expected, createCallback(result -> {
@@ -257,7 +261,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
                 .createIdentityHashMap();
         service.echo(expected, createCallback(result -> {
             assertThat(result).isNotNull();
-            assertThat(result).isEqualTo(expected);
+            assertTrue(TestSetValidator.isValid(expected, result));
         }));
     }
 
@@ -284,8 +288,8 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     }
 
     @Test
+    @Tag("IllegalAccess")
     public void testLinkedHashMap() {
-
         final LinkedHashMap<MarkerTypeLinkedHashMapKey, MarkerTypeLinkedHashMapValue> expected = TestSetFactory
                 .createLinkedHashMap();
         assertFalse(LinkedHashMap_CustomFieldSerializer.getAccessOrderNoReflection(expected));
@@ -299,8 +303,8 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     }
 
     @Test
+    @Tag("IllegalAccess")
     public void testLinkedHashMapLRU() {
-
         final LinkedHashMap<MarkerTypeLinkedHashMapKey, MarkerTypeLinkedHashMapValue> expected = TestSetFactory.createLRULinkedHashMap();
         assertTrue(LinkedHashMap_CustomFieldSerializer.getAccessOrderNoReflection(expected));
 

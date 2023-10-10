@@ -24,6 +24,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.user.server.rpc.RemoteServiceServletTestServiceImpl;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Fail.fail;
@@ -166,6 +167,7 @@ public class RemoteServiceServletTest extends RpcAsyncTestBase<RemoteServiceServ
     }
 
     @Test
+    @Tag("NotSupported")
     public void testManualSend() throws RequestException {
         RequestBuilder builder = service.testExpectCustomHeader(createCallback(result -> {
             assertFalse(req.isPending());
@@ -205,6 +207,7 @@ public class RemoteServiceServletTest extends RpcAsyncTestBase<RemoteServiceServ
      * RemoteServiceServlet#checkPermutationStrongName.
      */
     @Test
+    @Tag("NotSupported")
     public void testRequestWithoutStrongNameHeader() {
         ((ServiceDefTarget) service).setRpcRequestBuilder(new RpcRequestBuilder() {
             /**
@@ -235,6 +238,7 @@ public class RemoteServiceServletTest extends RpcAsyncTestBase<RemoteServiceServ
      * Ensure that each doFoo method is called.
      */
     @Test
+    @Tag("NotSupported")
     public void testRpcRequestBuilder() {
         final MyRpcRequestBuilder builder = new MyRpcRequestBuilder();
         ((ServiceDefTarget) service).setRpcRequestBuilder(builder);
@@ -243,6 +247,7 @@ public class RemoteServiceServletTest extends RpcAsyncTestBase<RemoteServiceServ
     }
 
     @Test
+    @Tag("NotSupported")
     public void testServiceInterfaceLocation() {
         this.req = service.test(createCallback(result -> {
             assertFalse(RemoteServiceServletTest.this.req.isPending());

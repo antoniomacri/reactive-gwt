@@ -54,6 +54,7 @@ public class SyncProxyTest {
     void setUp() {
         // Reset SyncProxy
         SyncProxy.setBaseURL(null);
+        SyncProxy.suppressRelativePathWarning(false);
     }
 
     @Test

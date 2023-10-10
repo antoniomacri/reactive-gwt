@@ -18,6 +18,7 @@ package com.google.gwt.user.client.rpc;
 import com.google.gwt.user.server.rpc.ValueTypesTestServiceImpl;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -365,6 +366,7 @@ public class ValueTypesTest extends RpcAsyncTestBase<ValueTypesTestService, Valu
     }
 
     @Test
+    @Tag("NotSupported")
     public void string_over64KB() {
         // Test a string over 64KB of a-z characters repeated.
         StringBuilder testString = new StringBuilder();
@@ -376,6 +378,7 @@ public class ValueTypesTest extends RpcAsyncTestBase<ValueTypesTestService, Valu
     }
 
     @Test
+    @Tag("NotSupported")
     public void string_over64KBWithUnicode() {
         // Test a string over64KB string that requires unicode escaping.
         StringBuilder testString = new StringBuilder();
