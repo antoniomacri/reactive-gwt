@@ -50,6 +50,11 @@ public class SyncProxyTest {
 
     }
 
+    @RemoteServiceRelativePath("/innertest")
+    public interface InnerTestServiceStartingWithSlash extends RemoteService {
+
+    }
+
     @BeforeEach
     void setUp() {
         // Reset SyncProxy
@@ -184,5 +189,11 @@ public class SyncProxyTest {
         } catch (SyncProxyException spe) {
             spe.verify(InfoType.SERVICE_BASE);
         }
+    }
+
+    @Test
+    public void testRemoveLeadingSlashFromRemoteServiceRelativePathAnnotation() {
+        assertThat(SyncProxy.getRemoteServiceRelativePathFromAnnotation(InnerTestServiceStartingWithSlash.class))
+                .as("Wrong path from annotation").isEqualTo("innertest");
     }
 }

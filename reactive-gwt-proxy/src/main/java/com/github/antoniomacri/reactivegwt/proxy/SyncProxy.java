@@ -194,7 +194,7 @@ public class SyncProxy {
 			}
 			throw new SyncProxyException(baseServiceIntf, InfoType.REMOTE_SERVICE_RELATIVE_PATH);
 		}
-		return baseServiceIntf.getAnnotation(RemoteServiceRelativePath.class).value();
+		return baseServiceIntf.getAnnotation(RemoteServiceRelativePath.class).value().replaceFirst("^/+", "");
 	}
 
 	public static boolean isSuppressRelativePathWarning() {
@@ -257,7 +257,7 @@ public class SyncProxy {
 		if (relativePathAnn == null) {
 			throw new RuntimeException(serviceIntf + " does not has a RemoteServiceRelativePath annotation");
 		}
-		String remoteServiceRelativePath = relativePathAnn.value();
+		String remoteServiceRelativePath = relativePathAnn.value().replaceFirst("^/+", "");
 		return newProxyInstance(serviceIntf, moduleBaseURL, remoteServiceRelativePath,
 				POLICY_MAP.get(serviceIntf.getName()), cookieManager, waitForInvocation);
 	}
