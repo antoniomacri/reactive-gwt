@@ -183,15 +183,6 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
         return ResponseReader.OBJECT;
     }
 
-    /**
-     * @param proxy
-     * @param method
-     * @param args
-     * @return
-     * @throws InvocationTargetException
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
-     */
     protected Object handleHasProxySettings(Object proxy, Method method,
                                             Object[] args) throws IllegalAccessException,
             IllegalArgumentException, InvocationTargetException {
@@ -236,8 +227,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
                 RpcTokenExceptionHandler.class).equals(method)) {
             this.rpcTokenExceptionHandler = (RpcTokenExceptionHandler) args[0];
             return null;
-        } else if (HasRpcToken.class.getMethod("setRpcTokenExceptionHandler",
-                RpcTokenExceptionHandler.class).equals(method)) {
+        } else if (HasRpcToken.class.getMethod("getRpcTokenExceptionHandler").equals(method)) {
             return this.rpcTokenExceptionHandler;
         }
         throw new MethodNotSupportedException("Method: " + method.getName()
@@ -292,9 +282,9 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
                 + proxy.getClass().getName());
         if (this.logger.getLevel() != null
                 && this.logger.getLevel().intValue() <= Level.CONFIG.intValue()) {
-            String intfs = "";
+            StringBuilder intfs = new StringBuilder();
             for (Class<?> intf : proxy.getClass().getInterfaces()) {
-                intfs += intf.getName() + ",";
+                intfs.append(intf.getName()).append(",");
             }
             this.logger.config("Proxy has interfaces: " + intfs);
         }
@@ -366,9 +356,9 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
                     this.logger.fine("Sync Method determined: "
                             + syncMethod.getName());
                 } catch (NoSuchMethodException nsme) {
-                    String temp = "";
+                    StringBuilder temp = new StringBuilder();
                     for (Class<?> cl : syncParamTypes) {
-                        temp += cl.getSimpleName() + ",";
+                        temp.append(cl.getSimpleName()).append(",");
                     }
                     throw new NoSuchMethodException("SPNoMeth "
                             + method.getName() + " class "
