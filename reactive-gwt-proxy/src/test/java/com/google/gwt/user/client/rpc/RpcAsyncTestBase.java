@@ -21,6 +21,7 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
 
     private final Class<T> serviceClass;
     private final String remoteServiceRelativePath;
+    private final AtomicReference<Throwable> exceptionReference = new AtomicReference<>();
     private CountDownLatch latch;
 
     protected TAsync service;
@@ -47,9 +48,13 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
     }
 
     @AfterEach
-    public void afterEach() throws InterruptedException {
+    public final void afterEach() throws Throwable {
         if (latch != null) {
             assertThat(latch.await(timeoutSeconds, TimeUnit.SECONDS)).isTrue();
+            Throwable t = exceptionReference.get();
+            if (t != null) {
+                throw t;
+            }
         }
     }
 
@@ -63,14 +68,18 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
         return new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
+                exceptionReference.set(caught);
                 latch.countDown();
-                TestSetValidator.rethrowException(caught);
             }
 
             @Override
             public void onSuccess(V result) {
+                try {
+                    asserts.accept(result);
+                } catch (Throwable rethrown) {
+                    exceptionReference.set(rethrown);
+                }
                 latch.countDown();
-                asserts.accept(result);
             }
         };
     }
@@ -80,14 +89,22 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
         return new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
+                try {
+                    callback.onFailure(caught);
+                } catch (Throwable rethrown) {
+                    exceptionReference.set(rethrown);
+                }
                 latch.countDown();
-                callback.onFailure(caught);
             }
 
             @Override
             public void onSuccess(V result) {
+                try {
+                    callback.onSuccess(result);
+                } catch (Throwable rethrown) {
+                    exceptionReference.set(rethrown);
+                }
                 latch.countDown();
-                callback.onSuccess(result);
             }
         };
     }
