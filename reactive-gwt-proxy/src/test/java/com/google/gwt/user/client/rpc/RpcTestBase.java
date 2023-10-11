@@ -1,6 +1,5 @@
 package com.google.gwt.user.client.rpc;
 
-import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.ibm.icu.util.TimeZone;
 import org.jboss.arquillian.junit5.ArquillianExtension;
@@ -134,7 +133,6 @@ public abstract class RpcTestBase {
 
     @BeforeEach
     public final void setUpTestBase() {
-        SyncProxy.setBaseURL(getModuleBaseURL());
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 

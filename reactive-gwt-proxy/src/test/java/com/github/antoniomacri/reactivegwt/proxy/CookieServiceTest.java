@@ -44,7 +44,7 @@ public class CookieServiceTest extends RpcAsyncTestBase<CookieService, CookieSer
     protected CookieServiceAsync getService() {
         CookieManager cm = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
         CookieServiceAsync cookieService = SyncProxy.createProxy(CookieServiceAsync.class,
-                new ProxySettings().setCookieManager(cm));
+                new ProxySettings(getModuleBaseURL()).setCookieManager(cm));
         return cookieService;
     }
 

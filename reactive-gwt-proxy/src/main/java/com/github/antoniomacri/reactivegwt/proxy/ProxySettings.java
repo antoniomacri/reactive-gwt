@@ -39,8 +39,8 @@ public class ProxySettings implements HasProxySettings {
 	ServiceAuthenticator serviceAuthenticator;
 	boolean waitForInvocation = false;
 
-	public ProxySettings() {
-
+	public ProxySettings(String moduleBaseUrl) {
+		this.moduleBaseUrl = moduleBaseUrl;
 	}
 
 	public ProxySettings(String moduleBaseUrl, String remoteServiceRelativePath, String policyName,

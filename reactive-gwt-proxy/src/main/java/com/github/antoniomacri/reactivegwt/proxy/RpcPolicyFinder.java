@@ -29,11 +29,22 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RpcPolicyFinder {
+
+	public RpcPolicyFinder(){
+	}
+
+	public <ServiceIntf> String fetchSerializationPolicyName(Class<ServiceIntf> serviceIntf, String moduleBaseURL) throws IOException {
+		Map<String, String> policyMap = fetchSerializationPolicyMap(moduleBaseURL);
+		return policyMap.get(serviceIntf.getName());
+	}
+
+
 	private static void dumpRemoteService(Map<String, String> result) {
 		if (result.size() > 0) {
 			logger.fine("Found " + result.size()
@@ -103,8 +114,10 @@ public class RpcPolicyFinder {
 		return result;
 	}
 
-	public static Map<String, String> fetchSerializationPolicyName(
-			String moduleBaseURL) throws IOException {
+	/**
+	 * Map from ServiceInterface class name to Serialization Policy name.
+	 */
+	public static Map<String, String> fetchSerializationPolicyMap(String moduleBaseURL) throws IOException {
 		Map<String, String> result = new HashMap<String, String>();
 
 		moduleBaseURL = moduleBaseURL.trim(); // remove outer trim just in case
@@ -236,6 +249,10 @@ public class RpcPolicyFinder {
 		return result;
 	}
 
+	/**
+	 * Map from ServiceInterface class name to Serialization Policy name by
+	 * loading policy-file data from the classpath.
+	 */
 	public static Map<String, String> searchPolicyFileInClassPath() {
 		Map<String, String> result = new HashMap<String, String>();
 		String classPath = System.getProperty("java.class.path");
@@ -287,7 +304,7 @@ public class RpcPolicyFinder {
 		return result;
 	}
 
-	private static final Map<String, String> CACHE_POLICY_FILE = new HashMap<String, String>();
+	private static final Map<String, String> CACHE_POLICY_FILE = new ConcurrentHashMap<>();
 
 	private static final String GWT_PRC_POLICY_FILE_EXT = ".gwt.rpc";
 

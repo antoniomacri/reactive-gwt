@@ -60,7 +60,7 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
 
 
     protected TAsync getService() {
-        return SyncProxy.create(serviceClass);
+        return SyncProxy.create(serviceClass, getModuleBaseURL());
     }
 
     protected <V> AsyncCallback<V> createCallback(Consumer<V> asserts) {

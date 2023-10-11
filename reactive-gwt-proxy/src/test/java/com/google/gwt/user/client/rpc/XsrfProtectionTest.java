@@ -76,7 +76,7 @@ public class XsrfProtectionTest extends RpcAsyncTestBase<XsrfTestService, XsrfTe
 
 
     protected XsrfTokenServiceAsync getAsyncXsrfService() {
-        XsrfTokenServiceAsync service = SyncProxy.create(XsrfTokenService.class);
+        XsrfTokenServiceAsync service = SyncProxy.create(XsrfTokenService.class, getModuleBaseURL());
         ((ServiceDefTarget) service).setServiceEntryPoint(getModuleBaseURL() + "xsrfmock");
         return service;
     }

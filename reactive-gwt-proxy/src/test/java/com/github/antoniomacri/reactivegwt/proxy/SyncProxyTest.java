@@ -4,6 +4,7 @@
  */
 package com.github.antoniomacri.reactivegwt.proxy;
 
+import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 
@@ -21,6 +22,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests the static verification methods within the main SyncProxy class. All
@@ -58,7 +62,6 @@ public class SyncProxyTest {
     @BeforeEach
     void setUp() {
         // Reset SyncProxy
-        SyncProxy.setBaseURL(null);
         SyncProxy.suppressRelativePathWarning(false);
     }
 
@@ -91,47 +94,44 @@ public class SyncProxyTest {
     }
 
     @Test
-    public void testDefaultUnsetSettings() {
-        ProxySettings settings = new ProxySettings();
+    public void testPrepareSettings() throws IOException {
+        RpcPolicyFinder policyFinder = mock(RpcPolicyFinder.class);
+
+        ProxySettings settings = new ProxySettings(null);
         try {
-            SyncProxy.defaultUnsetSettings(InnerTestService.class, settings);
+            SyncProxy.prepareSettings(InnerTestService.class, settings, policyFinder);
             fail("Should have failed on lack of a server base url available");
         } catch (SyncProxyException spe) {
             spe.verify(InfoType.MODULE_BASE_URL);
         }
+
         // Setup in-place policy's for services test below
-        String itsPolicy = "ITSPolicy";
-        String inatsPolicy = "INATSPolicy";
-        SyncProxy.POLICY_MAP.put(InnerTestService.class.getName(), itsPolicy);
-        SyncProxy.POLICY_MAP.put(InnerNoAnnotTestService.class.getName(),
-                inatsPolicy);
         String testUrl = "testUrl";
         String testUrl2 = "testUrl2";
-        // Test Default assignment to moduleBaseUrl
-        SyncProxy.moduleBaseURL = testUrl;
-        SyncProxy.defaultUnsetSettings(InnerTestService.class, settings);
-        assertThat(settings.getModuleBaseUrl())
-                .as("Failed default module base url assignment").isEqualTo(testUrl);
+        String itsPolicy = "ITSPolicy";
+        String inatsPolicy = "INATSPolicy";
+        doReturn(itsPolicy).when(policyFinder).fetchSerializationPolicyName(InnerTestService.class, testUrl);
+        doReturn(inatsPolicy).when(policyFinder).fetchSerializationPolicyName(InnerNoAnnotTestService.class, testUrl2);
+
         // Test Override of moduleBaseUrl
         settings.setModuleBaseUrl(testUrl2);
-        SyncProxy.defaultUnsetSettings(InnerTestService.class, settings);
-        assertThat(settings.getModuleBaseUrl())
-                .as("Failed override module base url assignment").isEqualTo(testUrl2);
+        assertThat(settings.getModuleBaseUrl()).isEqualTo(testUrl2);
+
         // Test relative path assignment
-        settings = new ProxySettings();
+        settings = new ProxySettings(testUrl2);
         try {
-            SyncProxy.defaultUnsetSettings(InnerNoAnnotTestService.class,
-                    settings);
+            SyncProxy.prepareSettings(InnerNoAnnotTestService.class, settings, policyFinder);
             fail("Should have failed on lack of available annotation");
         } catch (SyncProxyException spe) {
             spe.verify(InfoType.REMOTE_SERVICE_RELATIVE_PATH);
         }
+
         String testRelativePath = "relativePath";
         settings.setRemoteServiceRelativePath(testRelativePath);
-        SyncProxy.defaultUnsetSettings(InnerNoAnnotTestService.class, settings);
+        SyncProxy.prepareSettings(InnerNoAnnotTestService.class, settings, policyFinder);
         assertThat(settings.getRemoteServiceRelativePath())
                 .as("Failed to utilized manual relative path").isEqualTo(testRelativePath);
-        SyncProxy.defaultUnsetSettings(InnerTestService.class, settings);
+        SyncProxy.prepareSettings(InnerTestService.class, settings, policyFinder);
         assertThat(settings.getRemoteServiceRelativePath())
                 .as("Failed to utilized manual relative path with annotation")
                 .isEqualTo(testRelativePath);
@@ -140,23 +140,25 @@ public class SyncProxyTest {
                 .as("Cookie manager should be default if not provided").isNotNull();
         CookieManager cm = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
         settings.setCookieManager(cm);
-        SyncProxy.defaultUnsetSettings(InnerTestService.class, settings);
+        SyncProxy.prepareSettings(InnerTestService.class, settings, policyFinder);
         assertThat(settings.getCookieManager()).as("Wrong Cookie Manager").isEqualTo(cm);
+
         // Test policy names for provided test classes , then remove to check
         // for exception when missing
-        settings = new ProxySettings();
-        SyncProxy.defaultUnsetSettings(InnerTestService.class, settings);
+        settings = new ProxySettings(testUrl);
+        SyncProxy.prepareSettings(InnerTestService.class, settings, policyFinder);
         assertThat(settings.getPolicyName())
                 .as("Wrong policy for InnerTestService").isEqualTo(itsPolicy);
-        settings = new ProxySettings();
+
+        settings = new ProxySettings(testUrl2);
         settings.setRemoteServiceRelativePath(testRelativePath);
-        SyncProxy.defaultUnsetSettings(InnerNoAnnotTestService.class, settings);
+        SyncProxy.prepareSettings(InnerNoAnnotTestService.class, settings, policyFinder);
         assertThat(settings.getPolicyName())
                 .as("Wrong policy for InnerNoAnnotTestService").isEqualTo(inatsPolicy);
-        SyncProxy.POLICY_MAP.remove(InnerTestService.class.getName());
-        SyncProxy.POLICY_MAP.remove(InnerNoAnnotTestService.class.getName());
+
+        doReturn(null).when(policyFinder).fetchSerializationPolicyName(any(), any());
         try {
-            SyncProxy.defaultUnsetSettings(InnerTestService.class, settings);
+            SyncProxy.prepareSettings(InnerTestService.class, settings, policyFinder);
         } catch (SyncProxyException spe) {
             spe.verify(InfoType.POLICY_NAME_MISSING);
         }

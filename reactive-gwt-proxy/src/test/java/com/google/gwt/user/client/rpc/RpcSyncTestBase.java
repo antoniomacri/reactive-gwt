@@ -27,6 +27,6 @@ public abstract class RpcSyncTestBase<T extends RemoteService> extends RpcTestBa
 
 
     protected T getService() {
-        return SyncProxy.createSync(serviceClass);
+        return SyncProxy.createSync(serviceClass, getModuleBaseURL());
     }
 }

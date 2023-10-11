@@ -52,7 +52,6 @@ public class ConcurrencyTest {
                 .withFixedDelay(1000)));
 
         SyncProxy.suppressRelativePathWarning(true);
-        SyncProxy.setBaseURL(getModuleBaseURL());
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
@@ -108,7 +107,7 @@ public class ConcurrencyTest {
     }
 
     private ValueTypesTestServiceAsync getService() {
-        ValueTypesTestServiceAsync service = SyncProxy.create(ValueTypesTestService.class);
+        ValueTypesTestServiceAsync service = SyncProxy.create(ValueTypesTestService.class, getModuleBaseURL());
         ((ServiceDefTarget) service).setServiceEntryPoint(getModuleBaseURL() + "valuetypes");
         return service;
     }
