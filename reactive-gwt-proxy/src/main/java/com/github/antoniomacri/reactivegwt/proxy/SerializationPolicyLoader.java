@@ -17,25 +17,24 @@
  */
 package com.github.antoniomacri.reactivegwt.proxy;
 
+import com.google.gwt.user.server.rpc.SerializationPolicy;
+import com.google.gwt.user.server.rpc.impl.StandardSerializationPolicy;
+import com.google.gwt.user.server.rpc.impl.TypeNameObfuscator;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.user.server.rpc.SerializationPolicy;
-import com.google.gwt.user.server.rpc.impl.StandardSerializationPolicy;
-import com.google.gwt.user.server.rpc.impl.TypeNameObfuscator;
-
 /**
  * API for loading a {@link SerializationPolicy}.
- * 
+ * <p>
  * This is an exact copy of the GWT version, but the policies are switched for
  * serialization and deserialization.
  */
@@ -67,37 +66,6 @@ public final class SerializationPolicyLoader {
 	public static String getSerializationPolicyFileName(
 			String serializationPolicyStrongName) {
 		return serializationPolicyStrongName + ".gwt.rpc";
-	}
-
-	/**
-	 * Loads a SerializationPolicy from an input stream.
-	 * 
-	 * @param inputStream
-	 *            stream to load from
-	 * @return a {@link SerializationPolicy} loaded from the input stream
-	 * 
-	 * @throws IOException
-	 *             if an error occurs while reading the stream
-	 * @throws ParseException
-	 *             if the input stream is not properly formatted
-	 * @throws ClassNotFoundException
-	 *             if a class specified in the serialization policy cannot be
-	 *             loaded
-	 * 
-	 * @deprecated see {@link #loadFromStream(InputStream, List)}
-	 */
-	@Deprecated
-	public static SerializationPolicy loadFromStream(InputStream inputStream)
-			throws IOException, ParseException, ClassNotFoundException {
-		List<ClassNotFoundException> classNotFoundExceptions = new ArrayList<ClassNotFoundException>();
-		SerializationPolicy serializationPolicy = loadFromStream(inputStream,
-				classNotFoundExceptions);
-		if (!classNotFoundExceptions.isEmpty()) {
-			// Just report the first failure.
-			throw classNotFoundExceptions.get(0);
-		}
-
-		return serializationPolicy;
 	}
 
 	/**
@@ -141,7 +109,7 @@ public final class SerializationPolicyLoader {
 		int lineNum = 1;
 		while (line != null) {
 			line = line.trim();
-			if (line.length() > 0) {
+			if (!line.isEmpty()) {
 				String[] components = line.split(",");
 
 				if (components[0].equals(CLIENT_FIELDS_KEYWORD)) {
@@ -180,7 +148,7 @@ public final class SerializationPolicyLoader {
 
 					for (int i = 0; i < components.length; i++) {
 						components[i] = components[i].trim();
-						if (components[i].length() == 0) {
+						if (components[i].isEmpty()) {
 							throw new ParseException(FORMAT_ERROR_MESSAGE,
 									lineNum);
 						}
@@ -196,15 +164,15 @@ public final class SerializationPolicyLoader {
 					if (components.length == 2) {
 						fieldSer = fieldDeser = true;
 						instantSer = instantDeser = Boolean
-								.valueOf(components[1]);
+								.parseBoolean(components[1]);
 						typeId = binaryTypeName;
 					} else {
 						int idx = 1;
 						// TODO: Validate the instantiable string better.
-						fieldSer = Boolean.valueOf(components[idx++]);
-						instantSer = Boolean.valueOf(components[idx++]);
-						fieldDeser = Boolean.valueOf(components[idx++]);
-						instantDeser = Boolean.valueOf(components[idx++]);
+						fieldSer = Boolean.parseBoolean(components[idx++]);
+						instantSer = Boolean.parseBoolean(components[idx++]);
+						fieldDeser = Boolean.parseBoolean(components[idx++]);
+						instantDeser = Boolean.parseBoolean(components[idx++]);
 						typeId = components[idx++];
 
 						if (!fieldSer
@@ -244,7 +212,7 @@ public final class SerializationPolicyLoader {
 			line = br.readLine();
 			lineNum++;
 		}
-		/****************************************
+		/*
 		 * HERE'S THE CHANGE FROM THE ORIGINAL Deser and Ser are swapped because
 		 * we are the client side
 		 */

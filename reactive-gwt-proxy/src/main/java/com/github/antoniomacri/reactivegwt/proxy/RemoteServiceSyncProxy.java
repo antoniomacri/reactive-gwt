@@ -156,19 +156,6 @@ public class RemoteServiceSyncProxy implements SerializationStreamFactory {
         }
     }
 
-    /**
-     * @deprecated as of 0.6, use
-     * {@link #RemoteServiceSyncProxy(HasProxySettings, RpcToken, RpcTokenExceptionHandler)}
-     */
-    @Deprecated
-    public RemoteServiceSyncProxy(String moduleBaseURL, String remoteServiceRelativePath,
-                                  String serializationPolicyName, CookieManager cookieManager, RpcToken rpcToken,
-                                  RpcTokenExceptionHandler rpcTokenExceptionHandler) {
-        this(new ProxySettings().setModuleBaseUrl(moduleBaseURL)
-                .setRemoteServiceRelativePath(remoteServiceRelativePath).setPolicyName(serializationPolicyName)
-                .setCookieManager(cookieManager), rpcToken, rpcTokenExceptionHandler);
-    }
-
     @Override
     public SyncClientSerializationStreamReader createStreamReader(String encoded) throws SerializationException {
         SyncClientSerializationStreamReader reader = new SyncClientSerializationStreamReader(this.serializationPolicy);

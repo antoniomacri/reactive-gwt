@@ -15,19 +15,6 @@
  */
 package com.github.antoniomacri.reactivegwt.proxy;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.CookieManager;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.http.MethodNotSupportedException;
-
 import com.github.antoniomacri.reactivegwt.proxy.exception.SyncProxyException;
 import com.github.antoniomacri.reactivegwt.proxy.exception.SyncProxyException.InfoType;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -44,6 +31,17 @@ import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter.ResponseReader;
 import com.google.gwt.user.server.rpc.impl.SerializabilityUtil;
+import org.apache.http.MethodNotSupportedException;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Handles method call delegation from the Proxy interfaces
@@ -124,45 +122,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
     HasProxySettings settings;
 
     public RemoteServiceInvocationHandler(HasProxySettings settings) {
-        this(settings.getModuleBaseUrl(), settings
-                        .getRemoteServiceRelativePath(), settings.getPolicyName(),
-                settings.getCookieManager(), settings.isWaitForInvocation());
         this.settings = settings;
-    }
-
-    /**
-     * Legacy Support. Use
-     * {@link #RemoteServiceInvocationHandler(HasProxySettings)} where possible,
-     * this method may be deprecated in a future release
-     * <p>
-     * Uses waitForInvocation default as false.
-     *
-     * @deprecated since 0.5, preference to use
-     * {@link #RemoteServiceInvocationHandler(HasProxySettings)}
-     */
-    @Deprecated
-    public RemoteServiceInvocationHandler(String moduleBaseURL,
-                                          String remoteServiceRelativePath, String serializationPolicyName,
-                                          CookieManager cookieManager) {
-        this(moduleBaseURL, remoteServiceRelativePath, serializationPolicyName,
-                cookieManager, false);
-    }
-
-    /**
-     * Legacy Support. Use
-     * {@link #RemoteServiceInvocationHandler(HasProxySettings)} where possible,
-     * this method may be deprecated in a future release.
-     *
-     * @deprecated since 0.5, preference to use
-     * {@link #RemoteServiceInvocationHandler(HasProxySettings)}
-     */
-    @Deprecated
-    public RemoteServiceInvocationHandler(String moduleBaseURL,
-                                          String remoteServiceRelativePath, String serializationPolicyName,
-                                          CookieManager cookieManager, boolean waitForInvocation) {
-        this.settings = new ProxySettings(moduleBaseURL,
-                remoteServiceRelativePath, serializationPolicyName,
-                cookieManager, waitForInvocation);
     }
 
     private ResponseReader getReaderFor(Class<?> type) {
