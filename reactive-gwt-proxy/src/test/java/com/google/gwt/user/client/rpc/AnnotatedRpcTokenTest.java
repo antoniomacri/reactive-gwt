@@ -15,7 +15,7 @@
  */
 package com.google.gwt.user.client.rpc;
 
-import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.ReactiveGWT;
 import com.google.gwt.user.server.rpc.AnnotatedRpcTokenTestServiceImpl;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
@@ -44,7 +44,7 @@ public class AnnotatedRpcTokenTest extends RpcAsyncTestBase<AnnotatedRpcTokenTes
 
     @BeforeEach
     public void setUp() {
-        SyncProxy.suppressRelativePathWarning(true);
+        ReactiveGWT.suppressRelativePathWarning(true);
     }
 
 

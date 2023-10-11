@@ -62,9 +62,9 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
             if (RemoteService.class.isAssignableFrom(clazz)) {
                 return clazz;
             }
-            if (clazz.getName().endsWith(SyncProxy.ASYNC_POSTFIX)) {
+            if (clazz.getName().endsWith(ReactiveGWT.ASYNC_POSTFIX)) {
                 return ClassLoading.loadClass(clazz.getName().replace(
-                        SyncProxy.ASYNC_POSTFIX, ""));
+                        ReactiveGWT.ASYNC_POSTFIX, ""));
             }
             // if (!ServiceDefTarget.class.equals(clazz)
             // && !HasRpcToken.class.equals(clazz)

@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  * this class offers GWT-like GWT#create method access to create RPC service
  * interfaces.
  */
-public class SyncProxy {
+public class ReactiveGWT {
 
     /**
      * Similar action to Gwt.create(). This method assumes your service is
@@ -195,7 +195,7 @@ public class SyncProxy {
      * Sets logging level for all SyncProxy classes
      */
     public static void setLoggingLevel(Level level) {
-        SyncProxy.level = level;
+        ReactiveGWT.level = level;
         Logger topLogger = java.util.logging.Logger.getLogger("");
         // Handler for console (reuse it if it already exists)
         Handler consoleHandler = null;
@@ -230,7 +230,7 @@ public class SyncProxy {
      */
     public static void suppressRelativePathWarning(boolean suppressRelativePathWarning) {
         logger.info((suppressRelativePathWarning ? "" : "Not ") + "Supressing Relative Path Warning");
-        SyncProxy.suppressRelativePathWarning = suppressRelativePathWarning;
+        ReactiveGWT.suppressRelativePathWarning = suppressRelativePathWarning;
     }
 
     /**
@@ -239,7 +239,7 @@ public class SyncProxy {
      *
      * @since 0.5
      */
-    protected static Class<?>[] spClazzes = {SyncProxy.class, RpcPolicyFinder.class,
+    protected static Class<?>[] spClazzes = {ReactiveGWT.class, RpcPolicyFinder.class,
             RemoteServiceInvocationHandler.class, RemoteServiceSyncProxy.class,
             SyncClientSerializationStreamReader.class, SyncClientSerializationStreamWriter.class};
     /**
@@ -249,7 +249,7 @@ public class SyncProxy {
 
     static Level level;
 
-    static Logger logger = Logger.getLogger(SyncProxy.class.getName());
+    static Logger logger = Logger.getLogger(ReactiveGWT.class.getName());
 
     protected static final String ASYNC_POSTFIX = "Async";
 

@@ -15,7 +15,7 @@
  */
 package com.google.gwt.user.client.rpc;
 
-import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.ReactiveGWT;
 import com.google.gwt.user.server.rpc.MockXsrfTokenServiceImpl;
 import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
 import com.google.gwt.user.server.rpc.XsrfTestServiceImpl;
@@ -62,7 +62,7 @@ public class XsrfProtectionTest extends RpcAsyncTestBase<XsrfTestService, XsrfTe
 
     @BeforeEach
     public void gwtSetUp() {
-        SyncProxy.suppressRelativePathWarning(true);
+        ReactiveGWT.suppressRelativePathWarning(true);
         // MD5 test vector
         // TODO (AM): set cookie
 //        Cookies.setCookie(SESSION_COOKIE_NAME, "abc");
@@ -76,7 +76,7 @@ public class XsrfProtectionTest extends RpcAsyncTestBase<XsrfTestService, XsrfTe
 
 
     protected XsrfTokenServiceAsync getAsyncXsrfService() {
-        XsrfTokenServiceAsync service = SyncProxy.create(XsrfTokenService.class, getModuleBaseURL());
+        XsrfTokenServiceAsync service = ReactiveGWT.create(XsrfTokenService.class, getModuleBaseURL());
         ((ServiceDefTarget) service).setServiceEntryPoint(getModuleBaseURL() + "xsrfmock");
         return service;
     }

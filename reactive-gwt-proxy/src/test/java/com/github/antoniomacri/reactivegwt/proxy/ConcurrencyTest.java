@@ -51,7 +51,7 @@ public class ConcurrencyTest {
                 .withBody("//OK[13.0,[],0,7]")
                 .withFixedDelay(1000)));
 
-        SyncProxy.suppressRelativePathWarning(true);
+        ReactiveGWT.suppressRelativePathWarning(true);
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
@@ -107,7 +107,7 @@ public class ConcurrencyTest {
     }
 
     private ValueTypesTestServiceAsync getService() {
-        ValueTypesTestServiceAsync service = SyncProxy.create(ValueTypesTestService.class, getModuleBaseURL());
+        ValueTypesTestServiceAsync service = ReactiveGWT.create(ValueTypesTestService.class, getModuleBaseURL());
         ((ServiceDefTarget) service).setServiceEntryPoint(getModuleBaseURL() + "valuetypes");
         return service;
     }

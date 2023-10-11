@@ -1,6 +1,6 @@
 package com.google.gwt.user.client.rpc;
 
-import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.ReactiveGWT;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -36,7 +36,7 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
     protected RpcAsyncTestBase(Class<T> serviceClass, String remoteServiceRelativePath) {
         this.serviceClass = serviceClass;
         this.remoteServiceRelativePath = remoteServiceRelativePath;
-        SyncProxy.suppressRelativePathWarning(true);
+        ReactiveGWT.suppressRelativePathWarning(true);
     }
 
     @BeforeEach
@@ -60,7 +60,7 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
 
 
     protected TAsync getService() {
-        return SyncProxy.create(serviceClass, getModuleBaseURL());
+        return ReactiveGWT.create(serviceClass, getModuleBaseURL());
     }
 
     protected <V> AsyncCallback<V> createCallback(Consumer<V> asserts) {

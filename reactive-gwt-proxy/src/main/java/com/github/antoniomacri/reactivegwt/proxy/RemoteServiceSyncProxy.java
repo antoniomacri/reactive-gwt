@@ -319,7 +319,7 @@ public class RemoteServiceSyncProxy implements SerializationStreamFactory {
             settings.getServiceAuthenticator().applyAuthenticationToService(settings);
         }
         // Workaround for unknown reset of the logger
-        logger.setLevel(SyncProxy.getLoggingLevel());
+        logger.setLevel(ReactiveGWT.getLoggingLevel());
         logger.info("Send request to " + this.remoteServiceURL);
         logger.fine("Request payload: " + requestData);
 

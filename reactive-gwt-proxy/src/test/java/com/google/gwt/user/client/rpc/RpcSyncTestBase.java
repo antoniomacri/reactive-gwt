@@ -1,6 +1,6 @@
 package com.google.gwt.user.client.rpc;
 
-import com.github.antoniomacri.reactivegwt.proxy.SyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.ReactiveGWT;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
@@ -27,6 +27,6 @@ public abstract class RpcSyncTestBase<T extends RemoteService> extends RpcTestBa
 
 
     protected T getService() {
-        return SyncProxy.createSync(serviceClass, getModuleBaseURL());
+        return ReactiveGWT.createSync(serviceClass, getModuleBaseURL());
     }
 }
