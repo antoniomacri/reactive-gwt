@@ -27,7 +27,7 @@ public interface ServiceAuthenticationListener {
 	 * proceed with RPC's. This authenticator should be provided to the RPC
 	 * service to take effect
 	 *
-	 * @param accountName
+	 * @param authenticator
 	 *            the account the user logged in with, if available. This may be
 	 *            null in circumstances where a token was provided for access
 	 *            without identified specifically which user is being

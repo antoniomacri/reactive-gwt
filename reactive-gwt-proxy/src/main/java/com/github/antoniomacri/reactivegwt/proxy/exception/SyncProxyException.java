@@ -86,8 +86,6 @@ public class SyncProxyException extends InvocationException {
 	/**
 	 * Quickly verify's if this exceptions error type is in the provided set. If
 	 * not, this exception is re-thrown.
-	 *
-	 * @param type
 	 */
 	public void verify(InfoType... types) {
 		if (!Arrays.asList(types).contains(this.type)) {
