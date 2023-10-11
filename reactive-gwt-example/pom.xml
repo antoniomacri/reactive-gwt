@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.antoniomacri</groupId>
+        <groupId>io.github.antoniomacri</groupId>
         <artifactId>reactive-gwt</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
