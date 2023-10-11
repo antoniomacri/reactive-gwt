@@ -17,6 +17,7 @@ package com.github.antoniomacri.reactivegwt.proxy;
 import java.net.CookieManager;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import com.github.antoniomacri.reactivegwt.proxy.auth.ServiceAuthenticator;
 
@@ -38,6 +39,7 @@ public class ProxySettings implements HasProxySettings {
 	String remoteServiceRelativePath;
 	ServiceAuthenticator serviceAuthenticator;
 	boolean waitForInvocation = false;
+	ExecutorService executor;
 
 	public ProxySettings(String moduleBaseUrl) {
 		this.moduleBaseUrl = moduleBaseUrl;
@@ -153,6 +155,17 @@ public class ProxySettings implements HasProxySettings {
 	public ProxySettings setWaitForInvocation(boolean waitForInvocation) {
 		this.waitForInvocation = waitForInvocation;
 		return this;
+	}
+
+	@Override
+	public HasProxySettings setExecutor(ExecutorService executor) {
+		this.executor = executor;
+		return this;
+	}
+
+	@Override
+	public ExecutorService getExecutor() {
+		return executor;
 	}
 
 }

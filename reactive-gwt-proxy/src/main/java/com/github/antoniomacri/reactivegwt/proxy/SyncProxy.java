@@ -26,7 +26,7 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import java.lang.reflect.Proxy;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -139,6 +139,10 @@ public class SyncProxy {
         if (settings.getCookieManager() == null) {
             logger.config("Setting Cookie Manager to Default");
             settings.setCookieManager(DEFAULT_COOKIE_MANAGER);
+        }
+
+        if (settings.getExecutor() == null) {
+            settings.setExecutor(Executors.newSingleThreadExecutor());
         }
     }
 

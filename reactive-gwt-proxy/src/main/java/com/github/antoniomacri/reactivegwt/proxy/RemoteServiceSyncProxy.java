@@ -47,8 +47,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 /**
@@ -302,10 +300,8 @@ public class RemoteServiceSyncProxy implements SerializationStreamFactory {
     }
 
     private HttpClient createHttpClient() {
-        final ExecutorService executorService = Executors.newSingleThreadExecutor();
-
         HttpClient httpClient = HttpClient.newBuilder()
-                .executor(executorService)
+                .executor(settings.getExecutor())
                 .version(HttpClient.Version.HTTP_2)
                 .cookieHandler(this.settings.getCookieManager())
                 .build();
