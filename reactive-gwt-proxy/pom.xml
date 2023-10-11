@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.github.antoniomacri</groupId>
         <artifactId>reactive-gwt</artifactId>
-        <version>1.0</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>reactive-gwt-proxy</artifactId>
@@ -73,8 +73,7 @@
             <exclusions>
                 <!--
                   These deps must be excluded because GWT loads an old version which
-                  is only compatible with JVM <= 1.8, but jetty-annotations reads generated classes (built with the current compiler).
-                -->
+                  is only compatible with JVM <= 1.8, but jetty-annotations reads generated classes (built with the current compiler). -->
                 <exclusion>
                     <groupId>org.ow2.asm</groupId>
                     <artifactId>asm</artifactId>
