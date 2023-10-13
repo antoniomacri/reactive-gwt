@@ -456,6 +456,13 @@ public class SyncClientSerializationStreamWriter extends
 				.applyFieldSerializationPolicy(instanceClass,
 						this.serializationPolicy);
 
+		// Serialize a null String as the server-only blob for enhanced classes. We don't actually care
+		// about the value: see also the {@link SyncClientSerializationStreamReader#deserializeClass}
+		// and Issue 36 of the original syncproxy project.
+		if (this.serializationPolicy.getClientFieldNamesForEnhancedClass(instanceClass) != null) {
+			serializeValue(null, String.class);
+		}
+
 		for (Field declField : serializableFields) {
 			assert declField != null;
 
