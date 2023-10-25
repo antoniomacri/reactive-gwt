@@ -1,5 +1,6 @@
 /*
  * Copyright www.gdevelop.com.
+ * Copyright Antonio Macrì.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -33,23 +34,42 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * See the official Wiki for details and examples on usage. As a starting point,
- * this class offers GWT-like GWT#create method access to create RPC service
- * interfaces.
+ * Offers {@link com.google.gwt.core.client.GWT#create(Class)} methods to instantiate
+ * proxies for RPC service interfaces.
  */
 public class ReactiveGWT {
 
     /**
-     * Similar action to Gwt.create(). This method assumes your service is
-     * annotated with {@link RemoteServiceRelativePath}. See
-     * {@link #suppressRelativePathWarning(boolean)} in the event your service
-     * is not annotated with {@link RemoteServiceRelativePath}.
+     * Creates the client proxy for a GWT service interface.
+     * <p>
+     * It is similar to {@link com.google.gwt.core.client.GWT#create(Class)}. This method
+     * assumes your service is annotated with {@link RemoteServiceRelativePath} (otherwise,
+     * see {@link #suppressRelativePathWarning(boolean)}).
      *
-     * @return the Async interface of the provided serviceIntf
+     * @param serviceIntf   the {@link RemoteService} (sync) interface to instantiate
+     * @param moduleBaseURL the base url of the remote service, which is prepended to the
+     *                      {@link RemoteServiceRelativePath} value
+     * @return the Async interface of the provided {@code serviceIntf}
+     */
+    public static <ServiceIntfAsync, ServiceIntf extends RemoteService>
+    ServiceIntfAsync create(Class<ServiceIntf> serviceIntf, String moduleBaseURL) {
+        return create(serviceIntf, new ProxySettings(moduleBaseURL));
+    }
+
+    /**
+     * Creates the client proxy for a GWT service interface.
+     * <p>
+     * It is similar to {@link com.google.gwt.core.client.GWT#create(Class)}. This method
+     * assumes your service is annotated with {@link RemoteServiceRelativePath} (otherwise,
+     * see {@link #suppressRelativePathWarning(boolean)}).
+     *
+     * @param serviceIntf   the {@link RemoteService} (sync) interface to instantiate
+     * @param proxySettings proxy settings, comprising the base url of the remote service
+     * @return the Async interface of the provided {@code serviceIntf}
      */
     @SuppressWarnings("unchecked")
     public static <ServiceIntfAsync, ServiceIntf extends RemoteService>
-    ServiceIntfAsync create(Class<ServiceIntf> serviceIntf, String moduleBaseURL) {
+    ServiceIntfAsync create(Class<ServiceIntf> serviceIntf, ProxySettings proxySettings) {
         logger.config("Create service: " + serviceIntf.getName());
 
         Class<ServiceIntfAsync> asyncServiceIntf;
@@ -62,7 +82,7 @@ public class ReactiveGWT {
 
         logger.config("Creating Async Service: " + asyncServiceIntf.getName());
 
-        return createProxy(asyncServiceIntf, new ProxySettings(moduleBaseURL));
+        return createProxy(asyncServiceIntf, proxySettings);
     }
 
     /**
@@ -93,7 +113,7 @@ public class ReactiveGWT {
      * whichever was provided as serviceIntf
      */
     @SuppressWarnings("unchecked")
-    public static <ServiceIntf> ServiceIntf createProxy(Class<ServiceIntf> serviceIntf, ProxySettings settings) {
+    protected static <ServiceIntf> ServiceIntf createProxy(Class<ServiceIntf> serviceIntf, ProxySettings settings) {
         logger.config("Setting up Proxy: " + serviceIntf.getName());
 
         prepareSettings(serviceIntf, settings, new RpcPolicyFinder());
@@ -178,7 +198,7 @@ public class ReactiveGWT {
         if (baseServiceIntf.getAnnotation(RemoteServiceRelativePath.class) == null) {
             if (isSuppressRelativePathWarning()) {
                 logger.info("Suppressed warning for lack of RemoteServiceRelativePath annotation on service: "
-                        + baseServiceIntf);
+                            + baseServiceIntf);
                 return "";
             }
             throw new SyncProxyException(baseServiceIntf, InfoType.REMOTE_SERVICE_RELATIVE_PATH);
