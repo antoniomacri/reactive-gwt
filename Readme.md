@@ -45,3 +45,11 @@ Are you using SyncProxy in your Project? Let us know so we can generate a list o
 ## Changes
 
 The latest [Release Notes](https://github.com/jcricket/gwt-syncproxy/wiki/Release-Notes) are available up to version 0.5. The Roadmap is a work in progress and currently targeting version 0.6. Check the [Common Issues](https://github.com/jcricket/gwt-syncproxy/wiki/Common-Issues) wiki for a list of problems that may occur and how to resolve them before submitting a ticket. You may also post up to StackOverflow with the 'gwt-syncproxy' tag and we'll help you there.
+
+
+# Releasing
+
+```shell
+./mvnw -Darguments='-Dmaven.test.skip=true' release:prepare
+./mvnw release:perform
+```
