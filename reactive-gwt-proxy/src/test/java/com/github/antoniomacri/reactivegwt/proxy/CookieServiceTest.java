@@ -72,7 +72,7 @@ public class CookieServiceTest extends RpcAsyncTestBase<CookieService, CookieSer
                     .getCookieStore()
                     .add(URI.create("http://" + domain), cookie);
         }
-        service.echoCookiesFromClient(createCallback(result -> {
+        service.echoCookiesFromClient(waitedCallback(result -> {
             assertThat((Object) result.size()).as("Missing Cookies").isEqualTo(CookieService.COOKIE_VALS.length);
             for (String val : CookieService.COOKIE_VALS) {
                 assertThat(searchCookieStoreForValue(val,
@@ -97,7 +97,7 @@ public class CookieServiceTest extends RpcAsyncTestBase<CookieService, CookieSer
                     .getCookieStore()
                     .add(URI.create("http://another.url"), new HttpCookie(val, val));
         }
-        service.echoCookiesFromClient(createCallback(result ->
+        service.echoCookiesFromClient(waitedCallback(result ->
                 assertThat((Object) result.size()).as("Should be no cookies").isEqualTo(0)));
     }
 
@@ -106,7 +106,7 @@ public class CookieServiceTest extends RpcAsyncTestBase<CookieService, CookieSer
         // Make sure Cookie Store is empty to begin with
         assertThat((Object) ((HasProxySettings) service).getCookieManager()
                 .getCookieStore().getCookies().size()).as("Cookie Store should be empty").isEqualTo(0);
-        service.generateCookiesOnServer(createCallback(result -> {
+        service.generateCookiesOnServer(waitedCallback(result -> {
             assertThat((Object) ((HasProxySettings) service).getCookieManager()
                     .getCookieStore().getCookies().size()).as("Missing Cookies").isEqualTo(CookieService.COOKIE_VALS.length);
             for (String val : CookieService.COOKIE_VALS) {
@@ -185,8 +185,8 @@ public class CookieServiceTest extends RpcAsyncTestBase<CookieService, CookieSer
     @Test
     public void testSessionGood() {
         final String test = "TEST";
-        service.setSessionAttrib(test, createCallback(session ->
-                service.getSessionAttrib(createCallback(result ->
+        service.setSessionAttrib(test, waitedCallback(session ->
+                service.getSessionAttrib(waitedCallback(result ->
                         assertThat((Object) result).as("Wrong session attribute value").isEqualTo(test)))));
     }
 
@@ -195,11 +195,11 @@ public class CookieServiceTest extends RpcAsyncTestBase<CookieService, CookieSer
         // Make sure Cookie Store is empty to begin with
         assertThat((Object) ((HasProxySettings) service).getCookieManager()
                 .getCookieStore().getCookies().size()).as("Cookie Store should be empty").isEqualTo(0);
-        service.generateCookiesOnServer(createCallback(ignored -> {
+        service.generateCookiesOnServer(waitedCallback(ignored -> {
             // Make sure Cookie Store is empty to begin with
             assertThat((Object) ((HasProxySettings) service).getCookieManager()
                     .getCookieStore().getCookies().size()).as("Cookie Store should not be empty").isEqualTo(CookieService.COOKIE_VALS.length);
-            service.echoCookiesFromClient(createCallback(result2 -> {
+            service.echoCookiesFromClient(waitedCallback(result2 -> {
                 assertThat((Object) result2.size()).as("Missing Cookies").isEqualTo(CookieService.COOKIE_VALS.length);
                 for (String val : CookieService.COOKIE_VALS) {
                     assertThat(searchCookieStoreForValue(
@@ -220,12 +220,12 @@ public class CookieServiceTest extends RpcAsyncTestBase<CookieService, CookieSer
         // Make sure Cookie Store is empty to begin with
         assertThat((Object) ((HasProxySettings) service).getCookieManager()
                 .getCookieStore().getCookies().size()).as("Cookie Store should be empty").isEqualTo(0);
-        service.generateCookiesOnServer(createCallback(ignored -> {
+        service.generateCookiesOnServer(waitedCallback(ignored -> {
             CookieServiceAsync serviceAsync2 = getService();
             // Make sure Cookie Store is empty to begin with
             assertThat((Object) ((HasProxySettings) serviceAsync2).getCookieManager()
                     .getCookieStore().getCookies().size()).as("Cookie Store should be empty").isEqualTo(0);
-            serviceAsync2.echoCookiesFromClient(createCallback(result ->
+            serviceAsync2.echoCookiesFromClient(waitedCallback(result ->
                     assertThat((Object) result.size()).as("Should have no Cookies").isEqualTo(0)
             ));
         }));

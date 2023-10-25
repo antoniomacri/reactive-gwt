@@ -40,19 +40,19 @@ public class GreetingServiceTest extends RpcAsyncTestBase<GreetingService, Greet
      */
     @Test
     public void testGreetingService() {
-        service.greetServer(GreetingService.NAME, createCallback(result ->
+        service.greetServer(GreetingService.NAME, waitedCallback(result ->
                 assertTrue(result.contains(GreetingService.NAME))));
     }
 
     @Test
     public void testGreetingService2() {
-        service.greetServer2(GreetingService.NAME, createCallback(result ->
+        service.greetServer2(GreetingService.NAME, waitedCallback(result ->
                 assertEquals(GreetingService.NAME, result.getText())));
     }
 
     @Test
     public void testGreetingServiceArray() {
-        service.greetServerArr(GreetingService.NAME, createCallback(result ->
+        service.greetServerArr(GreetingService.NAME, waitedCallback(result ->
                 assertEquals(GreetingService.NAME, result.get(0))));
     }
 }

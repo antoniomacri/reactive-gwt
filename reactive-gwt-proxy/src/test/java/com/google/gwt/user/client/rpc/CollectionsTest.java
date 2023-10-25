@@ -74,7 +74,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
 
     @Test
     public void testArrayList() {
-        service.echo(TestSetFactory.createArrayList(), createCallback(result -> {
+        service.echo(TestSetFactory.createArrayList(), waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertTrue(TestSetValidator.isValid(result));
         }));
@@ -82,7 +82,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
 
     @Test
     public void testArrayListVoid() {
-        service.echoArrayListVoid(TestSetFactory.createArrayListVoid(), createCallback(result -> {
+        service.echoArrayListVoid(TestSetFactory.createArrayListVoid(), waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertTrue(TestSetValidator.isValidArrayListVoid(result));
         }));
@@ -92,7 +92,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     public void testArraysAsList() {
         final List<MarkerTypeArraysAsList> expected = TestSetFactory.createArraysAsList();
 
-        service.echoArraysAsList(expected, createCallback(result -> {
+        service.echoArraysAsList(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(expected).isEqualTo(result);
         }));
@@ -101,7 +101,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testBooleanArray() {
         final Boolean[] expected = TestSetFactory.createBooleanArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
 
@@ -113,7 +113,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testByteArray() {
         final Byte[] expected = TestSetFactory.createByteArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
 
@@ -125,7 +125,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testCharArray() {
         final Character[] expected = TestSetFactory.createCharArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
 
@@ -137,7 +137,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testDateArray() {
         final Date[] expected = TestSetFactory.createDateArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
 
@@ -149,7 +149,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testDoubleArray() {
         final Double[] expected = TestSetFactory.createDoubleArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
 
@@ -162,7 +162,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Tag("IllegalAccess")
     public void testEmptyEnumMap() {
         final EnumMap<MarkerTypeEnum, MarkerTypeEnumMapValue> expected = TestSetFactory.createEmptyEnumMap();
-        service.echoEmptyEnumMap(expected, createCallback(result -> {
+        service.echoEmptyEnumMap(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
         }));
@@ -170,7 +170,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
 
     @Test
     public void testEmptyList() {
-        service.echo(TestSetFactory.createEmptyList(), createCallback(result -> {
+        service.echo(TestSetFactory.createEmptyList(), waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEmpty();
         }));
@@ -178,7 +178,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
 
     @Test
     public void testEmptyMap() {
-        service.echo(TestSetFactory.createEmptyMap(), createCallback(result -> {
+        service.echo(TestSetFactory.createEmptyMap(), waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEmpty();
         }));
@@ -186,7 +186,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
 
     @Test
     public void testEmptySet() {
-        service.echo(TestSetFactory.createEmptySet(), createCallback(result -> {
+        service.echo(TestSetFactory.createEmptySet(), waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEmpty();
         }));
@@ -195,7 +195,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testEnumArray() {
         final Enum<?>[] expected = TestSetFactory.createEnumArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
 
@@ -208,7 +208,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Tag("IllegalAccess")
     public void testEnumMap() {
         final EnumMap<MarkerTypeEnum, MarkerTypeEnumMapValue> expected = TestSetFactory.createEnumMap();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
         }));
@@ -218,7 +218,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Tag("IllegalAccess")
     public void testEnumMapEnumKey() {
         final EnumMap<MarkerTypeEnum, MarkerTypeEnumMapValue> expected = TestSetFactory.createEnumMapEnumKey();
-        service.echoEnumKey(expected, createCallback(result -> {
+        service.echoEnumKey(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertTrue(TestSetValidator.isValidEnumKey(expected, result));
         }));
@@ -227,7 +227,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testFloatArray() {
         final Float[] expected = TestSetFactory.createFloatArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
 
@@ -240,7 +240,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testHashMap() {
         final HashMap<MarkerTypeHashMapKey, MarkerTypeHashMapValue> expected = TestSetFactory.createHashMap();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
         }));
@@ -249,7 +249,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testHashSet() {
         final HashSet<MarkerTypeHashSet> expected = TestSetFactory.createHashSet();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
         }));
@@ -259,7 +259,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     public void testIdentityHashMap() {
         final IdentityHashMap<MarkerTypeIdentityHashMapKey, MarkerTypeIdentityHashMapValue> expected = TestSetFactory
                 .createIdentityHashMap();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertTrue(TestSetValidator.isValid(expected, result));
         }));
@@ -269,7 +269,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     public void testIdentityHashMapEnumKey() {
         final IdentityHashMap<MarkerTypeEnum, MarkerTypeIdentityHashMapValue> expected = TestSetFactory
                 .createIdentityHashMapEnumKey();
-        service.echoEnumKey(expected, createCallback(result -> {
+        service.echoEnumKey(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertTrue(TestSetValidator.isValidEnumKey(expected, result));
         }));
@@ -278,7 +278,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testIntegerArray() {
         final Integer[] expected = TestSetFactory.createIntegerArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
 
@@ -294,7 +294,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
                 .createLinkedHashMap();
         assertFalse(LinkedHashMap_CustomFieldSerializer.getAccessOrderNoReflection(expected));
 
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             expected.get("SerializableSet");
             result.get("SerializableSet");
@@ -308,7 +308,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
         final LinkedHashMap<MarkerTypeLinkedHashMapKey, MarkerTypeLinkedHashMapValue> expected = TestSetFactory.createLRULinkedHashMap();
         assertTrue(LinkedHashMap_CustomFieldSerializer.getAccessOrderNoReflection(expected));
 
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             expected.get("SerializableSet");
             result.get("SerializableSet");
@@ -319,7 +319,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testLinkedHashSet() {
         final LinkedHashSet<MarkerTypeLinkedHashSet> expected = TestSetFactory.createLinkedHashSet();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
         }));
@@ -328,7 +328,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testLinkedList() {
         final LinkedList<MarkerTypeLinkedList> expected = TestSetFactory.createLinkedList();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
         }));
@@ -337,7 +337,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testLongArray() {
         final Long[] expected = TestSetFactory.createLongArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
 
@@ -350,7 +350,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testPrimitiveBooleanArray() {
         final boolean[] expected = TestSetFactory.createPrimitiveBooleanArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isEqualTo(expected);
         }));
     }
@@ -358,7 +358,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testPrimitiveByteArray() {
         final byte[] expected = TestSetFactory.createPrimitiveByteArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isEqualTo(expected);
         }));
     }
@@ -366,7 +366,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testPrimitiveCharArray() {
         final char[] expected = TestSetFactory.createPrimitiveCharArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
         }));
@@ -375,7 +375,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testPrimitiveDoubleArray() {
         final double[] expected = TestSetFactory.createPrimitiveDoubleArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
         }));
@@ -384,7 +384,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testPrimitiveFloatArray() {
         final float[] expected = TestSetFactory.createPrimitiveFloatArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
         }));
@@ -393,7 +393,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testPrimitiveIntegerArray() {
         final int[] expected = TestSetFactory.createPrimitiveIntegerArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
         }));
@@ -402,7 +402,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testPrimitiveLongArray() {
         final long[] expected = TestSetFactory.createPrimitiveLongArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
         }));
@@ -411,7 +411,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testPrimitiveShortArray() {
         final short[] expected = TestSetFactory.createPrimitiveShortArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
         }));
@@ -420,7 +420,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testShortArray() {
         final Short[] expected = TestSetFactory.createShortArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
 
@@ -432,7 +432,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
 
     @Test
     public void testSingletonList() {
-        service.echoSingletonList(TestSetFactory.createSingletonList(), createCallback(result -> {
+        service.echoSingletonList(TestSetFactory.createSingletonList(), waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertTrue(TestSetValidator.isValidSingletonList(result));
         }));
@@ -441,7 +441,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testSqlDateArray() {
         final java.sql.Date[] expected = TestSetFactory.createSqlDateArray();
-        service.echo(expected, this.<java.sql.Date[]>createCallback(result -> {
+        service.echo(expected, this.<java.sql.Date[]>waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
 
@@ -453,7 +453,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testSqlTimeArray() {
         final java.sql.Time[] expected = TestSetFactory.createSqlTimeArray();
-        service.echo(expected, this.<java.sql.Time[]>createCallback(result -> {
+        service.echo(expected, this.<java.sql.Time[]>waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
 
@@ -465,7 +465,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testSqlTimestampArray() {
         final java.sql.Timestamp[] expected = TestSetFactory.createSqlTimestampArray();
-        service.echo(expected, this.<java.sql.Timestamp[]>createCallback(result -> {
+        service.echo(expected, this.<java.sql.Timestamp[]>waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
 
@@ -477,7 +477,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testStringArray() {
         final String[] expected = TestSetFactory.createStringArray();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
 
@@ -489,7 +489,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testStringArrayArray() {
         final String[][] expected = new String[][]{new String[]{"hello"}, new String[]{"bye"}};
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
 
             // ensure result preserves meta-data for array store type checking
@@ -501,7 +501,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     public void testTreeMap() {
         for (boolean option : new boolean[]{true, false}) {
             final TreeMap<String, MarkerTypeTreeMap> expected = TestSetFactory.createTreeMap(option);
-            service.echo(expected, option, createCallback(result -> {
+            service.echo(expected, option, waitedCallback(result -> {
                 assertThat(result).isNotNull();
                 assertThat(result).isEqualTo(expected);
             }));
@@ -512,7 +512,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     public void testTreeSet() {
         for (boolean option : new boolean[]{true, false}) {
             final TreeSet<MarkerTypeTreeSet> expected = TestSetFactory.createTreeSet(option);
-            service.echo(expected, option, createCallback(result -> {
+            service.echo(expected, option, waitedCallback(result -> {
                 assertThat(result).isNotNull();
                 assertThat(result).isEqualTo(expected);
             }));
@@ -522,7 +522,7 @@ public class CollectionsTest extends RpcAsyncTestBase<CollectionsTestService, Co
     @Test
     public void testVector() {
         final Vector<MarkerTypeVector> expected = TestSetFactory.createVector();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertThat(result).isEqualTo(expected);
         }));

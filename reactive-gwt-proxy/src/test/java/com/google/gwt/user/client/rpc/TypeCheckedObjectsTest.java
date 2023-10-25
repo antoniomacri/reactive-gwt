@@ -62,7 +62,7 @@ public class TypeCheckedObjectsTest extends RpcAsyncTestBase<TypeCheckedObjectsT
 
     @Test
     public void testInvalidCheckedFieldSerializer() {
-        service.echo(TypeCheckedObjectsTestSetFactory.createInvalidCheckedFieldClass(), createCallback(new AsyncCallback<>() {
+        service.echo(TypeCheckedObjectsTestSetFactory.createInvalidCheckedFieldClass(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 // Expected in this case
@@ -78,7 +78,7 @@ public class TypeCheckedObjectsTest extends RpcAsyncTestBase<TypeCheckedObjectsT
 
     @Test
     public void testInvalidCheckedSerializer() {
-        service.echo(TypeCheckedObjectsTestSetFactory.createInvalidCheckedGenericClass(), createCallback(new AsyncCallback<>() {
+        service.echo(TypeCheckedObjectsTestSetFactory.createInvalidCheckedGenericClass(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 // Expected in this case
@@ -94,7 +94,7 @@ public class TypeCheckedObjectsTest extends RpcAsyncTestBase<TypeCheckedObjectsT
 
     @Test
     public void testInvalidCheckedSuperSerializer() {
-        service.echo(TypeCheckedObjectsTestSetFactory.createInvalidCheckedSuperClass(), createCallback(new AsyncCallback<TypeCheckedSuperClass<Integer, String>>() {
+        service.echo(TypeCheckedObjectsTestSetFactory.createInvalidCheckedSuperClass(), waitedCallback(new AsyncCallback<TypeCheckedSuperClass<Integer, String>>() {
             @Override
             public void onFailure(Throwable caught) {
                 // Expected in this case
@@ -110,7 +110,7 @@ public class TypeCheckedObjectsTest extends RpcAsyncTestBase<TypeCheckedObjectsT
 
     @Test
     public void testInvalidUncheckedSerializer() {
-        service.echo(TypeCheckedObjectsTestSetFactory.createInvalidUncheckedGenericClass(), createCallback(new AsyncCallback<>() {
+        service.echo(TypeCheckedObjectsTestSetFactory.createInvalidUncheckedGenericClass(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 // Expected in this case
@@ -126,7 +126,7 @@ public class TypeCheckedObjectsTest extends RpcAsyncTestBase<TypeCheckedObjectsT
 
     @Test
     public void testTypeCheckedFieldSerializer() {
-        service.echo(TypeCheckedObjectsTestSetFactory.createTypeCheckedFieldClass(), createCallback(new AsyncCallback<>() {
+        service.echo(TypeCheckedObjectsTestSetFactory.createTypeCheckedFieldClass(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail("Could not serialize/deserialize TypeCheckedFieldClass", caught);
@@ -142,7 +142,7 @@ public class TypeCheckedObjectsTest extends RpcAsyncTestBase<TypeCheckedObjectsT
 
     @Test
     public void testTypeCheckedNestedLists() {
-        service.echo(TypeCheckedObjectsTestSetFactory.createTypeCheckedNestedLists(), createCallback(new AsyncCallback<>() {
+        service.echo(TypeCheckedObjectsTestSetFactory.createTypeCheckedNestedLists(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail("Could not serialize/deserialize TypeCheckedNestedLists", caught);
@@ -158,7 +158,7 @@ public class TypeCheckedObjectsTest extends RpcAsyncTestBase<TypeCheckedObjectsT
 
     @Test
     public void testTypeCheckedSerializer() {
-        service.echo(TypeCheckedObjectsTestSetFactory.createTypeCheckedGenericClass(), createCallback(new AsyncCallback<>() {
+        service.echo(TypeCheckedObjectsTestSetFactory.createTypeCheckedGenericClass(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail("Could not serialize/deserialize TypeCheckedGenericClass", caught);
@@ -174,7 +174,7 @@ public class TypeCheckedObjectsTest extends RpcAsyncTestBase<TypeCheckedObjectsT
 
     @Test
     public void testTypeCheckedSuperSerializer() {
-        service.echo(TypeCheckedObjectsTestSetFactory.createTypeCheckedSuperClass(), createCallback(new AsyncCallback<TypeCheckedSuperClass<Integer, String>>() {
+        service.echo(TypeCheckedObjectsTestSetFactory.createTypeCheckedSuperClass(), waitedCallback(new AsyncCallback<TypeCheckedSuperClass<Integer, String>>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail("Could not serialize/deserialize TypeCheckedGenericClass", caught);
@@ -190,7 +190,7 @@ public class TypeCheckedObjectsTest extends RpcAsyncTestBase<TypeCheckedObjectsT
 
     @Test
     public void testTypeUncheckedSerializer() {
-        service.echo(TypeCheckedObjectsTestSetFactory.createTypeUncheckedGenericClass(), createCallback(new AsyncCallback<>() {
+        service.echo(TypeCheckedObjectsTestSetFactory.createTypeUncheckedGenericClass(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail("Could not serialize/deserialize TypeUncheckedGenericClass", caught);

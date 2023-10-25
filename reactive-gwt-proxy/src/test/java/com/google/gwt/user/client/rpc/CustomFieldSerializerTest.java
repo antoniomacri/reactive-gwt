@@ -57,7 +57,7 @@ public class CustomFieldSerializerTest extends RpcAsyncTestBase<CustomFieldSeria
      */
     @Test
     public void testCustomFieldSerializabilityInheritance() {
-        service.echo(CustomFieldSerializerTestSetFactory.createUnserializableSubclass(), createCallback(new AsyncCallback<>() {
+        service.echo(CustomFieldSerializerTestSetFactory.createUnserializableSubclass(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 assertThat(caught).as("Should be a SerializationException")
@@ -78,7 +78,7 @@ public class CustomFieldSerializerTest extends RpcAsyncTestBase<CustomFieldSeria
      */
     @Test
     public void testCustomFieldSerialization() {
-        service.echo(CustomFieldSerializerTestSetFactory.createUnserializableClass(), createCallback(new AsyncCallback<>() {
+        service.echo(CustomFieldSerializerTestSetFactory.createUnserializableClass(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 assertThat(caught).as("Class UnserializableClass should be serializable because it has a custom field serializer")
@@ -102,7 +102,7 @@ public class CustomFieldSerializerTest extends RpcAsyncTestBase<CustomFieldSeria
      */
     @Test
     public void testSerializableImmutables() {
-        service.echo(CustomFieldSerializerTestSetFactory.createSerializableImmutablesArray(), createCallback(new AsyncCallback<>() {
+        service.echo(CustomFieldSerializerTestSetFactory.createSerializableImmutablesArray(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 assertThat(caught).as("Could not serialize/deserialize immutable classes")
@@ -123,7 +123,7 @@ public class CustomFieldSerializerTest extends RpcAsyncTestBase<CustomFieldSeria
      */
     @Test
     public void testSerializableSubclasses() {
-        service.echo(CustomFieldSerializerTestSetFactory.createSerializableSubclass(), createCallback(new AsyncCallback<>() {
+        service.echo(CustomFieldSerializerTestSetFactory.createSerializableSubclass(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 assertThat(caught).as("Class SerializableSubclass should be serializable automatically")

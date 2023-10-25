@@ -55,7 +55,7 @@ public class EnumsTest extends RpcAsyncTestBase<EnumsTestService, EnumsTestServi
      */
     @Test
     public void testBasicEnums() {
-        service.echo(Basic.A, createCallback(result -> {
+        service.echo(Basic.A, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertEquals(Basic.A, result);
         }));
@@ -70,7 +70,7 @@ public class EnumsTest extends RpcAsyncTestBase<EnumsTestService, EnumsTestServi
     public void testComplexEnums() {
         Complex a = Complex.A;
         a.value = "client";
-        service.echo(Complex.A, createCallback(result -> {
+        service.echo(Complex.A, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertEquals(Complex.A, result);
 
@@ -84,7 +84,7 @@ public class EnumsTest extends RpcAsyncTestBase<EnumsTestService, EnumsTestServi
      */
     @Test
     public void testNull() {
-        service.echo((Basic) null, createCallback(result -> {
+        service.echo((Basic) null, waitedCallback(result -> {
             assertThat(result).isNull();
         }));
     }
@@ -94,7 +94,7 @@ public class EnumsTest extends RpcAsyncTestBase<EnumsTestService, EnumsTestServi
      */
     @Test
     public void testSubclassingEnums() {
-        service.echo(Subclassing.A, createCallback(result -> {
+        service.echo(Subclassing.A, waitedCallback(result -> {
             assertThat(result).isNotNull();
             assertEquals(Subclassing.A, result);
         }));
@@ -107,7 +107,7 @@ public class EnumsTest extends RpcAsyncTestBase<EnumsTestService, EnumsTestServi
     public void testFieldEnumWrapperClass() {
         FieldEnumWrapper wrapper = new FieldEnumWrapper();
         wrapper.setFieldEnum(FieldEnum.X);
-        service.echo(wrapper, createCallback(result -> {
+        service.echo(wrapper, waitedCallback(result -> {
             assertThat(result).isNotNull();
             FieldEnum fieldEnum = result.getFieldEnum();
             /*

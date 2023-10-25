@@ -128,7 +128,7 @@ public class RemoteServiceServletTest extends RpcAsyncTestBase<RemoteServiceServ
     public void testAlternateStatusCode() {
         ((ServiceDefTarget) service).setServiceEntryPoint(getModuleBaseURL() + "servlettest/404");
 
-        service.test(createCallback(new AsyncCallback<>() {
+        service.test(waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 if (caught instanceof StatusCodeException) {
@@ -152,7 +152,7 @@ public class RemoteServiceServletTest extends RpcAsyncTestBase<RemoteServiceServ
      */
     @Test
     public void testDeclaredRuntimeException() {
-        service.throwDeclaredRuntimeException(createCallback(new AsyncCallback<>() {
+        service.throwDeclaredRuntimeException(waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 assertTrue(caught instanceof NullPointerException);
@@ -169,7 +169,7 @@ public class RemoteServiceServletTest extends RpcAsyncTestBase<RemoteServiceServ
     @Test
     @Tag("NotSupported")
     public void testManualSend() throws RequestException {
-        RequestBuilder builder = service.testExpectCustomHeader(createCallback(result -> {
+        RequestBuilder builder = service.testExpectCustomHeader(waitedCallback(result -> {
             assertFalse(req.isPending());
         }));
 
@@ -187,7 +187,7 @@ public class RemoteServiceServletTest extends RpcAsyncTestBase<RemoteServiceServ
         // assertNotNull(GWT.getPermutationStrongName());
         assertNotNull(permutationStrongName);
         // service.testExpectPermutationStrongName(GWT.getPermutationStrongName(),
-        service.testExpectPermutationStrongName(permutationStrongName, createCallback(ignored -> {
+        service.testExpectPermutationStrongName(permutationStrongName, waitedCallback(ignored -> {
         }));
     }
 
@@ -220,7 +220,7 @@ public class RemoteServiceServletTest extends RpcAsyncTestBase<RemoteServiceServ
             }
         });
 
-        service.test(createCallback(new AsyncCallback<>() {
+        service.test(waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 assertTrue(caught instanceof StatusCodeException);
@@ -243,13 +243,13 @@ public class RemoteServiceServletTest extends RpcAsyncTestBase<RemoteServiceServ
         final MyRpcRequestBuilder builder = new MyRpcRequestBuilder();
         ((ServiceDefTarget) service).setRpcRequestBuilder(builder);
 
-        service.test(createCallback(result -> builder.check()));
+        service.test(waitedCallback(result -> builder.check()));
     }
 
     @Test
     @Tag("NotSupported")
     public void testServiceInterfaceLocation() {
-        this.req = service.test(createCallback(result -> {
+        this.req = service.test(waitedCallback(result -> {
             assertFalse(RemoteServiceServletTest.this.req.isPending());
         }));
         assertTrue(this.req.isPending());
@@ -261,7 +261,7 @@ public class RemoteServiceServletTest extends RpcAsyncTestBase<RemoteServiceServ
      */
     @Test
     public void testUnknownRuntimeException() {
-        service.throwUnknownRuntimeException(createCallback(new AsyncCallback<>() {
+        service.throwUnknownRuntimeException(waitedCallback(new AsyncCallback<>() {
 
             @Override
             public void onFailure(Throwable caught) {

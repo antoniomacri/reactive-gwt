@@ -65,7 +65,7 @@ public class RpcTokenTest extends RpcAsyncTestBase<RpcTokenTestService, RpcToken
 
     @Test
     public void testRpcTokenMissing() {
-        service.getRpcTokenFromRequest(createCallback(token -> {
+        service.getRpcTokenFromRequest(waitedCallback(token -> {
             assertNull(token);
         }));
     }
@@ -76,7 +76,7 @@ public class RpcTokenTest extends RpcAsyncTestBase<RpcTokenTestService, RpcToken
         token.tokenValue = "Drink kumys!";
         ((HasRpcToken) service).setRpcToken(token);
 
-        service.getRpcTokenFromRequest(createCallback(rpcToken -> {
+        service.getRpcTokenFromRequest(waitedCallback(rpcToken -> {
             assertNotNull(rpcToken);
             assertTrue(rpcToken instanceof TestRpcToken);
             assertEquals(token.tokenValue, ((TestRpcToken) rpcToken).tokenValue);
@@ -91,7 +91,7 @@ public class RpcTokenTest extends RpcAsyncTestBase<RpcTokenTestService, RpcToken
         ((ServiceDefTarget) service).setServiceEntryPoint(getModuleBaseURL() + "rpctokentest?throw=true");
         ((HasRpcToken) service).setRpcTokenExceptionHandler(Assertions::assertNotNull);
 
-        service.getRpcTokenFromRequest(createCallback(rpcToken -> {
+        service.getRpcTokenFromRequest(waitedCallback(rpcToken -> {
             fail("Should've called RpcTokenExceptionHandler");
         }));
     }
@@ -102,7 +102,7 @@ public class RpcTokenTest extends RpcAsyncTestBase<RpcTokenTestService, RpcToken
         token.token = 1337;
         ((HasRpcToken) service).setRpcToken(token);
 
-        service.getRpcTokenFromRequest(createCallback(result -> {
+        service.getRpcTokenFromRequest(waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(result instanceof AnotherTestRpcToken);
             assertEquals(token.token, ((AnotherTestRpcToken) result).token);

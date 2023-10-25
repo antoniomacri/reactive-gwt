@@ -53,7 +53,7 @@ public class FinalFieldsTest extends RpcAsyncTestBase<FinalFieldsTestService, Fi
     public void testFinalFields() {
         FinalFieldsNode node = new FinalFieldsNode(4, "C", 9);
 
-        service.transferObject(node, createCallback(result -> {
+        service.transferObject(node, waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(TestSetValidator.isValidFinalFieldsObjectFromServer(result));
         }));

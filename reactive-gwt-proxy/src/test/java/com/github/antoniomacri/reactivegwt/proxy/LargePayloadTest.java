@@ -31,13 +31,13 @@ public class LargePayloadTest extends RpcAsyncTestBase<LargePayloadService, Larg
 
     @Test
     public void testLargeResponseArray() {
-        service.testLargeResponseArray(createCallback(result ->
+        service.testLargeResponseArray(waitedCallback(result ->
                 assertThat(result.length).as("Wrong array size").isEqualTo(LargePayloadService.ARRAY_SIZE)));
     }
 
     @Test
     public void testLargeResponsePayload() {
-        service.testLargeResponsePayload(createCallback(result ->
+        service.testLargeResponsePayload(waitedCallback(result ->
                 assertThat(result.size()).as("Wrong list size").isEqualTo(LargePayloadService.PAYLOAD_SIZE)));
     }
 }

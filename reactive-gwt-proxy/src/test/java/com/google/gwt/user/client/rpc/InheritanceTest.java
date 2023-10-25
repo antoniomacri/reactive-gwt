@@ -60,7 +60,7 @@ public class InheritanceTest extends RpcAsyncTestBase<InheritanceTestServiceSubt
     public void testAnonymousClasses() {
         service.echo(() -> {
             // purposely empty
-        }, createCallback(new AsyncCallback<>() {
+        }, waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
             }
@@ -79,7 +79,7 @@ public class InheritanceTest extends RpcAsyncTestBase<InheritanceTestServiceSubt
      */
     @Test
     public void testFieldShadowing() {
-        service.echo(InheritanceTestSetFactory.createCircle(), createCallback(result -> {
+        service.echo(InheritanceTestSetFactory.createCircle(), waitedCallback(result -> {
             Circle circle = (Circle) result;
             assertNotNull(circle.getName());
         }));
@@ -91,7 +91,7 @@ public class InheritanceTest extends RpcAsyncTestBase<InheritanceTestServiceSubt
     @Test
     public void testJavaSerializableClass() {
         service.echo(new InheritanceTestSetFactory.JavaSerializableClass(3),
-                createCallback(Assertions::assertNotNull));
+                waitedCallback(Assertions::assertNotNull));
     }
 
     /**
@@ -117,7 +117,7 @@ public class InheritanceTest extends RpcAsyncTestBase<InheritanceTestServiceSubt
                 }
             }
         };
-        service.echo(first, createCallback(resendCallback));
+        service.echo(first, waitedCallback(resendCallback));
     }
 
     /**
@@ -125,7 +125,7 @@ public class InheritanceTest extends RpcAsyncTestBase<InheritanceTestServiceSubt
      */
     @Test
     public void testNonStaticInnerClass() {
-        service.echo(InheritanceTestSetFactory.createNonStaticInnerClass(), createCallback(new AsyncCallback<>() {
+        service.echo(InheritanceTestSetFactory.createNonStaticInnerClass(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
             }
@@ -139,7 +139,7 @@ public class InheritanceTest extends RpcAsyncTestBase<InheritanceTestServiceSubt
 
     @Test
     public void testReturnOfUnserializableClassFromServer() {
-        service.getUnserializableClass(createCallback(new AsyncCallback<>() {
+        service.getUnserializableClass(waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
             }
@@ -156,7 +156,7 @@ public class InheritanceTest extends RpcAsyncTestBase<InheritanceTestServiceSubt
      */
     @Test
     public void testSerializableClass() {
-        service.echo(InheritanceTestSetFactory.createSerializableClass(), createCallback(result -> {
+        service.echo(InheritanceTestSetFactory.createSerializableClass(), waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(InheritanceTestSetValidator.isValid((SerializableClass) result));
         }));
@@ -167,7 +167,7 @@ public class InheritanceTest extends RpcAsyncTestBase<InheritanceTestServiceSubt
      */
     @Test
     public void testSerializableSubclass() {
-        service.echo(InheritanceTestSetFactory.createSerializableSubclass(), createCallback(result -> {
+        service.echo(InheritanceTestSetFactory.createSerializableSubclass(), waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(InheritanceTestSetValidator.isValid((SerializableSubclass) result));
         }));
@@ -179,7 +179,7 @@ public class InheritanceTest extends RpcAsyncTestBase<InheritanceTestServiceSubt
 
         service.echo(() -> {
             // purposely empty
-        }, createCallback(new AsyncCallback<>() {
+        }, waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 assertThat(caught)
@@ -202,7 +202,7 @@ public class InheritanceTest extends RpcAsyncTestBase<InheritanceTestServiceSubt
      */
     @Test
     public void testTransientFieldExclusion() {
-        service.echo(InheritanceTestSetFactory.createSerializableClassWithTransientField(), createCallback(result -> {
+        service.echo(InheritanceTestSetFactory.createSerializableClassWithTransientField(), waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(InheritanceTestSetValidator.isValid((SerializableClassWithTransientField) result));
         }));

@@ -61,7 +61,7 @@ public class CoreJavaTest extends RpcAsyncTestBase<CoreJavaTestService, CoreJava
     @Test
     public void testMathContext() {
         final MathContext expected = createMathContext();
-        service.echoMathContext(expected, createCallback(result -> {
+        service.echoMathContext(expected, waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(isValid(result));
         }));

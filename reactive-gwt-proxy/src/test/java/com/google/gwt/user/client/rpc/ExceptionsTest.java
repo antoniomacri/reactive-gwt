@@ -55,7 +55,7 @@ public class ExceptionsTest extends RpcAsyncTestBase<ExceptionsTestService, Exce
                 "c", "m", "f", 42)});
         expected.initCause(new SerializableThrowable(null, "cause"));
 
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertThat(result)
                     .isNotNull()
                     .hasMessage("msg");
@@ -72,7 +72,7 @@ public class ExceptionsTest extends RpcAsyncTestBase<ExceptionsTestService, Exce
     @Tag("IllegalAccess")
     public void testUmbrellaException() {
         final UmbrellaException expected = TestSetFactory.createUmbrellaException();
-        service.echo(expected, createCallback(result -> {
+        service.echo(expected, waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(TestSetValidator.isValid(expected, result));
         }));

@@ -50,12 +50,12 @@ public class FinalFieldsFalseTest extends RpcAsyncTestBase<FinalFieldsTestServic
     public void testFinalFields() {
         FinalFieldsNode node = new FinalFieldsNode(4, "C", 9);
 
-        service.transferObject(node, createCallback(result -> {
+        service.transferObject(node, waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(TestSetValidator.isValidFinalFieldsObjectDefault(result));
         }));
 
-        service.returnI(node, createCallback(i -> {
+        service.returnI(node, waitedCallback(i -> {
             // since finalize is false, i should be 5
             assertEquals(Integer.valueOf(5), i);
         }));

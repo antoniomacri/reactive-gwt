@@ -34,7 +34,7 @@ public class OrderServiceTest extends RpcAsyncTestBase<OrderService, OrderServic
         OrderItem orderItem = new OrderItem();
         orderItem.setDescription("TONNO");
         orderItem.setId(2806670);
-        service.echo(orderItem, createCallback(result ->
+        service.echo(orderItem, waitedCallback(result ->
                 assertThat(result).usingRecursiveComparison().isEqualTo(orderItem)
         ));
     }

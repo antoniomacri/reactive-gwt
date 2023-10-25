@@ -50,7 +50,7 @@ public class ObjectGraphTest extends RpcAsyncTestBase<ObjectGraphTestService, Ob
 
     @Test
     public void testAcyclicGraph() {
-        service.echo_AcyclicGraph(TestSetFactory.createAcyclicGraph(), createCallback(result -> {
+        service.echo_AcyclicGraph(TestSetFactory.createAcyclicGraph(), waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(TestSetValidator.isValidAcyclicGraph((SerializableDoublyLinkedNode) result));
         }));
@@ -58,7 +58,7 @@ public class ObjectGraphTest extends RpcAsyncTestBase<ObjectGraphTestService, Ob
 
     @Test
     public void testComplexCyclicGraph() {
-        service.echo_ComplexCyclicGraph(TestSetFactory.createComplexCyclicGraph(), createCallback(result -> {
+        service.echo_ComplexCyclicGraph(TestSetFactory.createComplexCyclicGraph(), waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(TestSetValidator.isValidComplexCyclicGraph((SerializableDoublyLinkedNode) result));
         }));
@@ -66,7 +66,7 @@ public class ObjectGraphTest extends RpcAsyncTestBase<ObjectGraphTestService, Ob
 
     @Test
     public void testComplexCyclicGraphWithCFS() {
-        service.echo_ComplexCyclicGraphWithCFS(TestSetFactory.createComplexCyclicGraphWithCFS(), createCallback(result -> {
+        service.echo_ComplexCyclicGraphWithCFS(TestSetFactory.createComplexCyclicGraphWithCFS(), waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(TestSetValidator.isValidComplexCyclicGraphWithCFS(result));
         }));
@@ -75,7 +75,7 @@ public class ObjectGraphTest extends RpcAsyncTestBase<ObjectGraphTestService, Ob
     @Test
     public void testComplexCyclicGraph2() {
         final SerializableDoublyLinkedNode node = TestSetFactory.createComplexCyclicGraph();
-        service.echo_ComplexCyclicGraph(node, node, createCallback(result -> {
+        service.echo_ComplexCyclicGraph(node, node, waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(TestSetValidator.isValidComplexCyclicGraph((SerializableDoublyLinkedNode) result));
         }));
@@ -84,7 +84,7 @@ public class ObjectGraphTest extends RpcAsyncTestBase<ObjectGraphTestService, Ob
     @Test
     public void testDoublyReferencedArray() {
         final SerializableWithTwoArrays node = TestSetFactory.createDoublyReferencedArray();
-        service.echo_SerializableWithTwoArrays(node, createCallback(result -> {
+        service.echo_SerializableWithTwoArrays(node, waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(TestSetValidator.isValid((SerializableWithTwoArrays) result));
         }));
@@ -111,7 +111,7 @@ public class ObjectGraphTest extends RpcAsyncTestBase<ObjectGraphTestService, Ob
     @Test
     public void testPrivateNoArg() {
         final SerializablePrivateNoArg node = TestSetFactory.createPrivateNoArg();
-        service.echo_PrivateNoArg(node, createCallback(result -> {
+        service.echo_PrivateNoArg(node, waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(TestSetValidator.isValid((SerializablePrivateNoArg) result));
         }));
@@ -119,7 +119,7 @@ public class ObjectGraphTest extends RpcAsyncTestBase<ObjectGraphTestService, Ob
 
     @Test
     public void testTrivialCyclicGraph() {
-        service.echo_TrivialCyclicGraph(TestSetFactory.createTrivialCyclicGraph(), createCallback(result -> {
+        service.echo_TrivialCyclicGraph(TestSetFactory.createTrivialCyclicGraph(), waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(TestSetValidator.isValidTrivialCyclicGraph((SerializableDoublyLinkedNode) result));
         }));

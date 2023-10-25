@@ -183,7 +183,7 @@ public class UnicodeEscapingTest extends RpcAsyncTestBase<UnicodeEscapingService
     protected void clientToServerVerifyRange(final int start, final int end, final int size, final int step) throws InvalidCharacterException {
         current = start;
         int blockEnd = Math.min(end, current + size);
-        service.verifyStringContainingCharacterRange(current, blockEnd, getStringContainingCharacterRange(start, blockEnd), createCallback(new AsyncCallback<>() {
+        service.verifyStringContainingCharacterRange(current, blockEnd, getStringContainingCharacterRange(start, blockEnd), waitedCallback(new AsyncCallback<>() {
             final List<Throwable> fails = new ArrayList<>();
 
             @Override
@@ -216,7 +216,7 @@ public class UnicodeEscapingTest extends RpcAsyncTestBase<UnicodeEscapingService
 
     protected void serverToClientVerify(final int start, final int end, final int size, final int step) {
         current = start;
-        service.getStringContainingCharacterRange(start, Math.min(end, current + size), createCallback(new AsyncCallback<>() {
+        service.getStringContainingCharacterRange(start, Math.min(end, current + size), waitedCallback(new AsyncCallback<>() {
             final List<Throwable> fails = new ArrayList<>();
 
             @Override
@@ -274,7 +274,7 @@ public class UnicodeEscapingTest extends RpcAsyncTestBase<UnicodeEscapingService
      * Verify that string encoding/decoding is lossless.
      */
     private void echoVerify(final String str) {
-        service.echo(str, createCallback(result -> {
+        service.echo(str, waitedCallback(result -> {
             assertEquals(str, result);
         }));
     }

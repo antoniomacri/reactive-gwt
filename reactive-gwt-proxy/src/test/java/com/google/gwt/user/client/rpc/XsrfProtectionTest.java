@@ -84,7 +84,7 @@ public class XsrfProtectionTest extends RpcAsyncTestBase<XsrfTestService, XsrfTe
 
     @Test
     public void testRpcWithoutXsrfTokenFails() {
-        service.drink("kumys", createCallback(new AsyncCallback<>() {
+        service.drink("kumys", waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 RpcTokenException e = (RpcTokenException) caught;
@@ -104,7 +104,7 @@ public class XsrfProtectionTest extends RpcAsyncTestBase<XsrfTestService, XsrfTe
         XsrfToken badToken = new XsrfToken("Invalid Token");
         ((HasRpcToken) service).setRpcToken(badToken);
 
-        service.drink("maksym", createCallback(new AsyncCallback<>() {
+        service.drink("maksym", waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 checkServerState("maksym", false);
@@ -121,7 +121,7 @@ public class XsrfProtectionTest extends RpcAsyncTestBase<XsrfTestService, XsrfTe
     public void testXsrfTokenService() {
         XsrfTokenServiceAsync xsrfService = getAsyncXsrfService();
 
-        xsrfService.getNewXsrfToken(createCallback(result -> {
+        xsrfService.getNewXsrfToken(waitedCallback(result -> {
             assertNotNull(result);
             assertNotNull(result.getToken());
             // MD5("abc")
@@ -133,9 +133,9 @@ public class XsrfProtectionTest extends RpcAsyncTestBase<XsrfTestService, XsrfTe
     public void testRpcWithXsrfToken() {
         XsrfTokenServiceAsync xsrfService = getAsyncXsrfService();
 
-        xsrfService.getNewXsrfToken(createCallback(result -> {
+        xsrfService.getNewXsrfToken(waitedCallback(result -> {
             ((HasRpcToken) service).setRpcToken(result);
-            service.drink("airan", createCallback(ignored -> {
+            service.drink("airan", waitedCallback(ignored -> {
                 checkServerState("airan", true);
             }));
         }));
@@ -145,7 +145,7 @@ public class XsrfProtectionTest extends RpcAsyncTestBase<XsrfTestService, XsrfTe
     public void testXsrfTokenWithDifferentSessionCookieFails() {
         XsrfTokenServiceAsync xsrfService = getAsyncXsrfService();
 
-        xsrfService.getNewXsrfToken(createCallback(result -> {
+        xsrfService.getNewXsrfToken(waitedCallback(result -> {
             // Ensure it's MD5
             assertEquals(32, result.getToken().length());
 
@@ -156,7 +156,7 @@ public class XsrfProtectionTest extends RpcAsyncTestBase<XsrfTestService, XsrfTe
             // TODO (AM): change cookie
             //Cookies.setCookie(SESSION_COOKIE_NAME, "sometingrandom");
 
-            service.drink("bozo", createCallback(new AsyncCallback<>() {
+            service.drink("bozo", waitedCallback(new AsyncCallback<>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     RpcTokenException e = (RpcTokenException) caught;
@@ -173,7 +173,7 @@ public class XsrfProtectionTest extends RpcAsyncTestBase<XsrfTestService, XsrfTe
     }
 
     private void checkServerState(String drink, final boolean stateShouldChange) {
-        service.checkIfDrankDrink(drink, createCallback(result ->
+        service.checkIfDrankDrink(drink, waitedCallback(result ->
                 assertEquals(stateShouldChange, result)
         ));
     }

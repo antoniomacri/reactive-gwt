@@ -63,7 +63,7 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
         return ReactiveGWT.create(serviceClass, getModuleBaseURL());
     }
 
-    protected <V> AsyncCallback<V> createCallback(Consumer<V> asserts) {
+    protected <V> AsyncCallback<V> waitedCallback(Consumer<V> asserts) {
         this.latch = new CountDownLatch(1);
         return new AsyncCallback<>() {
             @Override
@@ -84,7 +84,7 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
         };
     }
 
-    protected <V> AsyncCallback<V> createCallback(AsyncCallback<V> callback) {
+    protected <V> AsyncCallback<V> waitedCallback(AsyncCallback<V> callback) {
         this.latch = new CountDownLatch(1);
         return new AsyncCallback<>() {
             @Override
@@ -111,7 +111,7 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
 
     protected <R> void waitForServiceCall(Consumer<AsyncCallback<R>> call) {
         var l = new CountDownLatch(1);
-        call.accept(createCallback(ignored -> l.countDown()));
+        call.accept(waitedCallback(ignored -> l.countDown()));
         try {
             l.await();
         } catch (InterruptedException e) {
@@ -122,7 +122,7 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
     protected <R> R getFromServiceCall(Consumer<AsyncCallback<R>> call) {
         var l = new CountDownLatch(1);
         AtomicReference<R> resultRef = new AtomicReference<>();
-        call.accept(createCallback(result -> {
+        call.accept(waitedCallback(result -> {
             resultRef.set(result);
             l.countDown();
         }));

@@ -50,7 +50,7 @@ public class RunTimeSerializationErrorsTest extends RpcAsyncTestBase<MixedSerial
 
     @Test
     public void testBadSerialization1() {
-        service.echoVoid(new MixedSerializable.NonSerializableSub(), createCallback(new AsyncCallback<>() {
+        service.echoVoid(new MixedSerializable.NonSerializableSub(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
             }
@@ -67,7 +67,7 @@ public class RunTimeSerializationErrorsTest extends RpcAsyncTestBase<MixedSerial
     public void testBadSerialization2() {
         final boolean[] callbackFired = new boolean[]{false};
 
-        Request req = service.echoRequest(new MixedSerializable.NonSerializableSub(), createCallback(new AsyncCallback<>() {
+        Request req = service.echoRequest(new MixedSerializable.NonSerializableSub(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 callbackFired[0] = true;
@@ -89,7 +89,7 @@ public class RunTimeSerializationErrorsTest extends RpcAsyncTestBase<MixedSerial
     public void testBadSerialization3() throws RequestException {
         final boolean[] callbackFired = new boolean[]{false};
 
-        RequestBuilder rb = service.echoRequestBuilder(new MixedSerializable.NonSerializableSub(), createCallback(new AsyncCallback<>() {
+        RequestBuilder rb = service.echoRequestBuilder(new MixedSerializable.NonSerializableSub(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 assertFalse(callbackFired[0], "callback fired twice");
@@ -109,7 +109,7 @@ public class RunTimeSerializationErrorsTest extends RpcAsyncTestBase<MixedSerial
 
     @Test
     public void testGoodSerialization1() {
-        service.echoVoid(new MixedSerializable.SerializableSub(), createCallback(new AsyncCallback<>() {
+        service.echoVoid(new MixedSerializable.SerializableSub(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail(caught.toString());
@@ -123,7 +123,7 @@ public class RunTimeSerializationErrorsTest extends RpcAsyncTestBase<MixedSerial
 
     @Test
     public void testGoodSerialization2() {
-        service.echoRequest(new MixedSerializable.SerializableSub(), createCallback(new AsyncCallback<>() {
+        service.echoRequest(new MixedSerializable.SerializableSub(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail(caught.toString());
@@ -137,7 +137,7 @@ public class RunTimeSerializationErrorsTest extends RpcAsyncTestBase<MixedSerial
 
     @Test
     public void testGoodSerialization3() {
-        service.echoVoid(new MixedSerializable.SerializableSub(), createCallback(new AsyncCallback<>() {
+        service.echoVoid(new MixedSerializable.SerializableSub(), waitedCallback(new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail(caught.toString());

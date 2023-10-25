@@ -105,7 +105,7 @@ public class LoggingRPCTest extends RpcAsyncTestBase<LoggingRPCTestService, Logg
 
     @Test
     public void testLogRecord() {
-        service.echoLogRecord(expectedLogRecord, createCallback(result -> {
+        service.echoLogRecord(expectedLogRecord, waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(isValid(result));
         }));

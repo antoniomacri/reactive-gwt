@@ -50,7 +50,7 @@ public class RecursiveClassTest extends RpcAsyncTestBase<RecursiveClassTestServi
      */
     @Test
     public void testRecursiveClass() {
-        service.greetServer("Hello", createCallback(result -> {
+        service.greetServer("Hello", waitedCallback(result -> {
             assertNotNull(result);
             assertTrue(result instanceof ResultNode);
         }));
