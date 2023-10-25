@@ -82,7 +82,7 @@ public class ReactiveGwtProcessor extends AbstractProcessor {
                         }
                     }
                 });
-        return true;
+        return false;
     }
 
     private void process(TypeElement rpcService) throws Exception {
