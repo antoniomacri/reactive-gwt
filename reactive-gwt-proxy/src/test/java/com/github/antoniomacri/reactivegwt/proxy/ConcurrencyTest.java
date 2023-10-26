@@ -9,14 +9,14 @@ import com.ibm.icu.util.TimeZone;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class ConcurrencyTest {
-    private static final Logger log = LoggerFactory.getLogger(ConcurrencyTest.class);
     protected static final String MODULE_RELATIVE_PATH = "AppRoot/AppModule/";
     private static final int ITERATIONS = 100;
 
@@ -68,36 +67,35 @@ public class ConcurrencyTest {
 
 
     @Test
-    public void test() throws InterruptedException {
+    public void testWaitingResponseDoesNotBlockThread() throws InterruptedException {
         ValueTypesTestServiceAsync service = getService();
         CountDownLatch latch = new CountDownLatch(ITERATIONS);
-        List<Throwable> exceptions = new ArrayList<>();
+        Collection<Throwable> exceptions = new ConcurrentLinkedQueue<>();
 
+        Instant start = Instant.now();
         for (int i = 0; i < ITERATIONS; i++) {
-            final int id = i;
-            long start = System.currentTimeMillis();
-            log.info("{}: Sending request.", id);
             service.echo(13.0, new AsyncCallback<>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    log.error("%d: Got exception after %s seconds"
-                            .formatted(id, (System.currentTimeMillis() - start) / 1000.0), caught);
-                    latch.countDown();
                     exceptions.add(caught);
+                    latch.countDown();
                 }
 
                 @Override
                 public void onSuccess(Double result) {
-                    log.info("%d: Got response %s after %s seconds"
-                            .formatted(id, result, (System.currentTimeMillis() - start) / 1000.0));
+                    try {
+                        assertThat(result).isNotNull();
+                        assertThat(result).isEqualTo(13.0);
+                    } catch (Throwable e) {
+                        exceptions.add(e);
+                    }
                     latch.countDown();
-                    assertThat(result).isNotNull();
-                    assertThat(result).isEqualTo(13.0);
                 }
             });
         }
 
         assertThat(latch.await(2, TimeUnit.SECONDS)).isTrue();
+        assertThat(Duration.between(start, Instant.now())).isGreaterThanOrEqualTo(Duration.ofSeconds(1));
         assertThat(exceptions).isEmpty();
     }
 
