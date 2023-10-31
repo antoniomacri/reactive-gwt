@@ -70,14 +70,31 @@ public abstract class RpcTestBase {
             Class<? extends RemoteService> serviceInterfaceClass,
             Map<Class<? extends RemoteServiceServlet>, Optional<String>> serviceImplClasses
     ) {
-        return buildTestArchive(serviceInterfaceClass, serviceImplClasses, null);
+        return buildTestArchive(serviceInterfaceClass, serviceImplClasses, null, null);
+    }
+
+    protected static WebArchive buildTestArchive(
+            Class<? extends RemoteService> serviceInterfaceClass,
+            Map<Class<? extends RemoteServiceServlet>, Optional<String>> serviceImplClasses,
+            Class<? extends EventListener> listenerClass
+    ) {
+        return buildTestArchive(serviceInterfaceClass, serviceImplClasses, listenerClass, null);
+    }
+
+    protected static WebArchive buildTestArchive(
+            Class<? extends RemoteService> serviceInterfaceClass,
+            Map<Class<? extends RemoteServiceServlet>, Optional<String>> serviceImplClasses,
+            String extraResources
+    ) {
+        return buildTestArchive(serviceInterfaceClass, serviceImplClasses, null, extraResources);
     }
 
 
     protected static WebArchive buildTestArchive(
             Class<? extends RemoteService> serviceInterfaceClass,
             Map<Class<? extends RemoteServiceServlet>, Optional<String>> serviceImplClasses,
-            Class<? extends EventListener> listenerClass
+            Class<? extends EventListener> listenerClass,
+            String extraResources
     ) {
         var archive = ShrinkWrap.create(WebArchive.class, "client-test.war");
         var webAppDescriptor = Descriptors.create(WebAppDescriptor.class).version("3.0");
@@ -92,6 +109,11 @@ public abstract class RpcTestBase {
             });
             addServletWithResources(archive, webAppDescriptor, serviceImplClass, remoteServiceRelativePath);
         });
+
+        if (extraResources != null) {
+            ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+            extracted(archive, extraResources, classLoader);
+        }
 
         if (listenerClass != null) {
             webAppDescriptor.createListener().listenerClass(listenerClass.getName());
@@ -111,18 +133,22 @@ public abstract class RpcTestBase {
                 .urlPattern(MODULE_RELATIVE_PATH + serviceRelativePath);
 
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        try (var stream = classLoader.getResourceAsStream(serviceRelativePath)) {
+        extracted(archive, serviceRelativePath, classLoader);
+
+        archive.addClass(serviceImplClass);
+    }
+
+    private static void extracted(WebArchive archive, String resourceFolder, ClassLoader classLoader) {
+        try (var stream = classLoader.getResourceAsStream(resourceFolder)) {
             if (stream != null) {
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)));
                 bufferedReader.lines().forEach(resource ->
-                        archive.addAsWebResource(serviceRelativePath + "/" + resource, MODULE_RELATIVE_PATH + resource)
+                        archive.addAsWebResource(resourceFolder + "/" + resource, MODULE_RELATIVE_PATH + resource)
                 );
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        archive.addClass(serviceImplClass);
     }
 
 
