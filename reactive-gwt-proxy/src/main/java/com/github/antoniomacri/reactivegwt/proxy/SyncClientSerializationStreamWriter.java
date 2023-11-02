@@ -437,6 +437,9 @@ public class SyncClientSerializationStreamWriter extends AbstractSerializationSt
             serializeArray(instanceClass, instance);
         } else if (instanceClass.isEnum()) {
             writeInt(((Enum<?>) instance).ordinal());
+        } else if (Exception.class.isAssignableFrom(instanceClass)) {
+            // See SerializabilityUtil.fieldQualifiesForSerialization()
+            writeString(((Exception) instance).getMessage());
         } else {
             // Regular class instance
             serializeClass(instance, instanceClass);

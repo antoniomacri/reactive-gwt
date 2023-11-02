@@ -32,6 +32,7 @@ import com.google.gwt.user.server.rpc.SerializationPolicy;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.net.CookieManager;
 import java.net.CookieStore;
 import java.net.HttpCookie;
@@ -286,12 +287,12 @@ public class RemoteServiceSyncProxy implements SerializationStreamFactory {
                                 return CompletableFuture.completedFuture(null);
                             }
                         } catch (SerializationException e) {
-                            throw new RuntimeException(e);
+                            throw new UndeclaredThrowableException(e);
                         }
                         if (throwable instanceof RuntimeException) {
                             throw (RuntimeException) throwable;
                         } else {
-                            throw new RuntimeException(throwable);
+                            throw new UndeclaredThrowableException(throwable);
                         }
                     } else {
                         throw new InvocationException("Unknown response " + encodedResponse);

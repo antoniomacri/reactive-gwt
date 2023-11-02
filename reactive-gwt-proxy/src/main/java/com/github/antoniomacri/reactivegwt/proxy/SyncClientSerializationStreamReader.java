@@ -33,6 +33,7 @@ import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 
@@ -582,6 +583,8 @@ public class SyncClientSerializationStreamReader extends AbstractSerializationSt
             instance = deserializeArray(instanceClass, instance);
         } else if (instanceClass.isEnum()) {
             // Enums are deserialized when they are instantiated
+        } else if (Exception.class.isAssignableFrom(instanceClass)) {
+            // Exceptions are deserialized when they are instantiated
         } else {
             deserializeClass(instanceClass, instance);
         }
@@ -660,6 +663,10 @@ public class SyncClientSerializationStreamReader extends AbstractSerializationSt
             int ordinal = readInt();
             assert ordinal >= 0 && ordinal < enumConstants.length;
             return enumConstants[ordinal];
+        } else if (Exception.class.isAssignableFrom(instanceClass)) {
+            // See SerializabilityUtil.fieldQualifiesForSerialization()
+            String message = readString();
+            return new Exception(message);
         } else {
             Constructor<?> constructor = instanceClass.getDeclaredConstructor();
             constructor.setAccessible(true);

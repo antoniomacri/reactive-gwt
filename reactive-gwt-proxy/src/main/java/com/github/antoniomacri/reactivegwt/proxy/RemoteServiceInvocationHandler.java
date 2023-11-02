@@ -36,6 +36,7 @@ import org.apache.http.MethodNotSupportedException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
@@ -364,10 +365,12 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
                         stage.handle((result, exception) -> {
                             if (exception != null) {
                                 if (exception instanceof CompletionException) {
-                                    callback_2.onFailure(exception.getCause());
-                                } else {
-                                    callback_2.onFailure(exception);
+                                    exception = exception.getCause();
                                 }
+                                if (exception instanceof UndeclaredThrowableException) {
+                                    exception = exception.getCause();
+                                }
+                                callback_2.onFailure(exception);
                             } else {
                                 callback_2.onSuccess(result);
                             }
