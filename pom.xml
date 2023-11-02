@@ -4,7 +4,7 @@
 
     <groupId>io.github.antoniomacri</groupId>
     <artifactId>reactive-gwt</artifactId>
-    <version>1.4.2</version>
+    <version>1.4.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Reactive GWT</name>
@@ -29,7 +29,7 @@
         <connection>scm:git:git@github.com:antoniomacri/reactive-gwt.git</connection>
         <developerConnection>scm:git:git@github.com:antoniomacri/reactive-gwt.git</developerConnection>
         <url>https://github.com/antoniomacri/reactive-gwt</url>
-        <tag>reactive-gwt-1.4.2</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
