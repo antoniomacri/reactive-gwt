@@ -17,18 +17,8 @@ package com.github.antoniomacri.reactivegwt.proxy;
 
 import com.github.antoniomacri.reactivegwt.proxy.exception.SyncProxyException;
 import com.github.antoniomacri.reactivegwt.proxy.exception.SyncProxyException.InfoType;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.HasRpcToken;
-import com.google.gwt.user.client.rpc.InvocationException;
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RpcToken;
+import com.google.gwt.user.client.rpc.*;
 import com.google.gwt.user.client.rpc.RpcToken.RpcTokenImplementation;
-import com.google.gwt.user.client.rpc.RpcTokenException;
-import com.google.gwt.user.client.rpc.RpcTokenExceptionHandler;
-import com.google.gwt.user.client.rpc.SerializationException;
-import com.google.gwt.user.client.rpc.SerializationStreamFactory;
-import com.google.gwt.user.client.rpc.SerializationStreamWriter;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter.ResponseReader;
 import com.google.gwt.user.server.rpc.impl.SerializabilityUtil;
 import org.apache.http.MethodNotSupportedException;
@@ -64,8 +54,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
                 return clazz;
             }
             if (clazz.getName().endsWith(ReactiveGWT.ASYNC_POSTFIX)) {
-                return ClassLoading.loadClass(clazz.getName().replace(
-                        ReactiveGWT.ASYNC_POSTFIX, ""));
+                return ClassLoading.loadClass(clazz.getName().replace(ReactiveGWT.ASYNC_POSTFIX, ""));
             }
             // if (!ServiceDefTarget.class.equals(clazz)
             // && !HasRpcToken.class.equals(clazz)
@@ -77,7 +66,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
         return null;
     }
 
-    private static final Map<Class<?>, ResponseReader> JPRIMITIVETYPE_TO_RESPONSEREADER = new HashMap<Class<?>, ResponseReader>();
+    private static final Map<Class<?>, ResponseReader> JPRIMITIVETYPE_TO_RESPONSEREADER = new HashMap<>();
 
     static {
         // JPRIMITIVETYPE_TO_RESPONSEREADER.put(Boolean.class,
@@ -99,12 +88,10 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
         // JPRIMITIVETYPE_TO_RESPONSEREADER.put(Void.class,
         // ResponseReader.VOID);
 
-        JPRIMITIVETYPE_TO_RESPONSEREADER.put(boolean.class,
-                ResponseReader.BOOLEAN);
+        JPRIMITIVETYPE_TO_RESPONSEREADER.put(boolean.class, ResponseReader.BOOLEAN);
         JPRIMITIVETYPE_TO_RESPONSEREADER.put(byte.class, ResponseReader.BYTE);
         JPRIMITIVETYPE_TO_RESPONSEREADER.put(char.class, ResponseReader.CHAR);
-        JPRIMITIVETYPE_TO_RESPONSEREADER.put(double.class,
-                ResponseReader.DOUBLE);
+        JPRIMITIVETYPE_TO_RESPONSEREADER.put(double.class, ResponseReader.DOUBLE);
         JPRIMITIVETYPE_TO_RESPONSEREADER.put(float.class, ResponseReader.FLOAT);
         JPRIMITIVETYPE_TO_RESPONSEREADER.put(int.class, ResponseReader.INT);
         JPRIMITIVETYPE_TO_RESPONSEREADER.put(long.class, ResponseReader.LONG);
@@ -112,24 +99,22 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
         JPRIMITIVETYPE_TO_RESPONSEREADER.put(void.class, ResponseReader.VOID);
     }
 
+
     RpcToken token;
-
     String serviceEntryPoint;
-
     RpcTokenExceptionHandler rpcTokenExceptionHandler;
-
-    Logger logger = Logger.getLogger(RemoteServiceInvocationHandler.class
-            .getName());
+    Logger logger = Logger.getLogger(RemoteServiceInvocationHandler.class.getName());
     HasProxySettings settings;
+
 
     public RemoteServiceInvocationHandler(HasProxySettings settings) {
         this.settings = settings;
     }
 
+
     private ResponseReader getReaderFor(Class<?> type) {
         this.logger.finer("Getting reader for: " + type.getName());
-        ResponseReader primitiveResponseReader = JPRIMITIVETYPE_TO_RESPONSEREADER
-                .get(type);
+        ResponseReader primitiveResponseReader = JPRIMITIVETYPE_TO_RESPONSEREADER.get(type);
         if (primitiveResponseReader != null) {
             return primitiveResponseReader;
         }
@@ -144,8 +129,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
         return ResponseReader.OBJECT;
     }
 
-    protected Object handleHasProxySettings(Object proxy, Method method,
-                                            Object[] args) throws IllegalAccessException,
+    protected Object handleHasProxySettings(Object proxy, Method method, Object[] args) throws IllegalAccessException,
             IllegalArgumentException, InvocationTargetException {
         return method.invoke(this.settings, args);
     }
@@ -159,24 +143,20 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
      *                                implemented interface is Async
      * @since 0.5
      */
-    protected Object handleHasRpcToken(Object proxy, Method method,
-                                       Object[] args) throws MethodNotSupportedException,
+    protected Object handleHasRpcToken(Object proxy, Method method, Object[] args) throws MethodNotSupportedException,
             NoSuchMethodException, ClassNotFoundException {
-        if (HasRpcToken.class.getMethod("setRpcToken", RpcToken.class).equals(
-                method)) {
+        if (HasRpcToken.class.getMethod("setRpcToken", RpcToken.class).equals(method)) {
             // Check if service has annotation defining the Token class and
             // that this token matches the specified class
             Class<?> srvcIntf = determineProxyServiceBaseInterface(proxy);
             if (srvcIntf != null) {
-                RpcTokenImplementation rti = srvcIntf
-                        .getAnnotation(RpcTokenImplementation.class);
+                RpcTokenImplementation rti = srvcIntf.getAnnotation(RpcTokenImplementation.class);
                 // Replace $ in class name in order to handle inner classes
                 if (rti != null
-                        && !args[0].getClass().getName().replace("$", ".")
-                        .equals(rti.value())) {
+                    && !args[0].getClass().getName().replace("$", ".").equals(rti.value())) {
                     throw new RpcTokenException("Incorrect Token Class. Got "
-                            + args[0].getClass().getName() + " but expected: "
-                            + rti.value());
+                                                + args[0].getClass().getName() + " but expected: "
+                                                + rti.value());
                 }
             }
 
@@ -184,95 +164,79 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
             return null;
         } else if (HasRpcToken.class.getMethod("getRpcToken").equals(method)) {
             return this.token;
-        } else if (HasRpcToken.class.getMethod("setRpcTokenExceptionHandler",
-                RpcTokenExceptionHandler.class).equals(method)) {
+        } else if (HasRpcToken.class.getMethod("setRpcTokenExceptionHandler", RpcTokenExceptionHandler.class).equals(method)) {
             this.rpcTokenExceptionHandler = (RpcTokenExceptionHandler) args[0];
             return null;
         } else if (HasRpcToken.class.getMethod("getRpcTokenExceptionHandler").equals(method)) {
             return this.rpcTokenExceptionHandler;
         }
         throw new MethodNotSupportedException("Method: " + method.getName()
-                + " in class: " + method.getDeclaringClass().getName()
-                + " not defined for class: " + proxy.getClass().getName());
+                                              + " in class: " + method.getDeclaringClass().getName()
+                                              + " not defined for class: " + proxy.getClass().getName());
     }
 
     /**
      * Handles method invocations to the {@link ServiceDefTarget} interface
      * implemented by the service.
      */
-    protected Object handleServiceDefTarget(Object proxy, Method method,
-                                            Object[] args) throws Throwable {
-        if (ServiceDefTarget.class.getMethod("getSerializationPolicyName")
-                .equals(method)) {
+    protected Object handleServiceDefTarget(Object proxy, Method method, Object[] args) throws Throwable {
+        if (ServiceDefTarget.class.getMethod("getSerializationPolicyName").equals(method)) {
             return this.settings.getPolicyName();
-        } else if (ServiceDefTarget.class.getMethod("setServiceEntryPoint",
-                String.class).equals(method)) {
+        } else if (ServiceDefTarget.class.getMethod("setServiceEntryPoint", String.class).equals(method)) {
             this.serviceEntryPoint = (String) args[0];
             // Modify current base and relative Path to newly specific
             // serviceEntryPoint assuming that base path is part of
             // serviceEntryPoint
             // TODO May not be a valid assumption
-            if (this.serviceEntryPoint.contains(this.settings
-                    .getModuleBaseUrl())) {
-                this.settings
-                        .setRemoteServiceRelativePath(this.serviceEntryPoint
-                                .split(this.settings.getModuleBaseUrl())[1]);
+            if (this.serviceEntryPoint.contains(this.settings.getModuleBaseUrl())) {
+                String remoteServiceRelativePath = this.serviceEntryPoint.split(this.settings.getModuleBaseUrl())[1];
+                this.settings.setRemoteServiceRelativePath(remoteServiceRelativePath);
             } else {
                 this.logger.warning("Unable to determine base (orig: "
-                        + this.settings.getModuleBaseUrl() + ") against: "
-                        + this.serviceEntryPoint);
+                                    + this.settings.getModuleBaseUrl() + ") against: "
+                                    + this.serviceEntryPoint);
                 throw new SyncProxyException(
                         determineProxyServiceBaseInterface(proxy),
                         InfoType.SERVICE_BASE_DELTA);
             }
             return null;
-        } else if (ServiceDefTarget.class.getMethod("getServiceEntryPoint")
-                .equals(method)) {
+        } else if (ServiceDefTarget.class.getMethod("getServiceEntryPoint").equals(method)) {
             return this.serviceEntryPoint;
         }
         // TODO handle all methods
         throw new MethodNotSupportedException("Method: " + method.getName()
-                + " in class: " + method.getDeclaringClass().getName()
-                + " not defined for class: " + proxy.getClass().getName());
+                                              + " in class: " + method.getDeclaringClass().getName()
+                                              + " not defined for class: " + proxy.getClass().getName());
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args)
-            throws Throwable {
-        this.logger.info("Invoking " + method.getName() + " on proxy: "
-                + proxy.getClass().getName());
-        if (this.logger.getLevel() != null
-                && this.logger.getLevel().intValue() <= Level.CONFIG.intValue()) {
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        this.logger.info("Invoking " + method.getName() + " on proxy: " + proxy.getClass().getName());
+        if (this.logger.getLevel() != null && this.logger.getLevel().intValue() <= Level.CONFIG.intValue()) {
             StringBuilder intfs = new StringBuilder();
             for (Class<?> intf : proxy.getClass().getInterfaces()) {
                 intfs.append(intf.getName()).append(",");
             }
             this.logger.config("Proxy has interfaces: " + intfs);
         }
+
         // Handle case where method call is GWT Client Intf
         // (ServiceDefTarget,HasRpcToken)
-        if (ServiceDefTarget.class.getName().equals(
-                method.getDeclaringClass().getName())) {
-            this.logger
-                    .info("Handling invocation of ServiceDefTarget Interface");
+        if (ServiceDefTarget.class.getName().equals(method.getDeclaringClass().getName())) {
+            this.logger.info("Handling invocation of ServiceDefTarget Interface");
             return handleServiceDefTarget(proxy, method, args);
-        } else if (HasRpcToken.class.getName().equals(
-                method.getDeclaringClass().getName())) {
+        } else if (HasRpcToken.class.getName().equals(method.getDeclaringClass().getName())) {
             this.logger.info("Handling invocation of HasRpcToken Interface");
             return handleHasRpcToken(proxy, method, args);
-        } else if (HasProxySettings.class.getName().equals(
-                method.getDeclaringClass().getName())) {
-            this.logger
-                    .info("Handling invocation of HasProxySettings Interface");
+        } else if (HasProxySettings.class.getName().equals(method.getDeclaringClass().getName())) {
+            this.logger.info("Handling invocation of HasProxySettings Interface");
             return handleHasProxySettings(proxy, method, args);
         }
-        RemoteServiceSyncProxy syncProxy = new RemoteServiceSyncProxy(settings,
-                this.token, this.rpcTokenExceptionHandler);
+
+        RemoteServiceSyncProxy syncProxy = new RemoteServiceSyncProxy(settings, this.token, this.rpcTokenExceptionHandler);
         // Handle delegation of calls to the RemoteServiceProxy hierarchy
-        if (SerializationStreamFactory.class.getName().equals(
-                method.getDeclaringClass().getName())) {
-            this.logger
-                    .info("Handling invocation of SerializationStreamFactory Interface");
+        if (SerializationStreamFactory.class.getName().equals(method.getDeclaringClass().getName())) {
+            this.logger.info("Handling invocation of SerializationStreamFactory Interface");
             return method.invoke(syncProxy, args);
         }
 
@@ -294,8 +258,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
             if (method.getDeclaringClass().getCanonicalName().endsWith("Async")) {
                 this.logger.info("Invoking as an Async Service");
                 isAsync = true;
-                serviceIntfName = serviceIntfName.substring(0,
-                        serviceIntfName.length() - 5);
+                serviceIntfName = serviceIntfName.substring(0, serviceIntfName.length() - 5);
                 paramCount--;
                 callback = (AsyncCallback<?>) args[paramCount];
 
@@ -307,27 +270,22 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
                     clazz = ClassLoading.loadClass(serviceIntfName);
                 } catch (ClassNotFoundException e) {
                     throw new InvocationException(
-                            "There is no sync version of " + serviceIntfName
-                                    + "Async");
+                            "There is no sync version of " + serviceIntfName + "Async");
                 }
-                Method syncMethod = null;
+                Method syncMethod;
                 try {
-                    syncMethod = clazz.getMethod(method.getName(),
-                            syncParamTypes);
-                    this.logger.fine("Sync Method determined: "
-                            + syncMethod.getName());
+                    syncMethod = clazz.getMethod(method.getName(), syncParamTypes);
+                    this.logger.fine("Sync Method determined: " + syncMethod.getName());
                 } catch (NoSuchMethodException nsme) {
                     StringBuilder temp = new StringBuilder();
                     for (Class<?> cl : syncParamTypes) {
                         temp.append(cl.getSimpleName()).append(",");
                     }
                     throw new NoSuchMethodException("SPNoMeth "
-                            + method.getName() + " class "
-                            + clazz.getSimpleName() + " params " + temp);
+                                                    + method.getName() + " class "
+                                                    + clazz.getSimpleName() + " params " + temp);
                 }
-                if (syncMethod != null) {
-                    returnType = syncMethod.getReturnType();
-                }
+                returnType = syncMethod.getReturnType();
             }
 
             // Interface name
@@ -341,8 +299,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
             // Params type
             for (int i = 0; i < paramCount; i++) {
                 // streamWriter.writeString(computeBinaryClassName(paramTypes[i]));
-                streamWriter.writeString(SerializabilityUtil
-                        .getSerializedTypeName(paramTypes[i]));
+                streamWriter.writeString(SerializabilityUtil.getSerializedTypeName(paramTypes[i]));
             }
 
             // Params
@@ -409,8 +366,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
         }
     }
 
-    private void writeParam(SerializationStreamWriter streamWriter,
-                            Class<?> paramType, Object paramValue)
+    private void writeParam(SerializationStreamWriter streamWriter, Class<?> paramType, Object paramValue)
             throws SerializationException {
         if (paramType == boolean.class) {
             streamWriter.writeBoolean((Boolean) paramValue);

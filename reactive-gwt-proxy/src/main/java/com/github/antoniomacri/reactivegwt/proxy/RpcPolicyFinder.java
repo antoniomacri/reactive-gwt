@@ -192,14 +192,7 @@ public class RpcPolicyFinder {
         connection.setRequestMethod("GET");
         connection.connect();
 
-        InputStream is = connection.getInputStream();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int len;
-        while ((len = is.read(buffer)) > 0) {
-            baos.write(buffer, 0, len);
-        }
-        String responseText = baos.toString(StandardCharsets.UTF_8);
+        String responseText = Utils.getResposeText(connection);
 
         if (myurl.endsWith(GWT_PRC_POLICY_FILE_EXT)) {
             CACHE_POLICY_FILE.put(myurl, responseText);

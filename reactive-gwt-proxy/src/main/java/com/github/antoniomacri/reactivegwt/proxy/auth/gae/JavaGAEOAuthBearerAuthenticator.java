@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.github.antoniomacri.reactivegwt.proxy.HasProxySettings;
+import com.github.antoniomacri.reactivegwt.proxy.Utils;
 import com.github.antoniomacri.reactivegwt.proxy.auth.DeviceServiceAuthenticationListener;
 import com.github.antoniomacri.reactivegwt.proxy.auth.GoogleOAuthClientIdManager;
 import com.github.antoniomacri.reactivegwt.proxy.auth.HasOAuthBearerToken;
@@ -211,14 +212,7 @@ public class JavaGAEOAuthBearerAuthenticator
 
 			int statusCode = connection.getResponseCode();
 			logger.config("Response code: " + statusCode);
-			InputStream is = connection.getInputStream();
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			byte[] buffer = new byte[1024];
-			int len;
-			while ((len = is.read(buffer)) > 0) {
-				baos.write(buffer, 0, len);
-			}
-			String encodedResponse = baos.toString("UTF8");
+			String encodedResponse = Utils.getResposeText(connection);
 			logger.fine("Response payload: " + encodedResponse);
 
 			deviceCodeResponse = new Gson().fromJson(encodedResponse, OAuth2DeviceCodeResponse.class);
@@ -369,14 +363,7 @@ public class JavaGAEOAuthBearerAuthenticator
 
 			int statusCode = connection.getResponseCode();
 			logger.config("Response code: " + statusCode);
-			InputStream is = connection.getInputStream();
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			byte[] buffer = new byte[1024];
-			int len;
-			while ((len = is.read(buffer)) > 0) {
-				baos.write(buffer, 0, len);
-			}
-			String encodedResponse = baos.toString("UTF8");
+			String encodedResponse = Utils.getResposeText(connection);
 
 			logger.fine("Response payload: " + encodedResponse);
 			tokenResponse = new Gson().fromJson(encodedResponse, OAuth2TokenResponse.class);
