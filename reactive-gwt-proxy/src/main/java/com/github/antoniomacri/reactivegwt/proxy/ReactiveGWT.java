@@ -18,26 +18,27 @@ package com.github.antoniomacri.reactivegwt.proxy;
 
 import com.github.antoniomacri.reactivegwt.proxy.exception.SyncProxyException;
 import com.github.antoniomacri.reactivegwt.proxy.exception.SyncProxyException.InfoType;
-import com.google.gwt.user.client.rpc.HasRpcToken;
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.google.gwt.user.client.rpc.SerializationStreamFactory;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.rpc.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Proxy;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.concurrent.Executors;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Offers {@link com.google.gwt.core.client.GWT#create(Class)} methods to instantiate
  * proxies for RPC service interfaces.
  */
 public class ReactiveGWT {
+    private static final Logger log = LoggerFactory.getLogger(ReactiveGWT.class);
+    private static boolean suppressRelativePathWarning = false;
+
+    private static final CookieManager DEFAULT_COOKIE_MANAGER = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
+
+    protected static final String ASYNC_POSTFIX = "Async";
+
 
     /**
      * Creates the client proxy for a GWT service interface.
@@ -70,8 +71,6 @@ public class ReactiveGWT {
     @SuppressWarnings("unchecked")
     public static <ServiceIntfAsync, ServiceIntf extends RemoteService>
     ServiceIntfAsync create(Class<ServiceIntf> serviceIntf, ProxySettings proxySettings) {
-        logger.config("Create service: " + serviceIntf.getName());
-
         Class<ServiceIntfAsync> asyncServiceIntf;
 
         try {
@@ -79,8 +78,6 @@ public class ReactiveGWT {
         } catch (ClassNotFoundException e) {
             throw new SyncProxyException(serviceIntf, InfoType.SERVICE_BASE);
         }
-
-        logger.config("Creating Async Service: " + asyncServiceIntf.getName());
 
         return createProxy(asyncServiceIntf, proxySettings);
     }
@@ -96,8 +93,6 @@ public class ReactiveGWT {
      */
     public static <ServiceIntf extends RemoteService>
     ServiceIntf createSync(Class<ServiceIntf> serviceIntf, String moduleBaseURL) {
-        logger.config("Create Sync Service: " + serviceIntf.getName());
-
         return createProxy(serviceIntf, new ProxySettings(moduleBaseURL));
     }
 
@@ -114,8 +109,6 @@ public class ReactiveGWT {
      */
     @SuppressWarnings("unchecked")
     protected static <ServiceIntf> ServiceIntf createProxy(Class<ServiceIntf> serviceIntf, ProxySettings settings) {
-        logger.config("Setting up Proxy: " + serviceIntf.getName());
-
         prepareSettings(serviceIntf, settings, new RpcPolicyFinder());
 
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -130,21 +123,18 @@ public class ReactiveGWT {
      * Sets default values to the settings parameters that are not yet set
      */
     protected static <ServiceIntf> void prepareSettings(Class<ServiceIntf> serviceIntf, ProxySettings settings, RpcPolicyFinder policyFinder) {
-        logger.info("Updating Default Settings for Unset Values");
         if (settings.getModuleBaseUrl() == null) {
             throw new SyncProxyException(serviceIntf, InfoType.MODULE_BASE_URL);
         }
-        logger.finer("Server Base Url: " + settings.getModuleBaseUrl());
+        log.debug("service={} moduleBaseUrl={}", serviceIntf.getName(), settings.getModuleBaseUrl());
 
         if (settings.getRemoteServiceRelativePath() == null) {
-            logger.config("Setting Service Relative Path by Annotation");
             settings.setRemoteServiceRelativePath(getRemoteServiceRelativePathFromAnnotation(serviceIntf));
         }
-        logger.finer("Remote Service Relative path: " + settings.getRemoteServiceRelativePath());
+        log.debug("service={} remoteServiceRelativePath={}", serviceIntf.getName(), settings.getRemoteServiceRelativePath());
 
         if (settings.getPolicyName() == null) {
             try {
-                logger.config("Setting Policy Name by URL");
                 String policyName = policyFinder.fetchSerializationPolicyName(serviceIntf, settings.getModuleBaseUrl());
                 settings.setPolicyName(policyName);
             } catch (Exception e) {
@@ -154,25 +144,23 @@ public class ReactiveGWT {
         if (settings.getPolicyName() == null) {
             throw new SyncProxyException(serviceIntf, InfoType.POLICY_NAME_MISSING);
         }
-        logger.finer("Service Policy name: " + settings.getPolicyName());
+        log.debug("service={} policyName={}", serviceIntf.getName(), settings.getPolicyName());
 
         if (settings.getCookieManager() == null) {
-            logger.config("Setting Cookie Manager to Default");
+            log.debug("service={} cookieManager=default", serviceIntf.getName());
             settings.setCookieManager(DEFAULT_COOKIE_MANAGER);
+        } else {
+            log.debug("service={} cookieManager=custom", serviceIntf.getName());
         }
 
         if (settings.getExecutor() == null) {
+            log.debug("service={} executor=default", serviceIntf.getName());
             settings.setExecutor(Executors.newSingleThreadExecutor());
+        } else {
+            log.debug("service={} executor={}", serviceIntf.getName(), settings.getExecutor());
         }
     }
 
-    public static Class<?>[] getLoggerClasses() {
-        return spClazzes;
-    }
-
-    protected static Level getLoggingLevel() {
-        return level;
-    }
 
     /**
      * Attempts to ascertain the remote service's relative path by retrieving
@@ -197,8 +185,8 @@ public class ReactiveGWT {
         }
         if (baseServiceIntf.getAnnotation(RemoteServiceRelativePath.class) == null) {
             if (isSuppressRelativePathWarning()) {
-                logger.info("Suppressed warning for lack of RemoteServiceRelativePath annotation on service: "
-                            + baseServiceIntf);
+                log.info("Suppressed warning for lack of RemoteServiceRelativePath annotation on service={}",
+                        baseServiceIntf);
                 return "";
             }
             throw new SyncProxyException(baseServiceIntf, InfoType.REMOTE_SERVICE_RELATIVE_PATH);
@@ -210,38 +198,6 @@ public class ReactiveGWT {
         return suppressRelativePathWarning;
     }
 
-
-    /**
-     * Sets logging level for all SyncProxy classes
-     */
-    public static void setLoggingLevel(Level level) {
-        ReactiveGWT.level = level;
-        Logger topLogger = java.util.logging.Logger.getLogger("");
-        // Handler for console (reuse it if it already exists)
-        Handler consoleHandler = null;
-        // see if there is already a console handler
-        for (Handler handler : topLogger.getHandlers()) {
-            if (handler instanceof ConsoleHandler) {
-                // found the console handler
-                consoleHandler = handler;
-                break;
-            }
-        }
-
-        if (consoleHandler == null) {
-            // there was no console handler found, create a new one
-            consoleHandler = new ConsoleHandler();
-            topLogger.addHandler(consoleHandler);
-        }
-        // set the console handler to level
-        consoleHandler.setLevel(level);
-
-        for (Class<?> clazz : spClazzes) {
-            Logger iLogger = Logger.getLogger(clazz.getName());
-            iLogger.setLevel(level);
-        }
-    }
-
     /**
      * Static flag to suppress the exception issued if a RemoteService does not
      * implement the {@link RemoteServiceRelativePath} annotation
@@ -249,29 +205,7 @@ public class ReactiveGWT {
      * @param suppressRelativePathWarning the suppressRelativePathWarning to set
      */
     public static void suppressRelativePathWarning(boolean suppressRelativePathWarning) {
-        logger.info((suppressRelativePathWarning ? "" : "Not ") + "Supressing Relative Path Warning");
+        log.info("suppressRelativePathWarning={}", suppressRelativePathWarning);
         ReactiveGWT.suppressRelativePathWarning = suppressRelativePathWarning;
     }
-
-    /**
-     * A list of the GSP core classes that GSP has, mainly used to activate
-     * code-based logging requests
-     *
-     * @since 0.5
-     */
-    protected static Class<?>[] spClazzes = {ReactiveGWT.class, RpcPolicyFinder.class,
-            RemoteServiceInvocationHandler.class, RemoteServiceSyncProxy.class,
-            SyncClientSerializationStreamReader.class, SyncClientSerializationStreamWriter.class};
-    /**
-     * @since 0.5
-     */
-    static boolean suppressRelativePathWarning = false;
-
-    static Level level;
-
-    static Logger logger = Logger.getLogger(ReactiveGWT.class.getName());
-
-    protected static final String ASYNC_POSTFIX = "Async";
-
-    private static final CookieManager DEFAULT_COOKIE_MANAGER = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
 }
