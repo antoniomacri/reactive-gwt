@@ -18,33 +18,18 @@ package com.github.antoniomacri.reactivegwt.proxy;
 import com.github.antoniomacri.reactivegwt.proxy.auth.ServiceAuthenticator;
 import com.github.antoniomacri.reactivegwt.proxy.auth.TestModeHostVerifier;
 import com.google.gwt.http.client.Response;
-import com.google.gwt.user.client.rpc.InvocationException;
-import com.google.gwt.user.client.rpc.RpcRequestBuilder;
-import com.google.gwt.user.client.rpc.RpcToken;
-import com.google.gwt.user.client.rpc.RpcTokenException;
-import com.google.gwt.user.client.rpc.RpcTokenExceptionHandler;
-import com.google.gwt.user.client.rpc.SerializationException;
-import com.google.gwt.user.client.rpc.SerializationStreamFactory;
-import com.google.gwt.user.client.rpc.StatusCodeException;
+import com.google.gwt.user.client.rpc.*;
 import com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.StringReader;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.net.CookieManager;
-import java.net.CookieStore;
-import java.net.HttpCookie;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
+import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -120,37 +105,21 @@ public class RemoteServiceSyncProxy implements SerializationStreamFactory {
         if (serializationPolicyName == null) {
             this.serializationPolicy = new DummySerializationPolicy();
         } else {
-            // It appears this section attempts to find the specified policy
-            // files within the included classpath before actually checking
-            // against cached live files retrieve by the RpcPolicyFinder...This
-            // should be reviewed it may make more sense to get a live version
-            // first, and if not available then look to a locally available
-            // version
             String policyFileName = SerializationPolicyLoader.getSerializationPolicyFileName(serializationPolicyName);
             logger.config("Retrieving Policy File: " + policyFileName + " for SerializationPolicy: "
-                    + serializationPolicyName);
-            InputStream is = getClass().getResourceAsStream("/" + policyFileName);
+                          + serializationPolicyName);
             try {
-                if (is == null) {
-                    logger.warning("Unable to get policy file from stream, attempting cache: " + policyFileName
-                            + " at base: " + moduleBaseURL);
-                    // Try to get from cache
-                    String text = RpcPolicyFinder.getCachedPolicyFile(moduleBaseURL + policyFileName);
-                    if (text != null) {
-                        is = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
-                    }
+                logger.warning("Unable to get policy file from stream, attempting cache: " + policyFileName
+                               + " at base: " + moduleBaseURL);
+                // Try to get from cache
+                String text = RpcPolicyFinder.getCachedPolicyFile(moduleBaseURL + policyFileName);
+                if (text != null) {
+                    this.serializationPolicy = SerializationPolicyLoader.load(new StringReader(text), null);
+                } else {
+                    throw new InvocationException("Error while loading serialization policy " + serializationPolicyName);
                 }
-                this.serializationPolicy = SerializationPolicyLoader.loadFromStream(is, null);
             } catch (Exception e) {
                 throw new InvocationException("Error while loading serialization policy " + serializationPolicyName, e);
-            } finally {
-                if (is != null) {
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                        // Ignore this error
-                    }
-                }
             }
         }
     }

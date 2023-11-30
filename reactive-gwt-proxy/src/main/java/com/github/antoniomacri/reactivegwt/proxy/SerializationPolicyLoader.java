@@ -23,8 +23,7 @@ import com.google.gwt.user.server.rpc.impl.TypeNameObfuscator;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.Reader;
 import java.text.ParseException;
 import java.util.*;
 
@@ -41,11 +40,6 @@ public final class SerializationPolicyLoader {
      * are visible to client code.
      */
     public static final String CLIENT_FIELDS_KEYWORD = "@ClientFields";
-
-    /**
-     * Default encoding for serialization policy files.
-     */
-    public static final String SERIALIZATION_POLICY_FILE_ENCODING = "UTF-8";
 
     private static final String FORMAT_ERROR_MESSAGE = "Expected: className, "
                                                        + "[true | false], [true | false], [true | false], [true | false], typeId, signature";
@@ -66,7 +60,7 @@ public final class SerializationPolicyLoader {
      * Loads a SerializationPolicy from an input stream and optionally record
      * any {@link ClassNotFoundException}s.
      *
-     * @param inputStream             stream to load the SerializationPolicy from.
+     * @param reader                  reader to load the SerializationPolicy from.
      * @param classNotFoundExceptions if not <code>null</code>, all of the
      *                                {@link ClassNotFoundException}s thrown while loading this
      *                                serialization policy will be added to this list
@@ -74,13 +68,7 @@ public final class SerializationPolicyLoader {
      * @throws IOException    if an error occurs while reading the stream
      * @throws ParseException if the input stream is not properly formatted
      */
-    public static SerializationPolicy loadFromStream(InputStream inputStream, List<ClassNotFoundException> classNotFoundExceptions)
-            throws IOException, ParseException {
-
-        if (inputStream == null) {
-            throw new NullPointerException("inputStream");
-        }
-
+    public static StandardSerializationPolicy load(Reader reader, List<ClassNotFoundException> classNotFoundExceptions) throws IOException, ParseException {
         Map<Class<?>, Boolean> whitelistSer = new HashMap<>();
         Map<Class<?>, Boolean> whitelistDeser = new HashMap<>();
         Map<Class<?>, String> typeIds = new HashMap<>();
@@ -88,8 +76,7 @@ public final class SerializationPolicyLoader {
 
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 
-        InputStreamReader isr = new InputStreamReader(inputStream, SERIALIZATION_POLICY_FILE_ENCODING);
-        BufferedReader br = new BufferedReader(isr);
+        BufferedReader br = new BufferedReader(reader);
 
         String line = br.readLine();
         int lineNum = 1;
