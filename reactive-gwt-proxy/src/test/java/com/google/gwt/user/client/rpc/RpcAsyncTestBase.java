@@ -1,6 +1,8 @@
 package com.google.gwt.user.client.rpc;
 
+import com.github.antoniomacri.reactivegwt.proxy.ProxySettings;
 import com.github.antoniomacri.reactivegwt.proxy.ReactiveGWT;
+import com.github.antoniomacri.reactivegwt.proxy.RpcPolicyFinder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -60,6 +62,12 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
         }
     }
 
+
+    protected <TService> ProxySettings createSettings(Class<TService> serviceClass) {
+        RpcPolicyFinder policyFinder = new RpcPolicyFinder(getModuleBaseURL());
+        ProxySettings settings = new ProxySettings(getModuleBaseURL(), serviceClass.getName(), policyFinder);
+        return settings;
+    }
 
     protected TAsync getService() {
         return ReactiveGWT.create(serviceClass, getModuleBaseURL());

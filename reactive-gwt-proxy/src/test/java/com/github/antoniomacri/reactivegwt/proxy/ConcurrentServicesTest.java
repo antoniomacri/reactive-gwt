@@ -106,14 +106,14 @@ public class ConcurrentServicesTest extends RpcAsyncTestBase<ValueTypesTestServi
 
     @Override
     public ValueTypesTestServiceAsync getService() {
-        ProxySettings settings = new ProxySettings(getModuleBaseURL());
+        ProxySettings settings = createSettings(ValueTypesTestService.class);
         settings.setExecutor(Executors.newSingleThreadExecutor());
         ValueTypesTestServiceAsync service = ReactiveGWT.create(ValueTypesTestService.class, settings);
         return service;
     }
 
     private ValueTypesTestServiceAsync getValueTypesService(ExecutorService executor) {
-        ProxySettings settings = new ProxySettings(getModuleBaseURL());
+        ProxySettings settings = createSettings(ValueTypesTestService.class);
         settings.setExecutor(executor);
         ValueTypesTestServiceAsync service = ReactiveGWT.create(ValueTypesTestService.class, settings);
         ((ServiceDefTarget) service).setServiceEntryPoint(getModuleBaseURL() + "valuetypes");
@@ -121,7 +121,7 @@ public class ConcurrentServicesTest extends RpcAsyncTestBase<ValueTypesTestServi
     }
 
     private CollectionsTestServiceAsync getCollectionsService(ExecutorService executor) {
-        ProxySettings settings = new ProxySettings(getModuleBaseURL());
+        ProxySettings settings = createSettings(CollectionsTestService.class);
         settings.setExecutor(executor);
         CollectionsTestServiceAsync service = ReactiveGWT.create(CollectionsTestService.class, settings);
         ((ServiceDefTarget) service).setServiceEntryPoint(getModuleBaseURL() + "collections");

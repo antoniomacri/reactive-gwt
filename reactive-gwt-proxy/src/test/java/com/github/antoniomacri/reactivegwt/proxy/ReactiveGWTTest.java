@@ -12,13 +12,11 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -86,16 +84,17 @@ public class ReactiveGWTTest {
     @Test
     public void shouldThrowExceptionIfBaseUrlIsMissing() {
         RpcPolicyFinder policyFinder = mock(RpcPolicyFinder.class);
-        ProxySettings settings = new ProxySettings(null);
+        ProxySettings settings = new ProxySettings(null, InnerTestService.class.getName(), policyFinder);
 
-        assertThatThrownBy(() -> ReactiveGWT.prepareSettings(InnerTestService.class, settings, policyFinder))
+        assertThatThrownBy(() -> ReactiveGWT.prepareSettings(InnerTestService.class, settings))
                 .isInstanceOf(SyncProxyException.class)
                 .satisfies(e -> ((SyncProxyException) e).verify(InfoType.MODULE_BASE_URL));
     }
 
     @Test
     public void shouldOverrideModuleBaseUrlViaSetter() {
-        ProxySettings settings = new ProxySettings(null);
+        RpcPolicyFinder policyFinder = mock(RpcPolicyFinder.class);
+        ProxySettings settings = new ProxySettings(null, InnerTestService.class.getName(), policyFinder);
 
         String testUrl2 = "testUrl2";
         settings.setModuleBaseUrl(testUrl2);
@@ -106,77 +105,70 @@ public class ReactiveGWTTest {
     public void shouldThrowExceptionIfRemoteServiceAnnotationIsMissing() {
         String testUrl2 = "testUrl2";
         RpcPolicyFinder policyFinder = mock(RpcPolicyFinder.class);
-        ProxySettings settings = new ProxySettings(testUrl2);
+        ProxySettings settings = new ProxySettings(testUrl2, InnerNoAnnotTestService.class.getName(), policyFinder);
 
-        assertThatThrownBy(() -> ReactiveGWT.prepareSettings(InnerNoAnnotTestService.class, settings, policyFinder))
+        assertThatThrownBy(() -> ReactiveGWT.prepareSettings(InnerNoAnnotTestService.class, settings))
                 .isInstanceOf(SyncProxyException.class)
                 .satisfies(e -> ((SyncProxyException) e).verify(InfoType.REMOTE_SERVICE_RELATIVE_PATH));
     }
 
     @Test
-    public void shouldAllowSettingRemoteServicePathViaSetter() throws IOException {
+    public void shouldAllowSettingRemoteServicePathViaSetter() {
         String testUrl2 = "testUrl2";
         RpcPolicyFinder policyFinder = mock(RpcPolicyFinder.class);
-        ProxySettings settings = new ProxySettings(testUrl2);
-
-        doReturn("INATSPolicy").when(policyFinder).fetchSerializationPolicyName(InnerNoAnnotTestService.class, testUrl2);
+        ProxySettings settings = new ProxySettings(testUrl2, InnerNoAnnotTestService.class.getName(), policyFinder);
 
         String testRelativePath = "relativePath";
         settings.setRemoteServiceRelativePath(testRelativePath);
-        ReactiveGWT.prepareSettings(InnerNoAnnotTestService.class, settings, policyFinder);
+        ReactiveGWT.prepareSettings(InnerNoAnnotTestService.class, settings);
         assertThat(settings.getRemoteServiceRelativePath()).isEqualTo(testRelativePath);
     }
 
     @Test
-    public void settingRemoteServicePathViaSetterShouldOverrideAnnotation() throws IOException {
+    public void settingRemoteServicePathViaSetterShouldOverrideAnnotation() {
         String testUrl2 = "testUrl2";
         RpcPolicyFinder policyFinder = mock(RpcPolicyFinder.class);
-        ProxySettings settings = new ProxySettings(testUrl2);
-
-        doReturn("INATSPolicy").when(policyFinder).fetchSerializationPolicyName(InnerTestService.class, testUrl2);
+        ProxySettings settings = new ProxySettings(testUrl2, InnerTestService.class.getName(), policyFinder);
 
         String testRelativePath = "relativePath";
         settings.setRemoteServiceRelativePath(testRelativePath);
-        ReactiveGWT.prepareSettings(InnerTestService.class, settings, policyFinder);
+        ReactiveGWT.prepareSettings(InnerTestService.class, settings);
         assertThat(settings.getRemoteServiceRelativePath()).isEqualTo(testRelativePath);
     }
 
     @Test
-    public void cookieManagerShouldBeDefaultIfNotProvided() throws IOException {
+    public void cookieManagerShouldBeDefaultIfNotProvided() {
         String testUrl2 = "testUrl2";
         RpcPolicyFinder policyFinder = mock(RpcPolicyFinder.class);
-        ProxySettings settings = new ProxySettings(testUrl2);
-        doReturn("INATSPolicy").when(policyFinder).fetchSerializationPolicyName(InnerTestService.class, testUrl2);
+        ProxySettings settings = new ProxySettings(testUrl2, InnerTestService.class.getName(), policyFinder);
 
-        ReactiveGWT.prepareSettings(InnerTestService.class, settings, policyFinder);
+        ReactiveGWT.prepareSettings(InnerTestService.class, settings);
 
         // Cookie manager should always be available
         assertThat(settings.getCookieManager()).isNotNull();
     }
 
     @Test
-    public void shouldOverrideCookieManagerViaSetter() throws IOException {
+    public void shouldOverrideCookieManagerViaSetter() {
         String testUrl2 = "testUrl2";
         RpcPolicyFinder policyFinder = mock(RpcPolicyFinder.class);
-        ProxySettings settings = new ProxySettings(testUrl2);
-        doReturn("INATSPolicy").when(policyFinder).fetchSerializationPolicyName(InnerTestService.class, testUrl2);
+        ProxySettings settings = new ProxySettings(testUrl2, InnerTestService.class.getName(), policyFinder);
 
         CookieManager cm = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
         settings.setCookieManager(cm);
 
-        ReactiveGWT.prepareSettings(InnerTestService.class, settings, policyFinder);
+        ReactiveGWT.prepareSettings(InnerTestService.class, settings);
         assertThat(settings.getCookieManager()).isSameAs(cm);
     }
 
     @Test
-    public void shouldThrowExceptionIfPolicyNameIsMissing() {
+    public void shouldThrowExceptionIfPolicyFinderIsMissing() {
         String testUrl2 = "testUrl2";
-        RpcPolicyFinder policyFinder = mock(RpcPolicyFinder.class);
-        ProxySettings settings = new ProxySettings(testUrl2);
+        ProxySettings settings = new ProxySettings(testUrl2, InnerTestService.class.getName(), null);
 
-        assertThatThrownBy(() -> ReactiveGWT.prepareSettings(InnerTestService.class, settings, policyFinder))
+        assertThatThrownBy(() -> ReactiveGWT.prepareSettings(InnerTestService.class, settings))
                 .isInstanceOf(SyncProxyException.class)
-                .satisfies(e -> ((SyncProxyException) e).verify(InfoType.POLICY_NAME_MISSING));
+                .satisfies(e -> ((SyncProxyException) e).verify(InfoType.POLICY_FINDER_MISSING));
     }
 
     @Test

@@ -49,7 +49,9 @@ public interface HasProxySettings {
 	 */
 	String getOAuthBearerToken();
 
-	String getPolicyName();
+	String getServiceName();
+
+	RpcPolicyFinder getPolicyFinder();
 
 	String getRemoteServiceRelativePath();
 
@@ -75,8 +77,6 @@ public interface HasProxySettings {
 	 * @since 0.6
 	 */
 	HasProxySettings setOAuthBearerToken(String bearerToken);
-
-	HasProxySettings setPolicyName(String policyName);
 
 	HasProxySettings setRemoteServiceRelativePath(String remoteServiceRelativePath);
 

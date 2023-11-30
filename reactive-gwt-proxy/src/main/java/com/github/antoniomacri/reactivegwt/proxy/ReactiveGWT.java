@@ -54,7 +54,8 @@ public class ReactiveGWT {
      */
     public static <ServiceIntfAsync, ServiceIntf extends RemoteService>
     ServiceIntfAsync create(Class<ServiceIntf> serviceIntf, String moduleBaseURL) {
-        return create(serviceIntf, new ProxySettings(moduleBaseURL));
+        RpcPolicyFinder policyFinder = new RpcPolicyFinder(moduleBaseURL);
+        return create(serviceIntf, new ProxySettings(moduleBaseURL, serviceIntf.getName(), policyFinder));
     }
 
     /**
@@ -93,7 +94,8 @@ public class ReactiveGWT {
      */
     public static <ServiceIntf extends RemoteService>
     ServiceIntf createSync(Class<ServiceIntf> serviceIntf, String moduleBaseURL) {
-        return createProxy(serviceIntf, new ProxySettings(moduleBaseURL));
+        RpcPolicyFinder policyFinder = new RpcPolicyFinder(moduleBaseURL);
+        return createProxy(serviceIntf, new ProxySettings(moduleBaseURL, serviceIntf.getName(), policyFinder));
     }
 
     /**
@@ -109,7 +111,7 @@ public class ReactiveGWT {
      */
     @SuppressWarnings("unchecked")
     protected static <ServiceIntf> ServiceIntf createProxy(Class<ServiceIntf> serviceIntf, ProxySettings settings) {
-        prepareSettings(serviceIntf, settings, new RpcPolicyFinder());
+        prepareSettings(serviceIntf, settings);
 
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         return (ServiceIntf) Proxy.newProxyInstance(
@@ -122,7 +124,7 @@ public class ReactiveGWT {
     /**
      * Sets default values to the settings parameters that are not yet set
      */
-    protected static <ServiceIntf> void prepareSettings(Class<ServiceIntf> serviceIntf, ProxySettings settings, RpcPolicyFinder policyFinder) {
+    protected static <ServiceIntf> void prepareSettings(Class<ServiceIntf> serviceIntf, ProxySettings settings) {
         if (settings.getModuleBaseUrl() == null) {
             throw new SyncProxyException(serviceIntf, InfoType.MODULE_BASE_URL);
         }
@@ -133,18 +135,9 @@ public class ReactiveGWT {
         }
         log.debug("service={} remoteServiceRelativePath={}", serviceIntf.getName(), settings.getRemoteServiceRelativePath());
 
-        if (settings.getPolicyName() == null) {
-            try {
-                String policyName = policyFinder.fetchSerializationPolicyName(serviceIntf, settings.getModuleBaseUrl());
-                settings.setPolicyName(policyName);
-            } catch (Exception e) {
-                throw new SyncProxyException(InfoType.POLICY_NAME_POPULATION, e);
-            }
+        if (settings.getPolicyFinder() == null) {
+            throw new SyncProxyException(serviceIntf, InfoType.POLICY_FINDER_MISSING);
         }
-        if (settings.getPolicyName() == null) {
-            throw new SyncProxyException(serviceIntf, InfoType.POLICY_NAME_MISSING);
-        }
-        log.debug("service={} policyName={}", serviceIntf.getName(), settings.getPolicyName());
 
         if (settings.getCookieManager() == null) {
             log.debug("service={} cookieManager=default", serviceIntf.getName());

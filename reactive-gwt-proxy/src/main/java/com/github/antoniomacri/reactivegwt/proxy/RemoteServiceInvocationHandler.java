@@ -20,6 +20,7 @@ import com.github.antoniomacri.reactivegwt.proxy.exception.SyncProxyException.In
 import com.google.gwt.user.client.rpc.*;
 import com.google.gwt.user.client.rpc.RpcToken.RpcTokenImplementation;
 import com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter.ResponseReader;
+import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.gwt.user.server.rpc.impl.SerializabilityUtil;
 import org.apache.http.MethodNotSupportedException;
 
@@ -181,7 +182,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
      */
     protected Object handleServiceDefTarget(Object proxy, Method method, Object[] args) throws Throwable {
         if (ServiceDefTarget.class.getMethod("getSerializationPolicyName").equals(method)) {
-            return this.settings.getPolicyName();
+            return this.settings.getPolicyFinder().getOrFetchPolicyName(settings.getServiceName());
         } else if (ServiceDefTarget.class.getMethod("setServiceEntryPoint", String.class).equals(method)) {
             this.serviceEntryPoint = (String) args[0];
             // Modify current base and relative Path to newly specific
@@ -233,7 +234,9 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
             return handleHasProxySettings(proxy, method, args);
         }
 
-        RemoteServiceProxy syncProxy = new RemoteServiceProxy(settings, this.token, this.rpcTokenExceptionHandler);
+        String policyName = settings.getPolicyFinder().getOrFetchPolicyName(settings.getServiceName());
+        SerializationPolicy policy = settings.getPolicyFinder().getSerializationPolicy(policyName);
+        RemoteServiceProxy syncProxy = new RemoteServiceProxy(settings, policyName, policy, this.token, this.rpcTokenExceptionHandler);
         // Handle delegation of calls to the RemoteServiceProxy hierarchy
         if (SerializationStreamFactory.class.getName().equals(method.getDeclaringClass().getName())) {
             this.logger.info("Handling invocation of SerializationStreamFactory Interface");

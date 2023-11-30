@@ -36,8 +36,8 @@ public class SyncProxyException extends InvocationException {
 		 */
 		REMOTE_SERVICE_RELATIVE_PATH("Check RemoteServiceRelativePath annotation on service"), MODULE_BASE_URL(
 				"Set SyncProxy Base Url"), POLICY_NAME_POPULATION(
-				"Unable to populate policy names, see below exception."), POLICY_NAME_MISSING(
-				"Unable to locate policy name. See FAQ"),
+				"Unable to populate policy names, see below exception."),
+		POLICY_FINDER_MISSING("Missing policy finder."),
 		/**
 		 * Used to indicate that an attempt to find the synchronous service
 		 * interface based on a provided Asynchronous service interface failed.

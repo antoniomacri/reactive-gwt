@@ -23,7 +23,6 @@ import com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.*;
 import java.net.http.HttpClient;
@@ -42,29 +41,8 @@ import java.util.logging.Logger;
  * on a specific executor.
  */
 public class RemoteServiceProxy implements SerializationStreamFactory {
-    public static class DummySerializationPolicy extends SerializationPolicy {
-        @Override
-        public boolean shouldDeserializeFields(Class<?> clazz) {
-            return clazz != null;
-        }
-
-        @Override
-        public boolean shouldSerializeFields(Class<?> clazz) {
-            return clazz != null;
-        }
-
-        @Override
-        public void validateDeserialize(Class<?> clazz) {
-        }
-
-        @Override
-        public void validateSerialize(Class<?> clazz) {
-        }
-    }
-
     public static final String OAUTH_BEARER_HEADER = "Authorization";
-
-    public final static String OAUTH_HEADER = "X-GSP-OAUTH-ID";
+    public static final String OAUTH_HEADER = "X-GSP-OAUTH-ID";
 
     static Logger logger = Logger.getLogger(RemoteServiceProxy.class.getName());
 
@@ -93,35 +71,19 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
      *
      * @since 0.6
      */
-    public RemoteServiceProxy(HasProxySettings settings, RpcToken rpcToken,
+    public RemoteServiceProxy(HasProxySettings settings,
+                              String serializationPolicyName,
+                              SerializationPolicy serializationPolicy,
+                              RpcToken rpcToken,
                               RpcTokenExceptionHandler rpcTokenExceptionhandler) {
         this.settings = settings;
         this.moduleBaseURL = settings.getModuleBaseUrl();
         this.remoteServiceURL = moduleBaseURL + settings.getRemoteServiceRelativePath();
-        this.serializationPolicyName = settings.getPolicyName();
+        this.serializationPolicyName = serializationPolicyName;
+        this.serializationPolicy = serializationPolicy;
         this.cookieManager = settings.getCookieManager();
         this.rpcToken = rpcToken;
         this.rpcTokenExceptionHandler = rpcTokenExceptionhandler;
-        if (serializationPolicyName == null) {
-            this.serializationPolicy = new DummySerializationPolicy();
-        } else {
-            String policyFileName = SerializationPolicyLoader.getSerializationPolicyFileName(serializationPolicyName);
-            logger.config("Retrieving Policy File: " + policyFileName + " for SerializationPolicy: "
-                          + serializationPolicyName);
-            try {
-                logger.warning("Unable to get policy file from stream, attempting cache: " + policyFileName
-                               + " at base: " + moduleBaseURL);
-                // Try to get from cache
-                String text = RpcPolicyFinder.getCachedPolicyFile(moduleBaseURL + policyFileName);
-                if (text != null) {
-                    this.serializationPolicy = SerializationPolicyLoader.load(new StringReader(text), null);
-                } else {
-                    throw new InvocationException("Error while loading serialization policy " + serializationPolicyName);
-                }
-            } catch (Exception e) {
-                throw new InvocationException("Error while loading serialization policy " + serializationPolicyName, e);
-            }
-        }
     }
 
     @Override

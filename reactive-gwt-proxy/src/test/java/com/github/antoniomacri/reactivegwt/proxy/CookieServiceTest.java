@@ -12,11 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.net.CookieManager;
-import java.net.CookiePolicy;
-import java.net.CookieStore;
-import java.net.HttpCookie;
-import java.net.URI;
+import java.net.*;
 import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,9 +38,9 @@ public class CookieServiceTest extends RpcAsyncTestBase<CookieService, CookieSer
 
     @Override
     protected CookieServiceAsync getService() {
-        CookieManager cm = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
-        CookieServiceAsync cookieService = ReactiveGWT.create(CookieService.class,
-                new ProxySettings(getModuleBaseURL()).setCookieManager(cm));
+        ProxySettings settings = createSettings(CookieService.class);
+        settings.setCookieManager(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
+        CookieServiceAsync cookieService = ReactiveGWT.create(CookieService.class, settings);
         return cookieService;
     }
 
