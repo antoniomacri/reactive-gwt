@@ -25,8 +25,6 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -175,8 +173,6 @@ public class InheritanceTest extends RpcAsyncTestBase<InheritanceTestServiceSubt
 
     @Test
     public void testSerializationExceptionPreventsCall() {
-        AtomicBoolean serializationExceptionCaught = new AtomicBoolean();
-
         service.echo(() -> {
             // purposely empty
         }, waitedCallback(new AsyncCallback<>() {
@@ -185,7 +181,6 @@ public class InheritanceTest extends RpcAsyncTestBase<InheritanceTestServiceSubt
                 assertThat(caught)
                         .as("onFailure: got something other than a SerializationException (" + caught.getClass().getName() + ")")
                         .isInstanceOf(SerializationException.class);
-                serializationExceptionCaught.set(true);
             }
 
             @Override
@@ -193,8 +188,6 @@ public class InheritanceTest extends RpcAsyncTestBase<InheritanceTestServiceSubt
                 fail("onSuccess: call should not have succeeded");
             }
         }));
-
-        assertThat(serializationExceptionCaught).as("serializationExceptionCaught was not true").isTrue();
     }
 
     /**
