@@ -233,7 +233,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
             return handleHasProxySettings(proxy, method, args);
         }
 
-        RemoteServiceSyncProxy syncProxy = new RemoteServiceSyncProxy(settings, this.token, this.rpcTokenExceptionHandler);
+        RemoteServiceProxy syncProxy = new RemoteServiceProxy(settings, this.token, this.rpcTokenExceptionHandler);
         // Handle delegation of calls to the RemoteServiceProxy hierarchy
         if (SerializationStreamFactory.class.getName().equals(method.getDeclaringClass().getName())) {
             this.logger.info("Handling invocation of SerializationStreamFactory Interface");

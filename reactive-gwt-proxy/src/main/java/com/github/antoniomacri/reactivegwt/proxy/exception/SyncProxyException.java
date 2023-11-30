@@ -16,7 +16,7 @@ package com.github.antoniomacri.reactivegwt.proxy.exception;
 
 import java.util.Arrays;
 
-import com.github.antoniomacri.reactivegwt.proxy.RemoteServiceSyncProxy;
+import com.github.antoniomacri.reactivegwt.proxy.RemoteServiceProxy;
 import com.google.gwt.user.client.rpc.InvocationException;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
@@ -50,7 +50,7 @@ public class SyncProxyException extends InvocationException {
 		 * url, we have no good way of separating the provided EntryPoint into
 		 * moduleBase and remoteServiceRelativePath. The moduleBase is needed
 		 * separately in
-		 * {@link RemoteServiceSyncProxy#doInvoke(com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter.ResponseReader, String)}
+		 * {@link RemoteServiceProxy#doInvoke(com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter.ResponseReader, String)}
 		 *
 		 */
 		SERVICE_BASE_DELTA("Unable to determine new module base url from provided service entry point.");

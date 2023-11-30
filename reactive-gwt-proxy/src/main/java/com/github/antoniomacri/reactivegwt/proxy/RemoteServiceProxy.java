@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  * Modified by Antonio Macrì to make HTTP calls using the Java HttpClient
  * on a specific executor.
  */
-public class RemoteServiceSyncProxy implements SerializationStreamFactory {
+public class RemoteServiceProxy implements SerializationStreamFactory {
     public static class DummySerializationPolicy extends SerializationPolicy {
         @Override
         public boolean shouldDeserializeFields(Class<?> clazz) {
@@ -66,7 +66,7 @@ public class RemoteServiceSyncProxy implements SerializationStreamFactory {
 
     public final static String OAUTH_HEADER = "X-GSP-OAUTH-ID";
 
-    static Logger logger = Logger.getLogger(RemoteServiceSyncProxy.class.getName());
+    static Logger logger = Logger.getLogger(RemoteServiceProxy.class.getName());
 
     public static boolean isReturnValue(String encodedResponse) {
         return encodedResponse.startsWith("//OK");
@@ -93,8 +93,8 @@ public class RemoteServiceSyncProxy implements SerializationStreamFactory {
      *
      * @since 0.6
      */
-    public RemoteServiceSyncProxy(HasProxySettings settings, RpcToken rpcToken,
-                                  RpcTokenExceptionHandler rpcTokenExceptionhandler) {
+    public RemoteServiceProxy(HasProxySettings settings, RpcToken rpcToken,
+                              RpcTokenExceptionHandler rpcTokenExceptionhandler) {
         this.settings = settings;
         this.moduleBaseURL = settings.getModuleBaseUrl();
         this.remoteServiceURL = moduleBaseURL + settings.getRemoteServiceRelativePath();
