@@ -4,7 +4,9 @@ import com.github.antoniomacri.reactivegwt.proxy.ReactiveGWT;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -110,27 +112,27 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
     }
 
     protected <R> void waitForServiceCall(Consumer<AsyncCallback<R>> call) {
-        var l = new CountDownLatch(1);
-        call.accept(waitedCallback(ignored -> l.countDown()));
-        try {
-            l.await();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        getFromServiceCall(call);
     }
 
     protected <R> R getFromServiceCall(Consumer<AsyncCallback<R>> call) {
-        var l = new CountDownLatch(1);
-        AtomicReference<R> resultRef = new AtomicReference<>();
-        call.accept(waitedCallback(result -> {
-            resultRef.set(result);
-            l.countDown();
-        }));
+        CompletableFuture<R> completableFuture = new CompletableFuture<>();
+        call.accept(new AsyncCallback<>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                completableFuture.completeExceptionally(caught);
+            }
+
+            @Override
+            public void onSuccess(R result) {
+                completableFuture.complete(result);
+            }
+        });
+
         try {
-            l.await();
-        } catch (InterruptedException e) {
+            return completableFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
-        return resultRef.get();
     }
 }
