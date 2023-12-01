@@ -181,130 +181,90 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
     }
 
 
+    @SuppressWarnings("SameReturnValue")
     private Object handleRemoteService(RemoteServiceProxy syncProxy, Method method, Object[] args) throws Throwable {
-        // // Get Service Interface
         Class<?> remoteServiceIntf = method.getDeclaringClass();
-
-        SerializationStreamWriter streamWriter = syncProxy.createStreamWriter();
+        String serviceAsyncIntfName = remoteServiceIntf.getCanonicalName();
+        assert serviceAsyncIntfName.endsWith("Async") : "The sync version of the service interface is not supported by the proxy";
 
         AsyncCallback<?> callback = null;
         Class<?>[] paramTypes = method.getParameterTypes();
         try {
-            // Determine whether sync or async
-            boolean isAsync = false;
-            // String serviceIntfName =
-            // method.getDeclaringClass().getCanonicalName();
-            String serviceIntfName = remoteServiceIntf.getCanonicalName();
-            int paramCount = paramTypes.length;
-            Class<?> returnType = method.getReturnType();
-            if (method.getDeclaringClass().getCanonicalName().endsWith("Async")) {
-                log.info("Invoking as an Async Service");
-                isAsync = true;
-                serviceIntfName = serviceIntfName.substring(0, serviceIntfName.length() - 5);
-                paramCount--;
-                callback = (AsyncCallback<?>) args[paramCount];
+            String serviceIntfName = serviceAsyncIntfName.substring(0, serviceAsyncIntfName.length() - 5);
+            int paramCount = paramTypes.length - 1;
+            callback = (AsyncCallback<?>) args[paramCount];
 
-                // Determine the return type
-                Class<?>[] syncParamTypes = new Class[paramCount];
-                System.arraycopy(paramTypes, 0, syncParamTypes, 0, paramCount);
-                Class<?> clazz;
-                try {
-                    clazz = ClassLoading.loadClass(serviceIntfName);
-                } catch (ClassNotFoundException e) {
-                    throw new InvocationException(
-                            "There is no sync version of " + serviceIntfName + "Async");
-                }
-                Method syncMethod;
-                try {
-                    syncMethod = clazz.getMethod(method.getName(), syncParamTypes);
-                    log.debug("Sync Method determined: {}", syncMethod.getName());
-                } catch (NoSuchMethodException nsme) {
-                    StringBuilder temp = new StringBuilder();
-                    for (Class<?> cl : syncParamTypes) {
-                        temp.append(cl.getSimpleName()).append(",");
-                    }
-                    throw new NoSuchMethodException("SPNoMeth "
-                                                    + method.getName() + " class "
-                                                    + clazz.getSimpleName() + " params " + temp);
-                }
-                returnType = syncMethod.getReturnType();
+            Class<?>[] syncParamTypes = new Class[paramCount];
+            System.arraycopy(paramTypes, 0, syncParamTypes, 0, paramCount);
+
+            Class<?> syncClass;
+            try {
+                syncClass = ClassLoading.loadClass(serviceIntfName);
+            } catch (ClassNotFoundException e) {
+                throw new InvocationException("There is no sync version of " + serviceIntfName + "Async");
             }
 
-            // Interface name
+            Method syncMethod;
+            try {
+                syncMethod = syncClass.getMethod(method.getName(), syncParamTypes);
+            } catch (NoSuchMethodException nsme) {
+                StringBuilder params = new StringBuilder();
+                for (Class<?> cl : syncParamTypes) {
+                    params.append(cl.getSimpleName()).append(",");
+                }
+                throw new NoSuchMethodException("No method " + method.getName() +
+                                                " in class " + syncClass.getSimpleName() +
+                                                " with params (" + params + ")");
+            }
+
+            Class<?> returnType = syncMethod.getReturnType();
+
+            SerializationStreamWriter streamWriter = syncProxy.createStreamWriter();
             streamWriter.writeString(serviceIntfName);
-            // Method name
             streamWriter.writeString(method.getName());
 
-            // Params count
             streamWriter.writeInt(paramCount);
-
-            // Params type
             for (int i = 0; i < paramCount; i++) {
                 // streamWriter.writeString(computeBinaryClassName(paramTypes[i]));
                 streamWriter.writeString(SerializabilityUtil.getSerializedTypeName(paramTypes[i]));
             }
-
-            // Params
             for (int i = 0; i < paramCount; i++) {
                 writeParam(streamWriter, paramTypes[i], args[i]);
             }
 
             String payload = streamWriter.toString();
             log.debug("Payload: {}", payload);
-            if (isAsync) {
-                log.info("Making Remote call as Async");
+
+            CompletionStage<Object> stage = syncProxy.doInvokeAsync(getReaderFor(returnType), payload);
+            // Check to make sure response should be processed,
+            // or not in case of situation such as
+            // RpcTokenException handled by a separate handler
+            if (!syncProxy.shouldIgnoreResponse() && callback != null) {
                 final AsyncCallback callback_2 = callback;
-
-                try {
-                    CompletionStage<Object> stage = syncProxy.doInvokeAsync(getReaderFor(returnType), payload);
-                    // Check to make sure response should be processed,
-                    // or not in case of situation such as
-                    // RpcTokenException handled by a separate handler
-                    if (!syncProxy.shouldIgnoreResponse() && callback_2 != null) {
-                        stage.handle((result, exception) -> {
-                            if (exception != null) {
-                                if (exception instanceof CompletionException) {
-                                    exception = exception.getCause();
-                                }
-                                if (exception instanceof UndeclaredThrowableException) {
-                                    exception = exception.getCause();
-                                }
-                                callback_2.onFailure(exception);
-                            } else {
-                                callback_2.onSuccess(result);
-                            }
-                            return null;
-                        });
+                stage.handle((result, exception) -> {
+                    if (exception != null) {
+                        if (exception instanceof CompletionException) {
+                            exception = exception.getCause();
+                        }
+                        if (exception instanceof UndeclaredThrowableException) {
+                            exception = exception.getCause();
+                        }
+                        callback_2.onFailure(exception);
+                    } else {
+                        callback_2.onSuccess(result);
                     }
-                } catch (Throwable e) {
-                    if (callback_2 != null) {
-                        callback_2.onFailure(e);
-                    }
-                }
-
-                return null;
-            } else {
-                log.info("Making Remote call as Sync");
-                return syncProxy.doInvoke(getReaderFor(returnType), payload);
+                    return null;
+                });
             }
-            /*
-             * Object result = syncProxy.doInvoke(getReaderFor(returnType),
-             * payload); if (callback != null){ callback.onSuccess(result); }
-             * return result;
-             */
+
+            return null;
         } catch (Throwable ex) {
             if (callback != null) {
                 callback.onFailure(ex);
                 return null;
+            } else {
+                throw ex;
             }
-            Class<?>[] expClasses = method.getExceptionTypes();
-            for (Class<?> clazz : expClasses) {
-                if (clazz.isAssignableFrom(ex.getClass())) {
-                    throw ex;
-                }
-            }
-
-            throw ex;
         }
     }
 

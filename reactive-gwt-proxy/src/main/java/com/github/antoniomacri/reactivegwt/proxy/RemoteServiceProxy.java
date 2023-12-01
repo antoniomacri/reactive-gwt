@@ -22,12 +22,10 @@ import com.google.gwt.user.client.rpc.*;
 import com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 
-import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -114,58 +112,6 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
         }
         logger.fine("TestModeHostVerifier not available, checking for HTTPS Protocol");
         return !serviceUrl.getProtocol().equalsIgnoreCase("https");
-    }
-
-    public Object doInvoke(RequestCallbackAdapter.ResponseReader responseReader, String requestData) throws Throwable {
-        HttpClient httpClient = createHttpClient();
-        URI cookieUri = URI.create("http://" + URI.create(moduleBaseURL).getHost());
-        HttpRequest.Builder requestBuilder = createHttpRequest(requestData, cookieUri);
-
-        try {
-            HttpResponse<String> response = httpClient.send(requestBuilder.build(), BodyHandlers.ofString());
-
-            // get all headers
-            logger.fine("Checking Response");
-            response.headers().map().forEach((k, v) -> logger.finer(k + " : " + v));
-
-            int statusCode = response.statusCode();
-            String encodedResponse = response.body();
-            logger.config("Response code: " + statusCode);
-            logger.fine("Response payload: " + encodedResponse);
-            logger.config("Post-Response cookies:" + cookieManager.getCookieStore().get(cookieUri));
-
-            if (statusCode == HttpURLConnection.HTTP_NOT_FOUND) {
-                // Do not provide full response data
-                throw new StatusCodeException(Response.SC_NOT_FOUND, "Not Found", null);
-            } else if (statusCode != HttpURLConnection.HTTP_OK) {
-                throw new StatusCodeException(statusCode, encodedResponse);
-            } else if (encodedResponse == null) {
-                // This can happen if the XHR is interrupted by the server dying
-                throw new InvocationException("No response payload");
-            } else if (isReturnValue(encodedResponse)) {
-                logger.info("Reading return value");
-                encodedResponse = encodedResponse.substring(4);
-                return responseReader.read(createStreamReader(encodedResponse));
-            } else if (isThrownException(encodedResponse)) {
-                logger.info("Handling Thrown exception");
-                encodedResponse = encodedResponse.substring(4);
-                Throwable throwable = (Throwable) createStreamReader(encodedResponse).readObject();
-                // Handle specific instance of RpcTokenException which may have
-                // a specified handler
-                if (throwable instanceof RpcTokenException && this.rpcTokenExceptionHandler != null) {
-                    this.rpcTokenExceptionHandler.onRpcTokenException((RpcTokenException) throwable);
-                    this.ignoreResponse = true;
-                    return null;
-                }
-                throw throwable;
-            } else {
-                throw new InvocationException("Unknown response " + encodedResponse);
-            }
-        } catch (IOException e) {
-            throw new InvocationException("IOException while receiving RPC response", e);
-        } catch (SerializationException e) {
-            throw new InvocationException("Error while deserialization response", e);
-        }
     }
 
     public CompletionStage<Object> doInvokeAsync(RequestCallbackAdapter.ResponseReader responseReader, String requestData) throws MalformedURLException {

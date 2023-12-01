@@ -84,39 +84,23 @@ public class ReactiveGWT {
     }
 
     /**
-     * Similar action to Gwt.create() except that this creates a sync'ed proxy.
-     * This method assumes your service is annotated with
-     * {@link RemoteServiceRelativePath}. See
-     * {@link #suppressRelativePathWarning(boolean)} in the event your service
-     * is not annotated with {@link RemoteServiceRelativePath}.
-     *
-     * @return a Sync Service interface object representing the serviceIntf provided
-     */
-    public static <ServiceIntf extends RemoteService>
-    ServiceIntf createSync(Class<ServiceIntf> serviceIntf, String moduleBaseURL) {
-        RpcPolicyFinder policyFinder = new RpcPolicyFinder(moduleBaseURL);
-        return createProxy(serviceIntf, new ProxySettings(moduleBaseURL, serviceIntf.getName(), policyFinder));
-    }
-
-    /**
-     * Creates the actual Sync and Async ProxyInterface for the service with the
+     * Creates the actual Async ProxyInterface for the service with the
      * specified options. This method assumes your service is annotated with
      * {@link RemoteServiceRelativePath}. See
      * {@link #suppressRelativePathWarning(boolean)} in the event your service
      * is not annotated with {@link RemoteServiceRelativePath}.
      *
-     * @param serviceIntf the service to create a proxy for
-     * @return an object representing either the Async or Sync interface,
-     * whichever was provided as serviceIntf
+     * @param asyncServiceIntf the service to create a proxy for
+     * @return an object representing the Async interface
      */
     @SuppressWarnings("unchecked")
-    protected static <ServiceIntf> ServiceIntf createProxy(Class<ServiceIntf> serviceIntf, ProxySettings settings) {
-        prepareSettings(serviceIntf, settings);
+    protected static <ServiceIntfAsync> ServiceIntfAsync createProxy(Class<ServiceIntfAsync> asyncServiceIntf, ProxySettings settings) {
+        prepareSettings(asyncServiceIntf, settings);
 
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        return (ServiceIntf) Proxy.newProxyInstance(
+        return (ServiceIntfAsync) Proxy.newProxyInstance(
                 classLoader,
-                new Class[]{serviceIntf, ServiceDefTarget.class, HasRpcToken.class, SerializationStreamFactory.class, HasProxySettings.class},
+                new Class[]{asyncServiceIntf, ServiceDefTarget.class, HasRpcToken.class, SerializationStreamFactory.class, HasProxySettings.class},
                 new RemoteServiceInvocationHandler(settings)
         );
     }
