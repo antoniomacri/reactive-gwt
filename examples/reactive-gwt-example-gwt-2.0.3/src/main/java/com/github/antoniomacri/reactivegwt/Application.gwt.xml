@@ -1,0 +1,8 @@
+<!DOCTYPE module PUBLIC "//gwt-module/"
+        "http://google-web-toolkit.googlecode.com/svn/tags/2.5.1/distro-source/core/src/gwt-module.dtd">
+<module rename-to="AppModule">
+    <inherits name="com.google.gwt.user.User"/>
+    <entry-point class="com.github.antoniomacri.reactivegwt.client.ApplicationEntryPoint"/>
+    <source path="client"/>
+    <source path="proxy"/>
+</module>

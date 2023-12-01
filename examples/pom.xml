@@ -25,6 +25,7 @@
     </developers>
 
     <modules>
+        <module>reactive-gwt-example-gwt-2.0.3</module>
         <module>reactive-gwt-example-gwt-2.7.0</module>
         <module>reactive-gwt-example-gwt-2.8.2</module>
     </modules>
