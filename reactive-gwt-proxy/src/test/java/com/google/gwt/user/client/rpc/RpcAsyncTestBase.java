@@ -6,10 +6,8 @@ import com.github.antoniomacri.reactivegwt.proxy.RpcPolicyFinder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.Queue;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -26,7 +24,7 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
     private final Class<T> serviceClass;
     private final String remoteServiceRelativePath;
     private final AtomicReference<Throwable> exceptionReference = new AtomicReference<>();
-    private CountDownLatch latch;
+    private final Queue<CountDownLatch> latches = new ConcurrentLinkedQueue<>();
 
     protected TAsync service;
     protected int timeoutSeconds = 1;
@@ -52,13 +50,16 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
     }
 
     @AfterEach
-    public final void afterEach() throws Throwable {
-        if (latch != null) {
+    public void afterEach() throws Throwable {
+        CountDownLatch latch = latches.poll();
+        while (latch != null) {
             assertThat(latch.await(timeoutSeconds, TimeUnit.SECONDS)).isTrue();
-            Throwable t = exceptionReference.get();
-            if (t != null) {
-                throw t;
-            }
+            latch = latches.poll();
+        }
+
+        Throwable t = exceptionReference.get();
+        if (t != null) {
+            throw t;
         }
     }
 
@@ -74,7 +75,9 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
     }
 
     protected <V> AsyncCallback<V> waitedCallback(Consumer<V> asserts) {
-        this.latch = new CountDownLatch(1);
+        var latch = new CountDownLatch(1);
+        latches.add(latch);
+
         return new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -95,7 +98,9 @@ public abstract class RpcAsyncTestBase<T extends RemoteService, TAsync> extends 
     }
 
     protected <V> AsyncCallback<V> waitedCallback(AsyncCallback<V> callback) {
-        this.latch = new CountDownLatch(1);
+        var latch = new CountDownLatch(1);
+        latches.add(latch);
+
         return new AsyncCallback<>() {
             @Override
             public void onFailure(Throwable caught) {

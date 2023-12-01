@@ -51,7 +51,9 @@ public class CookieServiceTest extends RpcAsyncTestBase<CookieService, CookieSer
     }
 
     @AfterEach
-    public final void tearDown() {
+    @Override
+    public void afterEach() throws Throwable {
+        super.afterEach(); // Wait for the callbacks
         waitForServiceCall((AsyncCallback<Void> callback) -> service.invalidateAllSessions(callback));
     }
 
