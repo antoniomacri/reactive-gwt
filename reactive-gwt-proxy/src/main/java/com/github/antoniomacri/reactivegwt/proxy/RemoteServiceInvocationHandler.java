@@ -32,7 +32,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Map.entry;
 
@@ -87,18 +87,18 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
             return handleHasProxySettings(method, args);
         }
 
-        String policyName = settings.getPolicyFinder().getOrFetchPolicyName(settings.getServiceName());
-        SerializationPolicy policy = settings.getPolicyFinder().getSerializationPolicy(policyName);
-        RemoteServiceProxy syncProxy = new RemoteServiceProxy(settings, policyName, policy, this.token, this.rpcTokenExceptionHandler);
-
         // Handle delegation of calls to the RemoteServiceProxy hierarchy
         if (SerializationStreamFactory.class.getName().equals(method.getDeclaringClass().getName())) {
             log.info("Handling invocation of SerializationStreamFactory Interface");
+            // Here we still need the policy synchronously...
+            String policyName = settings.getPolicyFinder().getOrFetchPolicyName(settings.getServiceName());
+            SerializationPolicy policy = settings.getPolicyFinder().getSerializationPolicy(policyName);
+            RemoteServiceProxy syncProxy = new RemoteServiceProxy(settings, policyName, policy, this.token, this.rpcTokenExceptionHandler);
             return method.invoke(syncProxy, args);
         }
 
         log.info("Handling invocation of RemoteService Interface");
-        return handleRemoteService(syncProxy, method, args);
+        return handleRemoteService(method, args);
     }
 
     /**
@@ -182,44 +182,82 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 
 
     @SuppressWarnings("SameReturnValue")
-    private Object handleRemoteService(RemoteServiceProxy syncProxy, Method method, Object[] args) throws Throwable {
+    private <T> Object handleRemoteService(Method method, Object[] args) throws Throwable {
         Class<?> remoteServiceIntf = method.getDeclaringClass();
         String serviceAsyncIntfName = remoteServiceIntf.getCanonicalName();
         assert serviceAsyncIntfName.endsWith("Async") : "The sync version of the service interface is not supported by the proxy";
 
-        AsyncCallback<?> callback = null;
+        String serviceIntfName = serviceAsyncIntfName.substring(0, serviceAsyncIntfName.length() - 5);
         Class<?>[] paramTypes = method.getParameterTypes();
+        int paramCount = paramTypes.length - 1;
+        @SuppressWarnings("unchecked")
+        AsyncCallback<T> callback = (AsyncCallback<T>) args[paramCount];
+
+        Class<?>[] syncParamTypes = new Class[paramCount];
+        System.arraycopy(paramTypes, 0, syncParamTypes, 0, paramCount);
+
+        Class<?> syncClass;
         try {
-            String serviceIntfName = serviceAsyncIntfName.substring(0, serviceAsyncIntfName.length() - 5);
-            int paramCount = paramTypes.length - 1;
-            callback = (AsyncCallback<?>) args[paramCount];
+            syncClass = ClassLoading.loadClass(serviceIntfName);
+        } catch (ClassNotFoundException e) {
+            throw new InvocationException("There is no sync version of " + serviceIntfName + "Async");
+        }
 
-            Class<?>[] syncParamTypes = new Class[paramCount];
-            System.arraycopy(paramTypes, 0, syncParamTypes, 0, paramCount);
-
-            Class<?> syncClass;
-            try {
-                syncClass = ClassLoading.loadClass(serviceIntfName);
-            } catch (ClassNotFoundException e) {
-                throw new InvocationException("There is no sync version of " + serviceIntfName + "Async");
+        Method syncMethod;
+        try {
+            syncMethod = syncClass.getMethod(method.getName(), syncParamTypes);
+        } catch (NoSuchMethodException nsme) {
+            StringBuilder params = new StringBuilder();
+            for (Class<?> cl : syncParamTypes) {
+                params.append(cl.getSimpleName()).append(",");
             }
+            throw new NoSuchMethodException("No method " + method.getName() +
+                                            " in class " + syncClass.getSimpleName() +
+                                            " with params (" + params + ")");
+        }
 
-            Method syncMethod;
-            try {
-                syncMethod = syncClass.getMethod(method.getName(), syncParamTypes);
-            } catch (NoSuchMethodException nsme) {
-                StringBuilder params = new StringBuilder();
-                for (Class<?> cl : syncParamTypes) {
-                    params.append(cl.getSimpleName()).append(",");
+        Class<?> returnType = syncMethod.getReturnType();
+
+        AtomicReference<RemoteServiceProxy> serviceProxyRef = new AtomicReference<>();
+
+        settings.getPolicyFinder().getOrFetchPolicyNameAsync(settings.getServiceName(), settings.getExecutor()).thenCompose(policyName -> {
+            SerializationPolicy policy = settings.getPolicyFinder().getSerializationPolicy(policyName);
+
+            RemoteServiceProxy serviceProxy = new RemoteServiceProxy(settings, policyName, policy, this.token, this.rpcTokenExceptionHandler);
+            serviceProxyRef.set(serviceProxy);
+
+            SerializationStreamWriter streamWriter = serviceProxy.createStreamWriter();
+            String payload = buildPayload(streamWriter, serviceIntfName, method, paramCount, paramTypes, args);
+
+            return serviceProxy.<T>doInvokeAsync(getReaderFor(returnType), payload);
+        }).handle((result, throwable) -> {
+            if (callback != null) {
+                // Check to make sure response should be processed,
+                // or not in case of situation such as
+                // RpcTokenException handled by a separate handler
+                RemoteServiceProxy serviceProxy = serviceProxyRef.get();
+                if (serviceProxy == null || !serviceProxy.shouldIgnoreResponse()) {
+                    if (throwable != null) {
+                        if (throwable instanceof CompletionException) {
+                            throwable = throwable.getCause();
+                        }
+                        if (throwable instanceof UndeclaredThrowableException) {
+                            throwable = throwable.getCause();
+                        }
+                        callback.onFailure(throwable);
+                    } else {
+                        callback.onSuccess(result);
+                    }
                 }
-                throw new NoSuchMethodException("No method " + method.getName() +
-                                                " in class " + syncClass.getSimpleName() +
-                                                " with params (" + params + ")");
             }
+            return null;
+        });
 
-            Class<?> returnType = syncMethod.getReturnType();
+        return null;
+    }
 
-            SerializationStreamWriter streamWriter = syncProxy.createStreamWriter();
+    private String buildPayload(SerializationStreamWriter streamWriter, String serviceIntfName, Method method, int paramCount, Class<?>[] paramTypes, Object[] args) {
+        try {
             streamWriter.writeString(serviceIntfName);
             streamWriter.writeString(method.getName());
 
@@ -234,37 +272,9 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 
             String payload = streamWriter.toString();
             log.debug("Payload: {}", payload);
-
-            CompletionStage<Object> stage = syncProxy.doInvokeAsync(getReaderFor(returnType), payload);
-            // Check to make sure response should be processed,
-            // or not in case of situation such as
-            // RpcTokenException handled by a separate handler
-            if (!syncProxy.shouldIgnoreResponse() && callback != null) {
-                final AsyncCallback callback_2 = callback;
-                stage.handle((result, exception) -> {
-                    if (exception != null) {
-                        if (exception instanceof CompletionException) {
-                            exception = exception.getCause();
-                        }
-                        if (exception instanceof UndeclaredThrowableException) {
-                            exception = exception.getCause();
-                        }
-                        callback_2.onFailure(exception);
-                    } else {
-                        callback_2.onSuccess(result);
-                    }
-                    return null;
-                });
-            }
-
-            return null;
-        } catch (Throwable ex) {
-            if (callback != null) {
-                callback.onFailure(ex);
-                return null;
-            } else {
-                throw ex;
-            }
+            return payload;
+        } catch (SerializationException e) {
+            throw new UndeclaredThrowableException(e);
         }
     }
 

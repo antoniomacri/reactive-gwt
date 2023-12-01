@@ -27,7 +27,10 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,6 +54,12 @@ public class RpcPolicyFinder {
         } catch (IOException e) {
             throw new InvocationException("Error while fetching serialization policy name", e);
         }
+    }
+
+    public CompletionStage<String> getOrFetchPolicyNameAsync(String serviceName, ExecutorService executor) {
+        // TODO: implement asyncrhonously on the given executor
+        String policyName = getOrFetchPolicyName(serviceName);
+        return CompletableFuture.completedFuture(policyName);
     }
 
     public SerializationPolicy getSerializationPolicy(String policyName) {

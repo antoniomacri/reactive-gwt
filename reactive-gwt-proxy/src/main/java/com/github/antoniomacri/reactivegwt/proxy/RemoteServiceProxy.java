@@ -28,7 +28,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.logging.Logger;
 
@@ -114,7 +113,7 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
         return !serviceUrl.getProtocol().equalsIgnoreCase("https");
     }
 
-    public CompletionStage<Object> doInvokeAsync(RequestCallbackAdapter.ResponseReader responseReader, String requestData) throws MalformedURLException {
+    public <T> CompletionStage<T> doInvokeAsync(RequestCallbackAdapter.ResponseReader responseReader, String requestData) {
         HttpClient httpClient = createHttpClient();
         URI cookieUri = URI.create("http://" + URI.create(moduleBaseURL).getHost());
         HttpRequest request = createHttpRequest(requestData, cookieUri);
@@ -146,7 +145,8 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
                         logger.info("Reading return value");
                         encodedResponse = encodedResponse.substring(4);
                         try {
-                            return responseReader.read(createStreamReader(encodedResponse));
+                            // noinspection unchecked
+                            return (T) responseReader.read(createStreamReader(encodedResponse));
                         } catch (SerializationException e) {
                             throw new RuntimeException(e);
                         }
@@ -161,7 +161,7 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
                             if (throwable instanceof RpcTokenException && this.rpcTokenExceptionHandler != null) {
                                 this.rpcTokenExceptionHandler.onRpcTokenException((RpcTokenException) throwable);
                                 this.ignoreResponse = true;
-                                return CompletableFuture.completedFuture(null);
+                                return null;
                             }
                         } catch (SerializationException e) {
                             throw new UndeclaredThrowableException(e);
@@ -186,7 +186,7 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
         return httpClient;
     }
 
-    private HttpRequest createHttpRequest(String requestData, URI cookieUri) throws MalformedURLException {
+    private HttpRequest createHttpRequest(String requestData, URI cookieUri) {
         // Auto apply authenticator if available. Makes it
         // possible that if the authenticator's values change (such as access
         // tokens that are refreshed), the client will not need to re-apply the
@@ -202,7 +202,12 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
         // Send request
         logger.config("Starting Request sending to " + this.remoteServiceURL);
         URI uri = URI.create(this.remoteServiceURL);
-        URL url = uri.toURL();
+        URL url;
+        try {
+            url = uri.toURL();
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
 
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().POST(HttpRequest.BodyPublishers.ofString(requestData))
                 .uri(uri)

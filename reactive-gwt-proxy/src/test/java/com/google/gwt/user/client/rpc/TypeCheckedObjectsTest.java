@@ -23,6 +23,7 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -66,7 +67,7 @@ public class TypeCheckedObjectsTest extends RpcAsyncTestBase<TypeCheckedObjectsT
             @Override
             public void onFailure(Throwable caught) {
                 // Expected in this case
-                assertTrue(caught instanceof SerializationException);
+                assertThat(caught).isInstanceOf(SerializationException.class);
             }
 
             @Override
@@ -82,7 +83,7 @@ public class TypeCheckedObjectsTest extends RpcAsyncTestBase<TypeCheckedObjectsT
             @Override
             public void onFailure(Throwable caught) {
                 // Expected in this case
-                assertTrue(caught instanceof SerializationException);
+                assertThat(caught).isInstanceOf(SerializationException.class);
             }
 
             @Override
@@ -98,7 +99,7 @@ public class TypeCheckedObjectsTest extends RpcAsyncTestBase<TypeCheckedObjectsT
             @Override
             public void onFailure(Throwable caught) {
                 // Expected in this case
-                assertTrue(caught instanceof SerializationException);
+                assertThat(caught).isInstanceOf(SerializationException.class);
             }
 
             @Override
@@ -114,7 +115,7 @@ public class TypeCheckedObjectsTest extends RpcAsyncTestBase<TypeCheckedObjectsT
             @Override
             public void onFailure(Throwable caught) {
                 // Expected in this case
-                assertTrue(caught instanceof SerializationException);
+                assertThat(caught).isInstanceOf(SerializationException.class);
             }
 
             @Override
