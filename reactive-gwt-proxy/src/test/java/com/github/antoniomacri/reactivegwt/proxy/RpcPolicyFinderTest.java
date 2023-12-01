@@ -80,4 +80,13 @@ public class RpcPolicyFinderTest {
         String policyName = policyFinder.getOrFetchPolicyName(OrderService.class.getName());
         assertThat(policyName).isEqualTo("49500BE2C20C979AD4B0A80E6F04FA03");
     }
+
+    @Test
+    void shouldFetchPolicyNameFromGWT203Service() {
+        serveFolder("orders-203");
+
+        RpcPolicyFinder policyFinder = new RpcPolicyFinder(getModuleBaseURL());
+        String policyName = policyFinder.getOrFetchPolicyName(OrderService.class.getName());
+        assertThat(policyName).isEqualTo("3639CB2AF30F48928BE6AA30F1CD8E92");
+    }
 }
