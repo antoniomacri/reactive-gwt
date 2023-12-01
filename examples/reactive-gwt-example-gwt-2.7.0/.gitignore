@@ -1,0 +1,4 @@
+src/gen/
+src/main/gwt-unitCache/
+src/main/webapp/AppModule/
+src/main/webapp/WEB-INF/deploy/
