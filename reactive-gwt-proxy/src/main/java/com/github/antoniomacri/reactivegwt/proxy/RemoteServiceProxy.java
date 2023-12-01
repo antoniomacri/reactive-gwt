@@ -117,9 +117,9 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
     public CompletionStage<Object> doInvokeAsync(RequestCallbackAdapter.ResponseReader responseReader, String requestData) throws MalformedURLException {
         HttpClient httpClient = createHttpClient();
         URI cookieUri = URI.create("http://" + URI.create(moduleBaseURL).getHost());
-        HttpRequest.Builder requestBuilder = createHttpRequest(requestData, cookieUri);
+        HttpRequest request = createHttpRequest(requestData, cookieUri);
 
-        return httpClient.sendAsync(requestBuilder.build(), BodyHandlers.ofString())
+        return httpClient.sendAsync(request, BodyHandlers.ofString())
                 .exceptionally(e -> {
                     throw new InvocationException("IOException while receiving RPC response", e);
                 })
@@ -186,7 +186,7 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
         return httpClient;
     }
 
-    private HttpRequest.Builder createHttpRequest(String requestData, URI cookieUri) throws MalformedURLException {
+    private HttpRequest createHttpRequest(String requestData, URI cookieUri) throws MalformedURLException {
         // Auto apply authenticator if available. Makes it
         // possible that if the authenticator's values change (such as access
         // tokens that are refreshed), the client will not need to re-apply the
@@ -258,7 +258,7 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
                 cookie.setPath(path);
             }
         }
-        return requestBuilder;
+        return requestBuilder.build();
     }
 
     /**
