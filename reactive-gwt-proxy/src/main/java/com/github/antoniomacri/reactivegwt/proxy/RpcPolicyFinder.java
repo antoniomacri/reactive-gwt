@@ -23,16 +23,17 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -44,9 +45,11 @@ public class RpcPolicyFinder {
     private static final Pattern CACHE_JS_FILE_PATTERN = Pattern.compile("([A-Z0-9]){32}\\.cache\\.js");
     private static final Pattern POLICY_NAME_DOUBLE_QUOTES_PATTERN = Pattern.compile("\"([A-Z0-9]){32}\"");
     private static final Pattern POLICY_NAME_SINGLE_QUOTES_PATTERN = Pattern.compile("'([A-Z0-9]){32}'");
-    private static final Map<String, String> CACHE_POLICY_FILE = new ConcurrentHashMap<>();
+    private static final ExecutorService DEFAULT_EXECUTOR = Executors.newSingleThreadExecutor();
 
     private final String moduleBaseURL;
+    private final Map<String, String> policyNameByService = new ConcurrentHashMap<>();
+    private final Map<String, SerializationPolicy> policyByName = new ConcurrentHashMap<>();
 
 
     public RpcPolicyFinder(String moduleBaseURL) {
@@ -55,127 +58,143 @@ public class RpcPolicyFinder {
 
     public String getOrFetchPolicyName(String serviceName) {
         try {
-            String policyName = fetchSerializationPolicyName(serviceName, moduleBaseURL);
-            // TODO: save after fetching
-            return policyName;
-        } catch (Exception e) {
-            throw new InvocationException("Error while fetching serialization policy name", e);
+            return getOrFetchPolicyNameAsync(serviceName, DEFAULT_EXECUTOR).toCompletableFuture().get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new InvocationException("Error while fetching serialization policy", e);
         }
     }
 
     public CompletionStage<String> getOrFetchPolicyNameAsync(String serviceName, ExecutorService executor) {
-        // TODO: implement asyncrhonously on the given executor
-        String policyName = getOrFetchPolicyName(serviceName);
-        return CompletableFuture.completedFuture(policyName);
-    }
-
-    public SerializationPolicy getSerializationPolicy(String policyName) {
-        String policyFileName = SerializationPolicyLoader.getSerializationPolicyFileName(policyName);
-        String text = CACHE_POLICY_FILE.get(moduleBaseURL + policyFileName);
-        if (text != null) {
-            try {
-                return SerializationPolicyLoader.load(new StringReader(text), null);
-            } catch (IOException | ParseException e) {
-                throw new InvocationException("Error while loading serialization policy " + policyName, e);
-            }
+        String policyName = policyNameByService.get(serviceName);
+        if (policyName != null) {
+            return CompletableFuture.completedFuture(policyName);
         } else {
-            throw new InvocationException("Error while loading serialization policy " + policyName);
+            return fetchSerializationPoliciesAsync(executor).thenApply(ignored -> {
+                String newPolicyName = policyNameByService.get(serviceName);
+                return newPolicyName;
+            });
         }
     }
 
-
-    private String fetchSerializationPolicyName(String serviceName, String moduleBaseURL) {
-        Map<String, String> policyMap = fetchSerializationPolicyMap(moduleBaseURL);
-        return policyMap.get(serviceName);
+    public SerializationPolicy getSerializationPolicy(String policyName) {
+        return policyByName.get(policyName);
     }
 
 
     /**
      * Map from ServiceInterface class name to Serialization Policy name.
      */
-    private static Map<String, String> fetchSerializationPolicyMap(String moduleBaseURL) {
-        Map<String, String> result = new HashMap<>();
+    private CompletionStage<Void> fetchSerializationPoliciesAsync(Executor executor) {
+        Map<String, String> newPolicyNameByService = new HashMap<>();
+        Map<String, SerializationPolicy> newPolicyByName = new HashMap<>();
+
+        log.info("Fetching serialization policies...");
+
+        HttpClient httpClient = HttpClient.newBuilder()
+                .executor(executor)
+                .version(HttpClient.Version.HTTP_2)
+                .build();
 
         String[] urlparts = moduleBaseURL.split("/");
         String moduleNoCacheJs = urlparts[urlparts.length - 1] + ".nocache.js";
-        String noCacheJsFileContent = getResposeText(moduleBaseURL + moduleNoCacheJs);
-
-        PERMUTATION_NAME_PATTERN.matcher(noCacheJsFileContent).results().findFirst().map(matchResult -> {
-            boolean xsiFrameLinker = noCacheJsFileContent.contains(".cache.js");
-            if (xsiFrameLinker) {
-                log.debug("Searching for policies generated by XSIFrame linker");
-                String permutationFile = matchResult.group().replace("'", "") + ".cache.js";
-                String responseText = getResposeText(moduleBaseURL + permutationFile);
-
-                return POLICY_NAME_DOUBLE_QUOTES_PATTERN.matcher(responseText).results()
-                        .map(mr -> mr.group().replace("\"", ""))
-                        .collect(Collectors.toSet());
-            } else {
-                log.debug("Searching for policies generated by standard linker");
-                String permutationFile = matchResult.group().replace("'", "") + ".cache.html";
-                String responseText = getResposeText(moduleBaseURL + permutationFile);
-
-                return POLICY_NAME_SINGLE_QUOTES_PATTERN.matcher(responseText).results()
-                        .skip(1 /* the permutation name */)
-                        .map(mr -> mr.group().replace("'", ""))
-                        .collect(Collectors.toSet());
-            }
-        }).map(s -> s.isEmpty() ? null : s).orElseGet(() -> {
-            // Examine the compilation-mappings.txt file that is generated by GWT, in the event
-            // (such as in 2.7.0) that serialization policies are no longer in the nocache.js file
-            log.info("No RemoteService fetched from server using JS/HTML fetcher, using JS fetcher...");
-            String compilationMappings = getResposeText(moduleBaseURL + "compilation-mappings.txt");
-
-            return CACHE_JS_FILE_PATTERN.matcher(compilationMappings).results().findFirst().map(matchResult -> {
-                String browserSpec = matchResult.group();
-                String cacheJs = getResposeText(moduleBaseURL + browserSpec);
-
-                return POLICY_NAME_SINGLE_QUOTES_PATTERN.matcher(cacheJs).results()
-                        .skip(1 /* the permutation name */)
-                        .map(mr -> mr.group().replace("'", ""))
-                        .collect(Collectors.toSet());
-            }).orElseGet(Set::of);
-        }).forEach(policyName -> {
-            String policyContent = getResposeText(moduleBaseURL + policyName + GWT_PRC_POLICY_FILE_EXT);
-
-            policyContent.lines().forEach(line -> {
-                int pos = line.indexOf(", false, false, false, false, _, ");
-                if (pos > 0) {
-                    result.put(line.substring(0, pos), policyName);
-                    result.put(line.substring(0, pos) + "Async", policyName);
+        return getResposeTextAsync(moduleBaseURL + moduleNoCacheJs, httpClient).thenCompose(noCacheJsFileContent -> {
+            Matcher matcher = PERMUTATION_NAME_PATTERN.matcher(noCacheJsFileContent);
+            if (matcher.find()) {
+                boolean xsiFrameLinker = noCacheJsFileContent.contains(".cache.js");
+                if (xsiFrameLinker) {
+                    log.debug("Searching for policies generated by XSIFrame linker");
+                    String permutationFile = matcher.group().replace("'", "") + ".cache.js";
+                    return getResposeTextAsync(moduleBaseURL + permutationFile, httpClient).thenApply(responseText ->
+                            POLICY_NAME_DOUBLE_QUOTES_PATTERN.matcher(responseText).results()
+                                    .map(mr -> mr.group().replace("\"", ""))
+                                    .collect(Collectors.toSet())
+                    );
+                } else {
+                    log.debug("Searching for policies generated by standard linker");
+                    String permutationFile = matcher.group().replace("'", "") + ".cache.html";
+                    return getResposeTextAsync(moduleBaseURL + permutationFile, httpClient).thenApply(responseText ->
+                            POLICY_NAME_SINGLE_QUOTES_PATTERN.matcher(responseText).results()
+                                    .skip(1 /* the permutation name */)
+                                    .map(mr -> mr.group().replace("'", ""))
+                                    .collect(Collectors.toSet())
+                    );
                 }
-            });
-        });
+            } else {
+                return CompletableFuture.completedFuture(Set.<String>of());
+            }
+        }).thenCompose(policyNames -> {
+            if (policyNames == null || policyNames.isEmpty()) {
+                // Examine the compilation-mappings.txt file that is generated by GWT, in the event
+                // (such as in 2.7.0) that serialization policies are no longer in the nocache.js file
+                log.info("No RemoteService fetched from server using JS/HTML fetcher, using JS fetcher...");
+                return getResposeTextAsync(moduleBaseURL + "compilation-mappings.txt", httpClient).thenCompose(compilationMappings -> {
+                    Matcher matcher = CACHE_JS_FILE_PATTERN.matcher(compilationMappings);
+                    if (matcher.find()) {
+                        String browserSpec = matcher.group();
+                        return getResposeTextAsync(moduleBaseURL + browserSpec, httpClient).thenApply(cacheJs ->
+                                POLICY_NAME_SINGLE_QUOTES_PATTERN.matcher(cacheJs).results()
+                                        .skip(1 /* the permutation name */)
+                                        .map(mr -> mr.group().replace("'", ""))
+                                        .collect(Collectors.toSet())
+                        );
+                    } else {
+                        return CompletableFuture.completedFuture(Set.<String>of());
+                    }
+                });
+            } else {
+                return CompletableFuture.completedFuture(policyNames);
+            }
+        }).thenCompose(policyNames -> {
+            CompletableFuture<?>[] completableFutures = new CompletableFuture[policyNames.size()];
+            int i = 0;
+            for (String policyName : policyNames) {
+                String policyUrl = moduleBaseURL + policyName + GWT_PRC_POLICY_FILE_EXT;
+                completableFutures[i] = getResposeTextAsync(policyUrl, httpClient).thenAccept(policyContent -> {
+                    SerializationPolicy serializationPolicy;
+                    try {
+                        serializationPolicy = SerializationPolicyLoader.load(new StringReader(policyContent), null);
+                    } catch (IOException | ParseException e) {
+                        log.error("Error while loading serialization policy " + policyName, e);
+                        return;
+                    }
 
-        if (result.isEmpty()) {
-            log.info("No RemoteService fetched from server");
-        } else {
-            log.info("Found {} RemoteService(s): {}", result.size(), String.join(", ", result.keySet()));
-        }
-        return result;
+                    AtomicInteger addedServices = new AtomicInteger();
+                    policyContent.lines().forEach(line -> {
+                        int pos = line.indexOf(", false, false, false, false, _, ");
+                        if (pos > 0) {
+                            newPolicyNameByService.put(line.substring(0, pos), policyName);
+                            newPolicyNameByService.put(line.substring(0, pos) + "Async", policyName);
+                            addedServices.incrementAndGet();
+                        }
+                    });
+                    if (addedServices.get() > 0) {
+                        newPolicyByName.put(policyName, serializationPolicy);
+                        log.debug("Added policy from url={} with {} service(s)", policyUrl, addedServices.get());
+                    }
+                });
+                i++;
+            }
+            return CompletableFuture.allOf(completableFutures);
+        }).thenAccept(ignored -> {
+            if (newPolicyNameByService.isEmpty()) {
+                log.info("No RemoteService fetched from server");
+            } else {
+                log.info("Found {} RemoteService(s) from {} policies: {}",
+                        newPolicyNameByService.size(), newPolicyByName.size(), String.join(", ", newPolicyNameByService.keySet()));
+            }
+            policyNameByService.putAll(newPolicyNameByService);
+            policyByName.putAll(newPolicyByName);
+        });
     }
 
-    private static String getResposeText(String fileUrl) {
-        log.debug("Fetching file: {}", fileUrl);
-        try {
-            URL url = new URL(fileUrl);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    private CompletableFuture<String> getResposeTextAsync(String url, HttpClient httpClient) {
+        URI uri = URI.create(url);
+        HttpRequest request = HttpRequest.newBuilder().GET().uri(uri).build();
 
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
-            connection.setInstanceFollowRedirects(true); // follow redirect
-            connection.setRequestMethod("GET");
-            connection.connect();
-
-            String responseText = Utils.getResposeText(connection);
-
-            if (fileUrl.endsWith(GWT_PRC_POLICY_FILE_EXT)) {
-                CACHE_POLICY_FILE.put(fileUrl, responseText);
-            }
-
+        log.debug("Getting resource at url=%s".formatted(url));
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(response -> {
+            String responseText = response.body();
             return responseText;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 }
