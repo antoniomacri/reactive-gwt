@@ -31,7 +31,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Map.entry;
@@ -220,40 +222,69 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 
         AtomicReference<RemoteServiceProxy> serviceProxyRef = new AtomicReference<>();
 
-        settings.getPolicyFinder().getOrFetchPolicyNameAsync(settings.getServiceName(), settings.getExecutor()).thenCompose(policyName -> {
-            SerializationPolicy policy = settings.getPolicyFinder().getSerializationPolicy(policyName);
-
-            RemoteServiceProxy serviceProxy = new RemoteServiceProxy(settings, policyName, policy, this.token, this.rpcTokenExceptionHandler);
-            serviceProxyRef.set(serviceProxy);
-
-            SerializationStreamWriter streamWriter = serviceProxy.createStreamWriter();
-            String payload = buildPayload(streamWriter, serviceIntfName, method, paramCount, paramTypes, args);
-
-            return serviceProxy.<T>doInvokeAsync(getReaderFor(returnType), payload);
-        }).handle((result, throwable) -> {
-            if (callback != null) {
-                // Check to make sure response should be processed,
-                // or not in case of situation such as
-                // RpcTokenException handled by a separate handler
-                RemoteServiceProxy serviceProxy = serviceProxyRef.get();
-                if (serviceProxy == null || !serviceProxy.shouldIgnoreResponse()) {
-                    if (throwable != null) {
-                        if (throwable instanceof CompletionException) {
-                            throwable = throwable.getCause();
+        settings.getPolicyFinder().getOrFetchPolicyNameAsync(settings.getServiceName(), settings.getExecutor())
+                .thenCompose(policyName ->
+                        this.<T>callRemoteService(serviceProxyRef, policyName, method, paramCount, paramTypes, args, returnType)
+                )
+                .handle((result, throwable) -> {
+                    if (callback != null) {
+                        // Check to make sure response should be processed,
+                        // or not in case of situation such as
+                        // RpcTokenException handled by a separate handler
+                        RemoteServiceProxy serviceProxy = serviceProxyRef.get();
+                        if (serviceProxy == null || !serviceProxy.shouldIgnoreResponse()) {
+                            if (throwable != null) {
+                                if (throwable instanceof CompletionException) {
+                                    throwable = throwable.getCause();
+                                }
+                                if (throwable instanceof UndeclaredThrowableException) {
+                                    throwable = throwable.getCause();
+                                }
+                                callback.onFailure(throwable);
+                            } else {
+                                callback.onSuccess(result);
+                            }
                         }
-                        if (throwable instanceof UndeclaredThrowableException) {
-                            throwable = throwable.getCause();
-                        }
-                        callback.onFailure(throwable);
-                    } else {
-                        callback.onSuccess(result);
                     }
-                }
-            }
-            return null;
-        });
+                    return null;
+                });
 
         return null;
+    }
+
+    private <T> CompletionStage<T> callRemoteService(
+            AtomicReference<RemoteServiceProxy> serviceProxyRef,
+            String policyName, Method method, int paramCount, Class<?>[] paramTypes, Object[] args, Class<?> returnType
+    ) {
+        SerializationPolicy policy = settings.getPolicyFinder().getSerializationPolicy(policyName);
+
+        RemoteServiceProxy serviceProxy = new RemoteServiceProxy(settings, policyName, policy, this.token, this.rpcTokenExceptionHandler);
+        serviceProxyRef.set(serviceProxy);
+
+        SerializationStreamWriter streamWriter = serviceProxy.createStreamWriter();
+        String payload = buildPayload(streamWriter, settings.getServiceName(), method, paramCount, paramTypes, args);
+
+        return serviceProxy.<T>doInvokeAsync(getReaderFor(returnType), payload).exceptionallyCompose(t -> {
+            Throwable throwable = t;
+            if (t instanceof CompletionException) {
+                throwable = throwable.getCause();
+            }
+            if (throwable instanceof StatusCodeException sce && sce.getStatusCode() == 500) {
+                log.warn("Received Internal Server Error from server, checking if serialization policy changed...");
+                return settings.getPolicyFinder().fetchPolicyNameAsync(settings.getServiceName(), settings.getExecutor()).thenCompose(newPolicyName -> {
+                    if (newPolicyName != null && !newPolicyName.equals(policyName)) {
+                        log.warn("Serialization policy actually changed, retrying service call...");
+                        // Try again with the new serialization policy
+                        return callRemoteService(serviceProxyRef, newPolicyName, method, paramCount, paramTypes, args, returnType);
+                    } else {
+                        log.info("Serialization policy did not change, not retrying service call");
+                        return CompletableFuture.failedStage(t);
+                    }
+                });
+            } else {
+                return CompletableFuture.failedStage(t);
+            }
+        });
     }
 
     private String buildPayload(SerializationStreamWriter streamWriter, String serviceIntfName, Method method, int paramCount, Class<?>[] paramTypes, Object[] args) {
