@@ -1,11 +1,11 @@
 /**
  * Copyright 2015 Blue Esoteric Web Development, LLC
  * <http://www.blueesoteric.com>
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at <http://www.apache.org/licenses/LICENSE-2.0>
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -26,65 +26,69 @@ import com.github.antoniomacri.reactivegwt.proxy.auth.ServiceAuthenticator;
  * create reusable settings objects that are customized.
  *
  * @author Preethum
- * @since 0.5
  * @version 0.6
+ * @since 0.5
  */
 public interface HasProxySettings {
-	CookieManager getCookieManager();
+    CookieManager getCookieManager();
 
-	/**
-	 * @since 0.6
-	 */
-	Map<String, String> getCustomHeaders();
+    /**
+     * @since 0.6
+     */
+    Map<String, String> getCustomHeaders();
 
-	String getModuleBaseUrl();
+    String getModuleBaseUrl();
 
-	/**
-	 * @since 0.6
-	 */
-	String getOAuth2IdToken();
+    /**
+     * @since 0.6
+     */
+    String getOAuth2IdToken();
 
-	/**
-	 * @since 0.6
-	 */
-	String getOAuthBearerToken();
+    /**
+     * @since 0.6
+     */
+    String getOAuthBearerToken();
 
-	String getServiceName();
+    String getServiceName();
 
-	RpcPolicyFinder getPolicyFinder();
+    RpcPolicyFinder getPolicyFinder();
 
-	String getRemoteServiceRelativePath();
+    String getRemoteServiceRelativePath();
 
-	ServiceAuthenticator getServiceAuthenticator();
+    ServiceAuthenticator getServiceAuthenticator();
 
-	boolean isWaitForInvocation();
+    boolean isWaitForInvocation();
 
-	HasProxySettings setCookieManager(CookieManager cookieManager);
+    HasProxySettings setCookieManager(CookieManager cookieManager);
 
-	/**
-	 * @since 0.6
-	 */
-	HasProxySettings setCustomHeaders(Map<String, String> headers);
+    /**
+     * @since 0.6
+     */
+    HasProxySettings setCustomHeaders(Map<String, String> headers);
 
-	HasProxySettings setModuleBaseUrl(String serverBaseUrl);
+    HasProxySettings setModuleBaseUrl(String serverBaseUrl);
 
-	/**
-	 * @since 0.6
-	 */
-	HasProxySettings setOAuth2IdToken(String token);
+    /**
+     * @since 0.6
+     */
+    HasProxySettings setOAuth2IdToken(String token);
 
-	/**
-	 * @since 0.6
-	 */
-	HasProxySettings setOAuthBearerToken(String bearerToken);
+    /**
+     * @since 0.6
+     */
+    HasProxySettings setOAuthBearerToken(String bearerToken);
 
-	HasProxySettings setRemoteServiceRelativePath(String remoteServiceRelativePath);
+    HasProxySettings setRemoteServiceRelativePath(String remoteServiceRelativePath);
 
-	HasProxySettings setServiceAuthenticator(ServiceAuthenticator authenticator);
+    HasProxySettings setServiceAuthenticator(ServiceAuthenticator authenticator);
 
-	HasProxySettings setWaitForInvocation(boolean waitForInvocation);
+    HasProxySettings setWaitForInvocation(boolean waitForInvocation);
 
-	HasProxySettings setExecutor(ExecutorService executor);
+    HasProxySettings setExecutor(ExecutorService executor);
 
-	ExecutorService getExecutor();
+    ExecutorService getExecutor();
+
+    int getSerializationStreamVersion();
+
+    HasProxySettings setSerializationStreamVersion(int serializationStreamVersion);
 }

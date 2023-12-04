@@ -36,6 +36,8 @@ public class ProxySettings implements HasProxySettings {
     ServiceAuthenticator serviceAuthenticator;
     boolean waitForInvocation = false;
     ExecutorService executor;
+    int serializationStreamVersion = 7;
+
 
     public ProxySettings(String moduleBaseUrl, String serviceName) {
         this.moduleBaseUrl = moduleBaseUrl;
@@ -159,5 +161,14 @@ public class ProxySettings implements HasProxySettings {
     @Override
     public ExecutorService getExecutor() {
         return executor;
+    }
+
+    public int getSerializationStreamVersion() {
+        return serializationStreamVersion;
+    }
+
+    public HasProxySettings setSerializationStreamVersion(int serializationStreamVersion) {
+        this.serializationStreamVersion = serializationStreamVersion;
+        return this;
     }
 }

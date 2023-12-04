@@ -312,7 +312,12 @@ public class SyncClientSerializationStreamWriter extends AbstractSerializationSt
 
     Logger logger = Logger.getLogger(SyncClientSerializationStreamWriter.class.getName());
 
+
     public SyncClientSerializationStreamWriter(Serializer serializer, String moduleBaseURL, String serializationPolicyStrongName, SerializationPolicy serializationPolicy, RpcToken rpcToken) {
+        this(serializer, moduleBaseURL, serializationPolicyStrongName, serializationPolicy, rpcToken, SERIALIZATION_STREAM_VERSION);
+    }
+
+    public SyncClientSerializationStreamWriter(Serializer serializer, String moduleBaseURL, String serializationPolicyStrongName, SerializationPolicy serializationPolicy, RpcToken rpcToken, int version) {
         this.serializer = serializer;
         this.moduleBaseURL = moduleBaseURL;
         this.serializationPolicyStrongName = serializationPolicyStrongName;
@@ -321,6 +326,7 @@ public class SyncClientSerializationStreamWriter extends AbstractSerializationSt
         if (rpcToken != null) {
             addFlags(FLAG_RPC_TOKEN_INCLUDED);
         }
+        super.setVersion(version);
     }
 
     @Override
