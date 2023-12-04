@@ -22,12 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 /**
- * Handles settings utilized by the SyncProxy creation. Set methods return the
- * Settings object for chaining.
- *
- * @author Preethum
- * @since 0.5
- * @version 0.6
+ * Handles settings utilized by the {@link ReactiveGWT} proxy.
  */
 public class ProxySettings implements HasProxySettings {
     String moduleBaseUrl;
@@ -41,6 +36,12 @@ public class ProxySettings implements HasProxySettings {
     ServiceAuthenticator serviceAuthenticator;
     boolean waitForInvocation = false;
     ExecutorService executor;
+
+    public ProxySettings(String moduleBaseUrl, String serviceName) {
+        this.moduleBaseUrl = moduleBaseUrl;
+        this.serviceName = serviceName;
+        this.policyFinder = new RpcPolicyFinder(moduleBaseUrl);
+    }
 
     public ProxySettings(String moduleBaseUrl, String serviceName, RpcPolicyFinder policyFinder) {
         this.moduleBaseUrl = moduleBaseUrl;
