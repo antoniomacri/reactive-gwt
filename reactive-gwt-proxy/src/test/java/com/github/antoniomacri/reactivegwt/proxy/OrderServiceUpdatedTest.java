@@ -14,6 +14,9 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.InstantSource;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -26,9 +29,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -49,6 +50,8 @@ public class OrderServiceUpdatedTest {
 
     WireMockServer wm;
     RpcPolicyFinder policyFinder;
+    InstantSource instantSource;
+    OrderServiceAsync service;
 
 
     @BeforeEach
@@ -59,6 +62,10 @@ public class OrderServiceUpdatedTest {
         ReactiveGWT.suppressRelativePathWarning(true);
 
         policyFinder = spy(new RpcPolicyFinder(getModuleBaseURL()));
+        instantSource = mock(InstantSource.class);
+        when(instantSource.instant()).thenReturn(Instant.now());
+
+        service = getService();
     }
 
     private String getModuleBaseURL() {
@@ -67,6 +74,7 @@ public class OrderServiceUpdatedTest {
 
     private OrderServiceAsync getService() {
         ProxySettings settings = new ProxySettings(getModuleBaseURL(), OrderService.class.getName(), policyFinder);
+        settings.setInstantSource(instantSource);
         OrderServiceAsync service = ReactiveGWT.create(OrderService.class, settings);
         ((ServiceDefTarget) service).setServiceEntryPoint(getModuleBaseURL() + "orders");
         return service;
@@ -82,32 +90,8 @@ public class OrderServiceUpdatedTest {
     public void when500IsReceivedThenShouldRefetchSerializationPolicyAndIfChangedRetryCall() throws InterruptedException, IOException {
         serveOrderService();
 
-        OrderServiceAsync service = getService();
-        AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
-        AtomicReference<OrderItem> resultRef = new AtomicReference<>();
-
-        OrderItem orderItem = new OrderItem();
-        orderItem.setDescription("TONNO");
-        orderItem.setId(2806670);
-
         // The first call is OK
-        CountDownLatch latch = new CountDownLatch(1);
-        service.echo(orderItem, new AsyncCallback<>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                exceptionRef.set(caught);
-                latch.countDown();
-            }
-
-            @Override
-            public void onSuccess(OrderItem result) {
-                resultRef.set(result);
-                latch.countDown();
-            }
-        });
-        assertThat(latch.await(1, TimeUnit.SECONDS)).isTrue();
-        assertThat(exceptionRef.get()).isNull();
-        assertThat(resultRef.get()).isNotNull().usingRecursiveComparison().isEqualTo(orderItem);
+        invokeServiceAndExpectResult();
 
         InOrder inOrder = inOrder(policyFinder);
         inOrder.verify(policyFinder, times(1)).getOrFetchPolicyNameAsync(eq(OrderService.class.getName()), any());
@@ -115,32 +99,13 @@ public class OrderServiceUpdatedTest {
         inOrder.verify(policyFinder, times(1)).getSerializationPolicy(eq("49500BE2C20C979AD4B0A80E6F04FA03"));
         inOrder.verifyNoMoreInteractions();
 
-        wm.resetAll();
         Mockito.reset(policyFinder);
-        exceptionRef.set(null);
-        resultRef.set(null);
 
         serveOrderServiceUpdated();
 
         // The second call obtains an internal server error, so the new serialization policy is fetched (*)
-        // and then the call is retried
-        CountDownLatch latch2 = new CountDownLatch(1);
-        service.echo(orderItem, new AsyncCallback<>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                exceptionRef.set(caught);
-                latch2.countDown();
-            }
-
-            @Override
-            public void onSuccess(OrderItem result) {
-                resultRef.set(result);
-                latch2.countDown();
-            }
-        });
-        assertThat(latch2.await(1, TimeUnit.SECONDS)).isTrue();
-        assertThat(exceptionRef.get()).isNull();
-        assertThat(resultRef.get()).isNotNull().usingRecursiveComparison().isEqualTo(orderItem);
+        // and then the call is retried and succeeds
+        invokeServiceAndExpectResult();
 
         inOrder = inOrder(policyFinder);
         inOrder.verify(policyFinder, times(1)).getOrFetchPolicyNameAsync(eq(OrderService.class.getName()), any());
@@ -149,38 +114,13 @@ public class OrderServiceUpdatedTest {
         inOrder.verify(policyFinder, times(1)).getSerializationPolicy(eq("49CEE67A18790BD431604E4192544D7F"));
         inOrder.verifyNoMoreInteractions();
     }
-
 
     @Test
     public void when500IsReceivedThenShouldRefetchSerializationPolicyAndIfNotChangedReturnError() throws InterruptedException, IOException {
         serveOrderService();
 
-        OrderServiceAsync service = getService();
-        AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
-        AtomicReference<OrderItem> resultRef = new AtomicReference<>();
-
-        OrderItem orderItem = new OrderItem();
-        orderItem.setDescription("TONNO");
-        orderItem.setId(2806670);
-
         // The first call is OK
-        CountDownLatch latch = new CountDownLatch(1);
-        service.echo(orderItem, new AsyncCallback<>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                exceptionRef.set(caught);
-                latch.countDown();
-            }
-
-            @Override
-            public void onSuccess(OrderItem result) {
-                resultRef.set(result);
-                latch.countDown();
-            }
-        });
-        assertThat(latch.await(1, TimeUnit.SECONDS)).isTrue();
-        assertThat(exceptionRef.get()).isNull();
-        assertThat(resultRef.get()).isNotNull().usingRecursiveComparison().isEqualTo(orderItem);
+        invokeServiceAndExpectResult();
 
         InOrder inOrder = inOrder(policyFinder);
         inOrder.verify(policyFinder, times(1)).getOrFetchPolicyNameAsync(eq(OrderService.class.getName()), any());
@@ -189,63 +129,25 @@ public class OrderServiceUpdatedTest {
         inOrder.verifyNoMoreInteractions();
 
         Mockito.reset(policyFinder);
-        exceptionRef.set(null);
-        resultRef.set(null);
 
         serveInternalServerError();
 
         // The second call obtains an internal server error, so we check for a new serialization policy (*)
-        // but, since it has not changed, the call is not retried, and we still get the 500 (**)
-        CountDownLatch latch2 = new CountDownLatch(1);
-        service.echo(orderItem, new AsyncCallback<>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                exceptionRef.set(caught);
-                latch2.countDown();
-            }
-
-            @Override
-            public void onSuccess(OrderItem result) {
-                resultRef.set(result);
-                latch2.countDown();
-            }
-        });
-        assertThat(latch2.await(1, TimeUnit.SECONDS)).isTrue();
-        assertThat(exceptionRef.get()).isNotNull().isInstanceOf(StatusCodeException.class);
-        assertThat(((StatusCodeException) exceptionRef.get()).getStatusCode()).isEqualTo(500);  // (**)
-        assertThat(resultRef.get()).isNull();
+        // but, since it has not changed, the call is not retried, and we still get the 500
+        invokeServiceAndExpectInternalServerError();
 
         inOrder = inOrder(policyFinder);
         inOrder.verify(policyFinder, times(1)).getOrFetchPolicyNameAsync(eq(OrderService.class.getName()), any());
-        inOrder.verify(policyFinder, times(1)).getSerializationPolicy(eq("49500BE2C20C979AD4B0A80E6F04FA03"));  // (*)
-        inOrder.verify(policyFinder, times(1)).fetchPolicyNameAsync(eq(OrderService.class.getName()), any());
+        inOrder.verify(policyFinder, times(1)).getSerializationPolicy(eq("49500BE2C20C979AD4B0A80E6F04FA03"));
+        inOrder.verify(policyFinder, times(1)).fetchPolicyNameAsync(eq(OrderService.class.getName()), any());  // (*)
         inOrder.verifyNoMoreInteractions();
 
-        wm.resetAll();
         Mockito.reset(policyFinder);
-        exceptionRef.set(null);
-        resultRef.set(null);
 
         serveOrderService();
 
-        // Now the backend is working again, and we get a success response (*)
-        CountDownLatch latch3 = new CountDownLatch(1);
-        service.echo(orderItem, new AsyncCallback<>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                exceptionRef.set(caught);
-                latch3.countDown();
-            }
-
-            @Override
-            public void onSuccess(OrderItem result) {
-                resultRef.set(result);
-                latch3.countDown();
-            }
-        });
-        assertThat(latch3.await(1, TimeUnit.SECONDS)).isTrue();
-        assertThat(exceptionRef.get()).isNull();
-        assertThat(resultRef.get()).isNotNull().usingRecursiveComparison().isEqualTo(orderItem);  // (*)
+        // Now the backend is working again, and we get a success response
+        invokeServiceAndExpectResult();
 
         inOrder = inOrder(policyFinder);
         inOrder.verify(policyFinder, times(1)).getOrFetchPolicyNameAsync(eq(OrderService.class.getName()), any());
@@ -254,35 +156,11 @@ public class OrderServiceUpdatedTest {
     }
 
     @Test
-    public void when500IsReceivedThenShouldRefetchSerializationPolicyAndIfChangedRetryCallWith500Again() throws InterruptedException, IOException {
+    public void shouldNotRefetchSerializationPolicyWhen500IsReceivedImmediatelyAfterPolicyChange() throws InterruptedException, IOException {
         serveOrderService();
 
-        OrderServiceAsync service = getService();
-        AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
-        AtomicReference<OrderItem> resultRef = new AtomicReference<>();
-
-        OrderItem orderItem = new OrderItem();
-        orderItem.setDescription("TONNO");
-        orderItem.setId(2806670);
-
         // The first call is OK
-        CountDownLatch latch = new CountDownLatch(1);
-        service.echo(orderItem, new AsyncCallback<>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                exceptionRef.set(caught);
-                latch.countDown();
-            }
-
-            @Override
-            public void onSuccess(OrderItem result) {
-                resultRef.set(result);
-                latch.countDown();
-            }
-        });
-        assertThat(latch.await(1, TimeUnit.SECONDS)).isTrue();
-        assertThat(exceptionRef.get()).isNull();
-        assertThat(resultRef.get()).isNotNull().usingRecursiveComparison().isEqualTo(orderItem);
+        invokeServiceAndExpectResult();
 
         InOrder inOrder = inOrder(policyFinder);
         inOrder.verify(policyFinder, times(1)).getOrFetchPolicyNameAsync(eq(OrderService.class.getName()), any());
@@ -290,42 +168,55 @@ public class OrderServiceUpdatedTest {
         inOrder.verify(policyFinder, times(1)).getSerializationPolicy(eq("49500BE2C20C979AD4B0A80E6F04FA03"));
         inOrder.verifyNoMoreInteractions();
 
-        wm.resetAll();
         Mockito.reset(policyFinder);
-        exceptionRef.set(null);
-        resultRef.set(null);
 
         serveOrderServiceUpdatedReturning500();
 
         // The second call obtains an internal server error, so the new serialization policy is fetched (*)
-        // and then the call is retried, but we still get a 500. As a consequence, we again try to fetch
-        // the serialization policy (**), but since it has not changed now, the process stops and we get a
-        // final 500 (***)
-        CountDownLatch latch2 = new CountDownLatch(1);
-        service.echo(orderItem, new AsyncCallback<>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                exceptionRef.set(caught);
-                latch2.countDown();
-            }
-
-            @Override
-            public void onSuccess(OrderItem result) {
-                resultRef.set(result);
-                latch2.countDown();
-            }
-        });
-        assertThat(latch2.await(1, TimeUnit.SECONDS)).isTrue();
-        assertThat(exceptionRef.get()).isNotNull().isInstanceOf(StatusCodeException.class);
-        assertThat(((StatusCodeException) exceptionRef.get()).getStatusCode()).isEqualTo(500);  // (***)
-        assertThat(resultRef.get()).isNull();
+        // and then the call is retried, but we still get a 500. However, we do NOT fetch the serialization
+        // policy again, since the min interval has not elapsed
+        invokeServiceAndExpectInternalServerError();
 
         inOrder = inOrder(policyFinder);
         inOrder.verify(policyFinder, times(1)).getOrFetchPolicyNameAsync(eq(OrderService.class.getName()), any());
         inOrder.verify(policyFinder, times(1)).getSerializationPolicy(eq("49500BE2C20C979AD4B0A80E6F04FA03"));
         inOrder.verify(policyFinder, times(1)).fetchPolicyNameAsync(eq(OrderService.class.getName()), any());  // (*)
         inOrder.verify(policyFinder, times(1)).getSerializationPolicy(eq("49CEE67A18790BD431604E4192544D7F"));
-        inOrder.verify(policyFinder, times(1)).fetchPolicyNameAsync(eq(OrderService.class.getName()), any());  // (**)
+        inOrder.verifyNoMoreInteractions();
+    }
+
+
+    @Test
+    public void shouldRefetchSerializationPolicyWhen500IsReceivedBeyondIntervalAfterPolicyChange() throws InterruptedException, IOException {
+        when500IsReceivedThenShouldRefetchSerializationPolicyAndIfChangedRetryCall();
+
+        Mockito.reset(policyFinder);
+
+        serveOrderServiceUpdatedReturning500();
+        when(instantSource.instant()).thenReturn(Instant.now().plus(4, ChronoUnit.MINUTES));
+
+        // This call obtains an internal server error, but the new serialization policy is NOT fetched, since
+        // the min interval (5 minutes) has not elapsed
+        invokeServiceAndExpectInternalServerError();
+
+        InOrder inOrder = inOrder(policyFinder);
+        inOrder.verify(policyFinder, times(1)).getOrFetchPolicyNameAsync(eq(OrderService.class.getName()), any());
+        inOrder.verify(policyFinder, times(1)).getSerializationPolicy(eq("49CEE67A18790BD431604E4192544D7F"));
+        inOrder.verifyNoMoreInteractions();
+
+        Mockito.reset(policyFinder);
+
+        when(instantSource.instant()).thenReturn(Instant.now().plus(6, ChronoUnit.MINUTES));
+
+        // Now, we again obtain an internal server error, but this time the new serialization policy is actually
+        // fetched (*), since the min interval has elapsed (but then, in this case, the call is NOT retried because
+        // the policy did not change)
+        invokeServiceAndExpectInternalServerError();
+
+        inOrder = inOrder(policyFinder);
+        inOrder.verify(policyFinder, times(1)).getOrFetchPolicyNameAsync(eq(OrderService.class.getName()), any());
+        inOrder.verify(policyFinder, times(1)).getSerializationPolicy(eq("49CEE67A18790BD431604E4192544D7F"));
+        inOrder.verify(policyFinder, times(1)).fetchPolicyNameAsync(eq(OrderService.class.getName()), any());  // (*)
         inOrder.verifyNoMoreInteractions();
     }
 
@@ -357,6 +248,8 @@ public class OrderServiceUpdatedTest {
     }
 
     private void serveOrderServiceUpdated() throws IOException {
+        wm.resetAll();
+
         serveStaticFile("orders-updated", "AppModule.nocache.js");
         serveStaticFile("orders-updated", "compilation-mappings.txt");
         serveStaticFile("orders-updated", "F46FD829C9E33DC26898B6707DE48047.cache.js");
@@ -386,6 +279,8 @@ public class OrderServiceUpdatedTest {
     }
 
     private void serveOrderServiceUpdatedReturning500() throws IOException {
+        wm.resetAll();
+
         serveStaticFile("orders-updated", "AppModule.nocache.js");
         serveStaticFile("orders-updated", "compilation-mappings.txt");
         serveStaticFile("orders-updated", "F46FD829C9E33DC26898B6707DE48047.cache.js");
@@ -418,5 +313,64 @@ public class OrderServiceUpdatedTest {
             wm.stubFor(get("/" + MODULE_RELATIVE_PATH + fileName)
                     .willReturn(aResponse().withBody(Objects.requireNonNull(inputStream).readAllBytes())));
         }
+    }
+
+    private void invokeServiceAndExpectResult() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        OrderItem orderItem = new OrderItem();
+        orderItem.setDescription("TONNO");
+        orderItem.setId(2806670);
+
+        AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
+        AtomicReference<OrderItem> resultRef = new AtomicReference<>();
+
+        service.echo(orderItem, new AsyncCallback<>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                exceptionRef.set(caught);
+                latch.countDown();
+            }
+
+            @Override
+            public void onSuccess(OrderItem result) {
+                resultRef.set(result);
+                latch.countDown();
+            }
+        });
+
+        assertThat(latch.await(1, TimeUnit.SECONDS)).isTrue();
+        assertThat(exceptionRef.get()).isNull();
+        assertThat(resultRef.get()).isNotNull().usingRecursiveComparison().isEqualTo(orderItem);
+    }
+
+    private void invokeServiceAndExpectInternalServerError() throws InterruptedException {
+        CountDownLatch latch3 = new CountDownLatch(1);
+
+        OrderItem orderItem = new OrderItem();
+        orderItem.setDescription("TONNO");
+        orderItem.setId(2806670);
+
+        AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
+        AtomicReference<OrderItem> resultRef = new AtomicReference<>();
+
+        service.echo(orderItem, new AsyncCallback<>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                exceptionRef.set(caught);
+                latch3.countDown();
+            }
+
+            @Override
+            public void onSuccess(OrderItem result) {
+                resultRef.set(result);
+                latch3.countDown();
+            }
+        });
+
+        assertThat(latch3.await(1, TimeUnit.SECONDS)).isTrue();
+        assertThat(exceptionRef.get()).isNotNull().isInstanceOf(StatusCodeException.class);
+        assertThat(((StatusCodeException) exceptionRef.get()).getStatusCode()).isEqualTo(500);
+        assertThat(resultRef.get()).isNull();
     }
 }

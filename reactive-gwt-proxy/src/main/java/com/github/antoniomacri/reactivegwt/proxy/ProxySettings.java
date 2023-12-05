@@ -17,6 +17,7 @@ package com.github.antoniomacri.reactivegwt.proxy;
 import com.github.antoniomacri.reactivegwt.proxy.auth.ServiceAuthenticator;
 
 import java.net.CookieManager;
+import java.time.InstantSource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -37,6 +38,8 @@ public class ProxySettings implements HasProxySettings {
     boolean waitForInvocation = false;
     ExecutorService executor;
     int serializationStreamVersion = 7;
+    InstantSource instantSource = InstantSource.system();
+    int serializationPolicyFetchMinIntervalMillis = 300_000;
 
 
     public ProxySettings(String moduleBaseUrl, String serviceName) {
@@ -169,6 +172,24 @@ public class ProxySettings implements HasProxySettings {
 
     public HasProxySettings setSerializationStreamVersion(int serializationStreamVersion) {
         this.serializationStreamVersion = serializationStreamVersion;
+        return this;
+    }
+
+    public InstantSource getInstantSource() {
+        return instantSource;
+    }
+
+    public HasProxySettings setInstantSource(InstantSource instantSource) {
+        this.instantSource = instantSource;
+        return this;
+    }
+
+    public int getSerializationPolicyFetchMinIntervalMillis() {
+        return serializationPolicyFetchMinIntervalMillis;
+    }
+
+    public HasProxySettings setSerializationPolicyFetchMinIntervalMillis(int serializationPolicyFetchMinIntervalMillis) {
+        this.serializationPolicyFetchMinIntervalMillis = serializationPolicyFetchMinIntervalMillis;
         return this;
     }
 }

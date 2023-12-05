@@ -15,6 +15,7 @@
 package com.github.antoniomacri.reactivegwt.proxy;
 
 import java.net.CookieManager;
+import java.time.InstantSource;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
@@ -91,4 +92,12 @@ public interface HasProxySettings {
     int getSerializationStreamVersion();
 
     HasProxySettings setSerializationStreamVersion(int serializationStreamVersion);
+
+    InstantSource getInstantSource();
+
+    HasProxySettings setInstantSource(InstantSource instantSource);
+
+    int getSerializationPolicyFetchMinIntervalMillis();
+
+    HasProxySettings setSerializationPolicyFetchMinIntervalMillis(int serializationPolicyFetchMinIntervalMillis);
 }

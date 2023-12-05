@@ -30,6 +30,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -60,6 +61,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
     RpcToken token;
     String serviceEntryPoint;
     RpcTokenExceptionHandler rpcTokenExceptionHandler;
+    AtomicReference<Instant> lastPolicyFetchInstant = new AtomicReference<>(Instant.MIN);
 
 
     public RemoteServiceInvocationHandler(HasProxySettings settings) {
@@ -270,17 +272,26 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
                 throwable = throwable.getCause();
             }
             if (throwable instanceof StatusCodeException sce && sce.getStatusCode() == 500) {
-                log.warn("Received Internal Server Error from server, checking if serialization policy changed...");
-                return settings.getPolicyFinder().fetchPolicyNameAsync(settings.getServiceName(), settings.getExecutor()).thenCompose(newPolicyName -> {
-                    if (newPolicyName != null && !newPolicyName.equals(policyName)) {
-                        log.warn("Serialization policy actually changed, retrying service call...");
-                        // Try again with the new serialization policy
-                        return callRemoteService(serviceProxyRef, newPolicyName, method, paramCount, paramTypes, args, returnType);
-                    } else {
-                        log.info("Serialization policy did not change, not retrying service call");
-                        return CompletableFuture.failedStage(t);
-                    }
-                });
+                Instant lastInstant = lastPolicyFetchInstant.get();
+                Instant now = settings.getInstantSource().instant();
+                if (lastInstant.plusMillis(settings.getSerializationPolicyFetchMinIntervalMillis()).isAfter(now)) {
+                    log.warn("Received Internal Server Error from server, but not checking if serialization policy changed since min interval has not elapsed ({} vs {})",
+                            lastInstant, now);
+                    return CompletableFuture.failedStage(t);
+                } else {
+                    log.warn("Received Internal Server Error from server, checking if serialization policy changed...");
+                    return settings.getPolicyFinder().fetchPolicyNameAsync(settings.getServiceName(), settings.getExecutor()).thenCompose(newPolicyName -> {
+                        lastPolicyFetchInstant.compareAndSet(lastInstant, now);
+                        if (newPolicyName != null && !newPolicyName.equals(policyName)) {
+                            log.warn("Serialization policy actually changed, retrying service call...");
+                            // Try again with the new serialization policy
+                            return callRemoteService(serviceProxyRef, newPolicyName, method, paramCount, paramTypes, args, returnType);
+                        } else {
+                            log.info("Serialization policy did not change, not retrying service call");
+                            return CompletableFuture.failedStage(t);
+                        }
+                    });
+                }
             } else {
                 return CompletableFuture.failedStage(t);
             }
