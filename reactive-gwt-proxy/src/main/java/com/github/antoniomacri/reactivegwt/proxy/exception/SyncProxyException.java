@@ -20,6 +20,7 @@ import com.github.antoniomacri.reactivegwt.proxy.RemoteServiceProxy;
 import com.google.gwt.user.client.rpc.InvocationException;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter;
 
 /**
  * @author Preethum
@@ -50,8 +51,7 @@ public class SyncProxyException extends InvocationException {
 		 * url, we have no good way of separating the provided EntryPoint into
 		 * moduleBase and remoteServiceRelativePath. The moduleBase is needed
 		 * separately in
-		 * {@link RemoteServiceProxy#doInvoke(com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter.ResponseReader, String)}
-		 *
+		 * {@link RemoteServiceProxy#doInvokeAsync(RequestCallbackAdapter.ResponseReader, String)}
 		 */
 		SERVICE_BASE_DELTA("Unable to determine new module base url from provided service entry point.");
 		String help;
