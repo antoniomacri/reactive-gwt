@@ -166,9 +166,11 @@ public class RpcPolicyFinder {
                     policyContent.lines().forEach(line -> {
                         int pos = line.indexOf(", false, false, false, false, _, ");
                         if (pos > 0) {
-                            newPolicyNameByService.put(line.substring(0, pos), policyName);
-                            newPolicyNameByService.put(line.substring(0, pos) + "Async", policyName);
+                            String serviceName = line.substring(0, pos);
+                            newPolicyNameByService.put(serviceName, policyName);
+                            newPolicyNameByService.put(serviceName + "Async", policyName);
                             addedServices.incrementAndGet();
+                            log.debug("Created mapping of serviceName={}/Async to policy={}", serviceName, policyName);
                         }
                     });
                     if (addedServices.get() > 0) {
