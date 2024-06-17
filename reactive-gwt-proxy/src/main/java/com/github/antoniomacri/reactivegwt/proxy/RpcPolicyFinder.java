@@ -28,9 +28,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -155,11 +153,15 @@ public class RpcPolicyFinder {
                 String policyUrl = moduleBaseURL + policyName + GWT_PRC_POLICY_FILE_EXT;
                 completableFutures[i] = getResposeTextAsync(policyUrl, httpClient).thenAccept(policyContent -> {
                     SerializationPolicy serializationPolicy;
+                    List<ClassNotFoundException> notFoundExceptions = new ArrayList<>();
                     try {
-                        serializationPolicy = SerializationPolicyLoader.load(new StringReader(policyContent), null);
+                        serializationPolicy = SerializationPolicyLoader.load(new StringReader(policyContent), notFoundExceptions);
                     } catch (IOException | ParseException e) {
-                        log.error("Error while loading serialization policy " + policyName, e);
+                        log.error("Error while loading serialization policy" + policyName, e);
                         return;
+                    }
+                    if (!notFoundExceptions.isEmpty()) {
+                        log.error("Classes not found while loading serialization policy={} exceptions={}", policyName, notFoundExceptions);
                     }
 
                     AtomicInteger addedServices = new AtomicInteger();
