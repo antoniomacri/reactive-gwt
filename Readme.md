@@ -49,6 +49,18 @@ The latest [Release Notes](https://github.com/jcricket/gwt-syncproxy/wiki/Releas
 
 # Releasing
 
+Check the token is currently valid or issue a new token. Login to https://s01.oss.sonatype.org then go to https://s01.oss.sonatype.org/#profile;User%20Token and generate a new token.
+
+Paste the token in the `settings.xml` as
+```xml
+<server>
+    <id>ossrh</id>
+    <username>...</username>
+    <password>...</password>
+</server>
+```
+
+Finally, run the release plugin:
 ```shell
 ./mvnw -Darguments='-Dmaven.test.skip=true' release:prepare
 ./mvnw release:perform
