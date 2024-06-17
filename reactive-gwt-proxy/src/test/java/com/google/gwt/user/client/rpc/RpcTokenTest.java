@@ -20,6 +20,7 @@ import com.google.gwt.user.server.rpc.RpcTokenServiceImpl;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Fail.fail;
@@ -87,6 +88,7 @@ public class RpcTokenTest extends RpcAsyncTestBase<RpcTokenTestService, RpcToken
      * Modified by Antonio Macrì to remove dependence on {@link GWT#getModuleBaseURL()}
      */
     @Test
+    @Tag("IllegalAccess")
     public void testRpcTokenExceptionHandler() {
         ((ServiceDefTarget) service).setServiceEntryPoint(getModuleBaseURL() + "rpctokentest?throw=true");
         ((HasRpcToken) service).setRpcTokenExceptionHandler(Assertions::assertNotNull);

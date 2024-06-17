@@ -23,6 +23,7 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -83,6 +84,7 @@ public class XsrfProtectionTest extends RpcAsyncTestBase<XsrfTestService, XsrfTe
 
 
     @Test
+    @Tag("IllegalAccess")
     public void testRpcWithoutXsrfTokenFails() {
         service.drink("kumys", waitedCallback(new AsyncCallback<>() {
             @Override
@@ -118,6 +120,7 @@ public class XsrfProtectionTest extends RpcAsyncTestBase<XsrfTestService, XsrfTe
     }
 
     @Test
+    @Tag("NotSupported")
     public void testXsrfTokenService() {
         XsrfTokenServiceAsync xsrfService = getAsyncXsrfService();
 
@@ -130,6 +133,7 @@ public class XsrfProtectionTest extends RpcAsyncTestBase<XsrfTestService, XsrfTe
     }
 
     @Test
+    @Tag("NotSupported")
     public void testRpcWithXsrfToken() {
         XsrfTokenServiceAsync xsrfService = getAsyncXsrfService();
 
@@ -142,6 +146,7 @@ public class XsrfProtectionTest extends RpcAsyncTestBase<XsrfTestService, XsrfTe
     }
 
     @Test
+    @Tag("NotSupported")
     public void testXsrfTokenWithDifferentSessionCookieFails() {
         XsrfTokenServiceAsync xsrfService = getAsyncXsrfService();
 
