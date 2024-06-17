@@ -94,7 +94,7 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
 
     @Override
     public SyncClientSerializationStreamWriter createStreamWriter() {
-        SyncClientSerializationStreamWriter streamWriter = new SyncClientSerializationStreamWriter(null,
+        SyncClientSerializationStreamWriter streamWriter = new SyncClientSerializationStreamWriter(
                 this.moduleBaseURL, this.serializationPolicyName, this.serializationPolicy, this.rpcToken,
                 settings.getSerializationStreamVersion());
         streamWriter.prepareToWrite();
