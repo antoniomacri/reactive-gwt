@@ -14,12 +14,12 @@
  */
 package com.github.antoniomacri.reactivegwt.proxy;
 
+import com.github.antoniomacri.reactivegwt.proxy.auth.ServiceAuthenticator;
+
 import java.net.CookieManager;
 import java.time.InstantSource;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-
-import com.github.antoniomacri.reactivegwt.proxy.auth.ServiceAuthenticator;
+import java.util.concurrent.Executor;
 
 /**
  * Interface to specify an object that will provide for requested Proxy
@@ -85,9 +85,9 @@ public interface HasProxySettings {
 
     HasProxySettings setWaitForInvocation(boolean waitForInvocation);
 
-    HasProxySettings setExecutor(ExecutorService executor);
+    HasProxySettings setExecutor(Executor executor);
 
-    ExecutorService getExecutor();
+    Executor getExecutor();
 
     int getSerializationStreamVersion();
 

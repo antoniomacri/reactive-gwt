@@ -20,7 +20,7 @@ import java.net.CookieManager;
 import java.time.InstantSource;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 
 /**
  * Handles settings utilized by the {@link ReactiveGWT} proxy.
@@ -36,7 +36,7 @@ public class ProxySettings implements HasProxySettings {
     String remoteServiceRelativePath;
     ServiceAuthenticator serviceAuthenticator;
     boolean waitForInvocation = false;
-    ExecutorService executor;
+    Executor executor;
     int serializationStreamVersion = 7;
     InstantSource instantSource = InstantSource.system();
     int serializationPolicyFetchMinIntervalMillis = 300_000;
@@ -156,13 +156,13 @@ public class ProxySettings implements HasProxySettings {
     }
 
     @Override
-    public HasProxySettings setExecutor(ExecutorService executor) {
+    public HasProxySettings setExecutor(Executor executor) {
         this.executor = executor;
         return this;
     }
 
     @Override
-    public ExecutorService getExecutor() {
+    public Executor getExecutor() {
         return executor;
     }
 

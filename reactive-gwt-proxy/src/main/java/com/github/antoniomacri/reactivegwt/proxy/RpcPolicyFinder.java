@@ -62,7 +62,7 @@ public class RpcPolicyFinder {
         }
     }
 
-    public CompletionStage<String> getOrFetchPolicyNameAsync(String serviceName, ExecutorService executor) {
+    public CompletionStage<String> getOrFetchPolicyNameAsync(String serviceName, Executor executor) {
         String policyName = policyNameByService.get(serviceName);
         if (policyName != null) {
             return CompletableFuture.completedFuture(policyName);
@@ -71,7 +71,7 @@ public class RpcPolicyFinder {
         }
     }
 
-    public CompletionStage<String> fetchPolicyNameAsync(String serviceName, ExecutorService executor) {
+    public CompletionStage<String> fetchPolicyNameAsync(String serviceName, Executor executor) {
         return fetchSerializationPoliciesAsync(executor).thenApply(ignored -> {
             String newPolicyName = policyNameByService.get(serviceName);
             return newPolicyName;
