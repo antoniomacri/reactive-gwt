@@ -62,6 +62,8 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
     RpcTokenExceptionHandler rpcTokenExceptionHandler;
 
     HasProxySettings settings;
+    HttpClient httpClient;
+
 
     /**
      * Constructor to utilized provided Proxy Settings
@@ -81,6 +83,16 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
         this.cookieManager = settings.getCookieManager();
         this.rpcToken = rpcToken;
         this.rpcTokenExceptionHandler = rpcTokenExceptionhandler;
+        this.httpClient = createHttpClient(settings);
+    }
+
+    private static HttpClient createHttpClient(HasProxySettings settings) {
+        HttpClient httpClient = HttpClient.newBuilder()
+                .executor(settings.getExecutor())
+                .version(HttpClient.Version.HTTP_2)
+                .cookieHandler(settings.getCookieManager())
+                .build();
+        return httpClient;
     }
 
     @Override
@@ -115,7 +127,6 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
     }
 
     public <T> CompletionStage<T> doInvokeAsync(RequestCallbackAdapter.ResponseReader responseReader, String requestData) {
-        HttpClient httpClient = createHttpClient();
         URI cookieUri = URI.create("http://" + URI.create(moduleBaseURL).getHost());
         HttpRequest request = createHttpRequest(requestData, cookieUri);
 
@@ -176,15 +187,6 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
                         throw new InvocationException("Unknown response " + encodedResponse);
                     }
                 });
-    }
-
-    private HttpClient createHttpClient() {
-        HttpClient httpClient = HttpClient.newBuilder()
-                .executor(settings.getExecutor())
-                .version(HttpClient.Version.HTTP_2)
-                .cookieHandler(this.settings.getCookieManager())
-                .build();
-        return httpClient;
     }
 
     private HttpRequest createHttpRequest(String requestData, URI cookieUri) {
