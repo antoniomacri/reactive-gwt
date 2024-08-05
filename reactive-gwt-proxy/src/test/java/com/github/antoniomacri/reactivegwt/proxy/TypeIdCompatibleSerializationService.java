@@ -5,9 +5,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 import java.util.List;
 
-@RemoteServiceRelativePath("orders")
-public interface OrderService extends RemoteService {
-    OrderItem echo(OrderItem item);
-
-    int putList(List<OrderItem> list);
+@RemoteServiceRelativePath("typeIds")
+public interface TypeIdCompatibleSerializationService extends RemoteService {
+    void put(List<Integer> items);
 }

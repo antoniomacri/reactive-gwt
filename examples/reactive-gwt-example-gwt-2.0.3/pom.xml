@@ -92,6 +92,8 @@
                     <httpConnector>
                         <port>8090</port>
                     </httpConnector>
+                    <stopKey>please-stop</stopKey>
+                    <stopPort>8091</stopPort>
                 </configuration>
             </plugin>
         </plugins>

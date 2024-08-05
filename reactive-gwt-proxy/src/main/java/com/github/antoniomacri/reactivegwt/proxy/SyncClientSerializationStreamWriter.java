@@ -21,6 +21,7 @@ import com.google.gwt.user.client.rpc.impl.AbstractSerializationStreamWriter;
 import com.google.gwt.user.client.rpc.impl.ClientSerializationStreamWriter;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.gwt.user.server.rpc.impl.SerializabilityUtil;
+import com.google.gwt.user.server.rpc.impl.StandardSerializationPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +29,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 
 /**
@@ -106,12 +104,36 @@ public class SyncClientSerializationStreamWriter extends AbstractSerializationSt
             clazz = e.getDeclaringClass();
         }
 
-        String typeName = clazz.getName();
-
-        String serializationSignature = SerializabilityUtil.getSerializationSignature(clazz, this.serializationPolicy);
-        if (serializationSignature != null) {
-            typeName += "/" + serializationSignature;
+        String typeName = null;
+        // By using the typeName from SerializabilityUtil, a request to the server may fail
+        // ("Invalid type signature for java.util.ArrayList") since the local type signature is
+        // different from the remote one, e.g. a local typeName "java.util.ArrayList/4159755760"
+        // vs a remote "java.util.ArrayList/3821976829".
+        // However, many collections have custom field serializers (for instance look at
+        // com.google.gwt.user.client.rpc.core.java.util.ArrayList_CustomFieldSerializer),
+        // which basically all work in the same way: serialize the size and then every
+        // single element.
+        // In those cases it should be safe to ignore the local typeSignature and use the
+        // remote as written in the serialization policy.
+        if (getVersion() == 5 && Collection.class.isAssignableFrom(clazz)) {
+            if (serializationPolicy instanceof StandardSerializationPolicy std) {
+                try {
+                    typeName = std.getTypeIdForClass(clazz);
+                } catch (SerializationException e) {
+                    throw new RuntimeException(e);
+                }
+                log.warn("Using typeName={} from serializationPolicy={} for type={}",
+                        typeName, serializationPolicyStrongName, clazz);
+            }
         }
+        if (typeName == null) {
+            typeName = clazz.getName();
+            String serializationSignature = SerializabilityUtil.getSerializationSignature(clazz, this.serializationPolicy);
+            if (serializationSignature != null) {
+                typeName += "/" + serializationSignature;
+            }
+        }
+
         return typeName;
     }
 
