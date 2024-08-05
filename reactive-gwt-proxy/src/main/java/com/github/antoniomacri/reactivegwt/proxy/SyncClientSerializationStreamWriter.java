@@ -137,7 +137,7 @@ public class SyncClientSerializationStreamWriter extends AbstractSerializationSt
         assert instance != null;
 
         Class<?> clazz = getClassForSerialization(instance);
-        log.trace("Serialize instance={} signature={} as class={}", instance, typeSignature, clazz);
+        log.trace("Serialize instance={} signature={} as class={}", instance, typeSignature, clazz.getName());
 
         this.serializationPolicy.validateSerialize(clazz);
 
