@@ -2,7 +2,7 @@
 <module rename-to="AppModule">
     <inherits name="com.google.gwt.user.User"/>
     <collapse-all-properties/>
-    <entry-point class="com.github.antoniomacri.reactivegwt.client.ExampleEntryPoint"/>
+    <entry-point class="com.github.antoniomacri.reactivegwt.client.ApplicationEntryPoint"/>
     <source path="client"/>
     <source path="proxy"/>
 </module>

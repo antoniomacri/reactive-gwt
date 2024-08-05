@@ -6,15 +6,17 @@
     <parent>
         <groupId>io.github.antoniomacri</groupId>
         <artifactId>reactive-gwt-examples</artifactId>
-        <version>1.0.0</version>
+        <version>1.6.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>reactive-gwt-example-gwt-2.7.0</artifactId>
     <packaging>war</packaging>
 
     <properties>
-        <gwt.version>2.7.0</gwt.version>
         <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <gwt.version>2.7.0</gwt.version>
+        <jetty.version>9.4.50.v20221201</jetty.version>
     </properties>
 
     <dependencyManagement>
@@ -36,12 +38,7 @@
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-dev</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.smallrye.reactive</groupId>
-            <artifactId>mutiny</artifactId>
-            <version>2.3.1</version>
+            <artifactId>gwt-servlet</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.persistence</groupId>
@@ -75,6 +72,18 @@
                 <configuration>
                     <module>com.github.antoniomacri.reactivegwt.Application</module>
                     <draftCompile>true</draftCompile>
+                    <webappDirectory>src/main/webapp</webappDirectory>
+                    <jvm>${jdk8}</jvm>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>${jetty.version}</version>
+                <configuration>
+                    <httpConnector>
+                        <port>8090</port>
+                    </httpConnector>
                 </configuration>
             </plugin>
         </plugins>
