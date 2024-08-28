@@ -21,20 +21,11 @@ import com.google.gwt.user.client.rpc.impl.AbstractSerializationStreamReader;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.gwt.user.server.rpc.impl.SerializabilityUtil;
 import com.google.gwt.user.server.rpc.impl.SerializedInstanceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.logging.Logger;
+import java.lang.reflect.*;
+import java.util.*;
 
 
 /**
@@ -44,6 +35,8 @@ import java.util.logging.Logger;
  * @see com.google.gwt.user.server.rpc.impl.ServerSerializationStreamReader
  */
 public class SyncClientSerializationStreamReader extends AbstractSerializationStreamReader {
+    private static final Logger log = LoggerFactory.getLogger(SyncClientSerializationStreamReader.class);
+
     /**
      * Used to accumulate elements while deserializing array types. The generic
      * type of the BoundedList will vary from the component type of the array it
@@ -370,8 +363,6 @@ public class SyncClientSerializationStreamReader extends AbstractSerializationSt
 
     private static final String POSTLUDE = "])";
 
-    Logger logger = Logger.getLogger(SyncClientSerializationStreamReader.class.getName());
-
     public SyncClientSerializationStreamReader(SerializationPolicy serializationPolicy) {
         this.serializationPolicy = serializationPolicy;
     }
@@ -493,7 +484,7 @@ public class SyncClientSerializationStreamReader extends AbstractSerializationSt
             try {
                 this.serializationPolicy.validateDeserialize(instanceClass);
             } catch (SerializationException e) {
-                this.logger.warning(e.getMessage());
+                log.warn("Failed validateDeserialize", e);
             }
 
             // TODO validateTypeVersions(instanceClass, serializedInstRef);
@@ -545,9 +536,7 @@ public class SyncClientSerializationStreamReader extends AbstractSerializationSt
         // if there are server fields ignore them
         if (this.serializationPolicy.getClientFieldNamesForEnhancedClass(instanceClass) != null) {
             int encodedPosition = readInt();
-            this.logger.info("Encoded server field found for class:"
-                             + instanceClass + " with value: "
-                             + getString(encodedPosition));
+            log.info("For class={} received encodedField={}", instanceClass, getString(encodedPosition));
         }
         Field[] serializableFields = SerializabilityUtil.applyFieldSerializationPolicy(instanceClass, this.serializationPolicy);
         for (Field declField : serializableFields) {

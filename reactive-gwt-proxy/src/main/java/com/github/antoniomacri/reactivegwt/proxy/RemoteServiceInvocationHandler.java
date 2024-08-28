@@ -71,29 +71,18 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        log.info("Invoking method={} on proxy={}", method.getName(), proxy.getClass().getName());
-        if (log.isDebugEnabled()) {
-            StringBuilder intfs = new StringBuilder();
-            for (Class<?> intf : proxy.getClass().getInterfaces()) {
-                intfs.append(intf.getName()).append(",");
-            }
-            log.debug("Proxy has interfaces: " + intfs);
-        }
+        log.debug("Invoking method={} on service={}", method.getName(), settings.getServiceName());
 
         if (ServiceDefTarget.class.getName().equals(method.getDeclaringClass().getName())) {
-            log.info("Handling invocation of ServiceDefTarget Interface");
             return handleServiceDefTarget(proxy, method, args);
         } else if (HasRpcToken.class.getName().equals(method.getDeclaringClass().getName())) {
-            log.info("Handling invocation of HasRpcToken Interface");
             return handleHasRpcToken(proxy, method, args);
         } else if (HasProxySettings.class.getName().equals(method.getDeclaringClass().getName())) {
-            log.info("Handling invocation of HasProxySettings Interface");
             return handleHasProxySettings(method, args);
         }
 
         // Handle delegation of calls to the RemoteServiceProxy hierarchy
         if (SerializationStreamFactory.class.getName().equals(method.getDeclaringClass().getName())) {
-            log.info("Handling invocation of SerializationStreamFactory Interface");
             // Here we still need the policy synchronously...
             String policyName = settings.getPolicyFinder().getOrFetchPolicyName(settings.getServiceName());
             SerializationPolicy policy = settings.getPolicyFinder().getSerializationPolicy(policyName);
@@ -101,7 +90,6 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
             return method.invoke(syncProxy, args);
         }
 
-        log.info("Handling invocation of RemoteService Interface");
         return handleRemoteService(method, args);
     }
 

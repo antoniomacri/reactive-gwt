@@ -21,6 +21,8 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.rpc.*;
 import com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.*;
@@ -28,7 +30,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
-import java.util.logging.Logger;
 
 /**
  * Base on {@link com.google.gwt.user.client.rpc.impl.RemoteServiceProxy}
@@ -40,7 +41,7 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
     public static final String OAUTH_BEARER_HEADER = "Authorization";
     public static final String OAUTH_HEADER = "X-GSP-OAUTH-ID";
 
-    static Logger logger = Logger.getLogger(RemoteServiceProxy.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(RemoteServiceProxy.class);
 
     public static boolean isReturnValue(String encodedResponse) {
         return encodedResponse.startsWith("//OK");
@@ -86,9 +87,7 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
     @Override
     public SyncClientSerializationStreamReader createStreamReader(String encoded) throws SerializationException {
         SyncClientSerializationStreamReader reader = new SyncClientSerializationStreamReader(this.serializationPolicy);
-        logger.finer("Preparing Stream Reader");
         reader.prepareToRead(encoded);
-        logger.finer("Stream Reader Prepared");
         return reader;
     }
 
@@ -103,14 +102,12 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
     }
 
     private boolean requiresSecuredProtocol(URL serviceUrl) {
-        logger.config("Checking if connection requires a secured protocol");
         ServiceAuthenticator authenticator = settings.getServiceAuthenticator();
         if (authenticator instanceof TestModeHostVerifier) {
             boolean whiteHost = ((TestModeHostVerifier) authenticator).isTestModeHost(serviceUrl);
-            logger.config("WhiteHost status(" + serviceUrl + "): " + whiteHost);
+            log.debug("WhiteHost status({}): {}", serviceUrl, whiteHost);
             return !whiteHost;
         }
-        logger.fine("TestModeHostVerifier not available, checking for HTTPS Protocol");
         return !serviceUrl.getProtocol().equalsIgnoreCase("https");
     }
 
@@ -123,15 +120,15 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
                     throw new InvocationException("IOException while receiving RPC response", e);
                 })
                 .thenApply(response -> {
-                    // get all headers
-                    logger.fine("Checking Response");
-                    response.headers().map().forEach((k, v) -> logger.finer(k + " : " + v));
-
                     int statusCode = response.statusCode();
                     String encodedResponse = response.body();
-                    logger.config("Response code: " + statusCode);
-                    logger.fine("Response payload: " + encodedResponse);
-                    logger.config("Post-Response cookies:" + cookieManager.getCookieStore().get(cookieUri));
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("Received response with statusCode={} and payload={}", statusCode, encodedResponse);
+                        log.debug("Received cookies={}", cookieManager.getCookieStore().get(cookieUri));
+                    } else {
+                        log.debug("Received response with statusCode={}", statusCode);
+                    }
 
                     if (statusCode == HttpURLConnection.HTTP_NOT_FOUND) {
                         // Do not provide full response data
@@ -142,7 +139,6 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
                         // This can happen if the XHR is interrupted by the server dying
                         throw new InvocationException("No response payload");
                     } else if (isReturnValue(encodedResponse)) {
-                        logger.info("Reading return value");
                         encodedResponse = encodedResponse.substring(4);
                         try {
                             // noinspection unchecked
@@ -151,7 +147,6 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
                             throw new RuntimeException(e);
                         }
                     } else if (isThrownException(encodedResponse)) {
-                        logger.info("Handling Thrown exception");
                         encodedResponse = encodedResponse.substring(4);
                         Throwable throwable;
                         try {
@@ -187,11 +182,14 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
         if (settings.getServiceAuthenticator() != null) {
             settings.getServiceAuthenticator().applyAuthenticationToService(settings);
         }
-        logger.info("Send request to " + this.remoteServiceURL);
-        logger.fine("Request payload: " + requestData);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Sending request to requestUrl={} with payload={}", this.remoteServiceURL, requestData);
+        } else {
+            log.info("Sending request to requestUrl={}", this.remoteServiceURL);
+        }
 
         // Send request
-        logger.config("Starting Request sending to " + this.remoteServiceURL);
         URI uri = URI.create(this.remoteServiceURL);
         URL url;
         try {
@@ -238,19 +236,18 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
         // Create the URI with port if specified
         String domain = URI.create(this.moduleBaseURL).getHost();
         String path = URI.create(this.remoteServiceURL).getPath();
-        logger.fine("Cookie target uri: " + cookieUri);
-        logger.config("Setting cookies: " + this.cookieManager.getCookieStore().get(cookieUri));
+        log.debug("For cookieUri={} setting cookies={}", cookieUri, this.cookieManager.getCookieStore().get(cookieUri));
         for (HttpCookie cookie : store.get(cookieUri)) {
             // Domain must be specified on Cookie to be passed along in
             // Android
             if (cookie.getDomain() == null) {
-                logger.finer("Setting domain for Cookie: " + cookie.getName() + " to " + domain);
+                log.trace("For cookieName={} setting cookieDomain={}", cookie.getName(), domain);
                 cookie.setDomain(domain);
             }
             // Path must be specified on Cookie to be passed along in POJ
             // and Android
             if (cookie.getPath() == null) {
-                logger.finer("Setting path for Cookie: " + cookie.getName() + " to " + path);
+                log.trace("For cookieName={} setting cookiePath={}", cookie.getName(), path);
                 cookie.setPath(path);
             }
         }

@@ -245,7 +245,7 @@ public class SyncClientSerializationStreamWriter extends AbstractSerializationSt
     }
 
     private void serializeWithCustomSerializer(Class<?> customSerializer, Object instance, Class<?> instanceClass) throws SerializationException {
-        log.info("Serializing type={} with customSerializer={}", instanceClass.getName(), customSerializer.getName());
+        log.trace("Serializing type={} with customSerializer={}", instanceClass.getName(), customSerializer.getName());
         try {
             assert !instanceClass.isArray();
 
