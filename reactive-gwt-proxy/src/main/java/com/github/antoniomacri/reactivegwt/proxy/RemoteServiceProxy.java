@@ -24,7 +24,6 @@ import com.google.gwt.user.server.rpc.SerializationPolicy;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.*;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.Map;
@@ -62,7 +61,6 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
     RpcTokenExceptionHandler rpcTokenExceptionHandler;
 
     HasProxySettings settings;
-    HttpClient httpClient;
 
 
     /**
@@ -83,16 +81,6 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
         this.cookieManager = settings.getCookieManager();
         this.rpcToken = rpcToken;
         this.rpcTokenExceptionHandler = rpcTokenExceptionhandler;
-        this.httpClient = createHttpClient(settings);
-    }
-
-    private static HttpClient createHttpClient(HasProxySettings settings) {
-        HttpClient httpClient = HttpClient.newBuilder()
-                .executor(settings.getExecutor())
-                .version(HttpClient.Version.HTTP_2)
-                .cookieHandler(settings.getCookieManager())
-                .build();
-        return httpClient;
     }
 
     @Override
@@ -130,7 +118,7 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
         URI cookieUri = URI.create("http://" + URI.create(moduleBaseURL).getHost());
         HttpRequest request = createHttpRequest(requestData, cookieUri);
 
-        return httpClient.sendAsync(request, BodyHandlers.ofString())
+        return settings.getHttpClient().sendAsync(request, BodyHandlers.ofString())
                 .exceptionally(e -> {
                     throw new InvocationException("IOException while receiving RPC response", e);
                 })

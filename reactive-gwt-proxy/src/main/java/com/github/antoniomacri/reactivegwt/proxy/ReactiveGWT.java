@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Proxy;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.net.http.HttpClient;
 import java.util.concurrent.Executors;
 
 /**
@@ -135,6 +136,17 @@ public class ReactiveGWT {
             settings.setExecutor(Executors.newSingleThreadExecutor());
         } else {
             log.debug("service={} executor={}", serviceIntf.getName(), settings.getExecutor());
+        }
+
+        if (settings.getHttpClient() == null) {
+            log.debug("service={} httpClient=default", serviceIntf.getName());
+            settings.setHttpClient(HttpClient.newBuilder()
+                    .executor(settings.getExecutor())
+                    .version(HttpClient.Version.HTTP_2)
+                    .cookieHandler(settings.getCookieManager())
+                    .build());
+        } else {
+            log.debug("service={} httpClient={}", serviceIntf.getName(), settings.getHttpClient());
         }
     }
 

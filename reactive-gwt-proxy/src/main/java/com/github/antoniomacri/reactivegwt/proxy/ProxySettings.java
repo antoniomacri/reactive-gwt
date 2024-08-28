@@ -17,6 +17,7 @@ package com.github.antoniomacri.reactivegwt.proxy;
 import com.github.antoniomacri.reactivegwt.proxy.auth.ServiceAuthenticator;
 
 import java.net.CookieManager;
+import java.net.http.HttpClient;
 import java.time.InstantSource;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +41,7 @@ public class ProxySettings implements HasProxySettings {
     int serializationStreamVersion = 7;
     InstantSource instantSource = InstantSource.system();
     int serializationPolicyFetchMinIntervalMillis = 300_000;
+    HttpClient httpClient;
 
 
     public ProxySettings(String moduleBaseUrl, String serviceName) {
@@ -166,30 +168,47 @@ public class ProxySettings implements HasProxySettings {
         return executor;
     }
 
+    @Override
     public int getSerializationStreamVersion() {
         return serializationStreamVersion;
     }
 
+    @Override
     public HasProxySettings setSerializationStreamVersion(int serializationStreamVersion) {
         this.serializationStreamVersion = serializationStreamVersion;
         return this;
     }
 
+    @Override
     public InstantSource getInstantSource() {
         return instantSource;
     }
 
+    @Override
     public HasProxySettings setInstantSource(InstantSource instantSource) {
         this.instantSource = instantSource;
         return this;
     }
 
+    @Override
     public int getSerializationPolicyFetchMinIntervalMillis() {
         return serializationPolicyFetchMinIntervalMillis;
     }
 
+    @Override
     public HasProxySettings setSerializationPolicyFetchMinIntervalMillis(int serializationPolicyFetchMinIntervalMillis) {
         this.serializationPolicyFetchMinIntervalMillis = serializationPolicyFetchMinIntervalMillis;
+        return this;
+    }
+
+    @Override
+    public HttpClient getHttpClient() {
+        return httpClient;
+    }
+
+    @Override
+    public HasProxySettings setHttpClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
         return this;
     }
 }

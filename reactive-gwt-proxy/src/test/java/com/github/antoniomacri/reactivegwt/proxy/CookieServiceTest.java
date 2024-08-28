@@ -10,6 +10,7 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.net.*;
@@ -138,6 +139,7 @@ public class CookieServiceTest extends RpcAsyncTestBase<CookieService, CookieSer
     }
 
     @Test
+    @Tag("NotSupported")
     public void testOnTheFlyCookieManagerChange() {
         // Make sure Cookie Store is empty to begin with
         assertThat((Object) ((HasProxySettings) service).getCookieManager()

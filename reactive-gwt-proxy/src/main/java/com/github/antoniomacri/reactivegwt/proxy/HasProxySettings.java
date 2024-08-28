@@ -17,6 +17,7 @@ package com.github.antoniomacri.reactivegwt.proxy;
 import com.github.antoniomacri.reactivegwt.proxy.auth.ServiceAuthenticator;
 
 import java.net.CookieManager;
+import java.net.http.HttpClient;
 import java.time.InstantSource;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -100,4 +101,9 @@ public interface HasProxySettings {
     int getSerializationPolicyFetchMinIntervalMillis();
 
     HasProxySettings setSerializationPolicyFetchMinIntervalMillis(int serializationPolicyFetchMinIntervalMillis);
+
+    HttpClient getHttpClient();
+
+    HasProxySettings setHttpClient(HttpClient httpClient);
+
 }
