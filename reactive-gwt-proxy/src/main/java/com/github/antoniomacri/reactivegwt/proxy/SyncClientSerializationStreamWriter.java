@@ -29,7 +29,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -115,7 +120,8 @@ public class SyncClientSerializationStreamWriter extends AbstractSerializationSt
         // single element.
         // In those cases it should be safe to ignore the local typeSignature and use the
         // remote as written in the serialization policy.
-        if (getVersion() == 5 && Collection.class.isAssignableFrom(clazz)) {
+        // Same for Date.
+        if (getVersion() == 5 && Collection.class.isAssignableFrom(clazz) && Date.class.isAssignableFrom(clazz)) {
             if (serializationPolicy instanceof StandardSerializationPolicy std) {
                 try {
                     typeName = std.getTypeIdForClass(clazz);
