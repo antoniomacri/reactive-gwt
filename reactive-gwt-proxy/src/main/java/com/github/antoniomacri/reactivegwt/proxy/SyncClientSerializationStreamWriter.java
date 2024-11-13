@@ -121,7 +121,7 @@ public class SyncClientSerializationStreamWriter extends AbstractSerializationSt
         // In those cases it should be safe to ignore the local typeSignature and use the
         // remote as written in the serialization policy.
         // Same for Date.
-        if (getVersion() == 5 && Collection.class.isAssignableFrom(clazz) && Date.class.isAssignableFrom(clazz)) {
+        if (getVersion() == 5 && (Collection.class.isAssignableFrom(clazz) || Date.class.isAssignableFrom(clazz))) {
             if (serializationPolicy instanceof StandardSerializationPolicy std) {
                 try {
                     typeName = std.getTypeIdForClass(clazz);
