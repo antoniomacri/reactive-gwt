@@ -124,7 +124,7 @@ public class RemoteServiceProxy implements SerializationStreamFactory {
                     String encodedResponse = response.body();
 
                     if (log.isDebugEnabled()) {
-                        log.debug("Received response with statusCode={} and payload={}", statusCode, encodedResponse);
+                        log.debug("Received response with statusCode={} and payload=\"{}\"", statusCode, encodedResponse);
                         log.debug("Received cookies={}", cookieManager.getCookieStore().get(cookieUri));
                     } else {
                         log.debug("Received response with statusCode={}", statusCode);

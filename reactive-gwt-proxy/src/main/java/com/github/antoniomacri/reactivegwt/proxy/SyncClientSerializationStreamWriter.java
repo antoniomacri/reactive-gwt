@@ -129,7 +129,7 @@ public class SyncClientSerializationStreamWriter extends AbstractSerializationSt
                     throw new RuntimeException(e);
                 }
                 log.warn("Using typeName={} from serializationPolicy={} for type={}",
-                        typeName, serializationPolicyStrongName, clazz);
+                        typeName, serializationPolicyStrongName, clazz.getName());
             }
         }
         if (typeName == null) {
