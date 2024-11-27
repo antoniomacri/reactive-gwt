@@ -120,8 +120,17 @@ public class SyncClientSerializationStreamWriter extends AbstractSerializationSt
         // single element.
         // In those cases it should be safe to ignore the local typeSignature and use the
         // remote as written in the serialization policy.
-        // Same for Date.
-        if (getVersion() == 5 && (Collection.class.isAssignableFrom(clazz) || Date.class.isAssignableFrom(clazz))) {
+        if (getVersion() == 5 && (
+                Collection.class.isAssignableFrom(clazz) ||
+                // Same for Date.
+                Date.class.isAssignableFrom(clazz) ||
+                // For enums, old GWT versions (such as 2.0.3), do not create a signature based
+                // on the actual enum values, but instead compute it just from the enum name
+                // (and its superclasses). Newer versions (such as 2.8.2 we are using here) consider
+                // all the enum values. Since the old logic is pretty useless, there should be no
+                // problem in bypassing the signature check on an old server.
+                Enum.class.isAssignableFrom(clazz)
+        )) {
             if (serializationPolicy instanceof StandardSerializationPolicy std) {
                 try {
                     typeName = std.getTypeIdForClass(clazz);
