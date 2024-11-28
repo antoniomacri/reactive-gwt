@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>io.github.antoniomacri</groupId>
         <artifactId>reactive-gwt-examples</artifactId>
-        <version>1.7.5-SNAPSHOT</version>
+        <version>1.7.5</version>
     </parent>
 
     <artifactId>reactive-gwt-example-modern-client</artifactId>
@@ -182,14 +181,14 @@
                         </goals>
                         <configuration>
                             <target>
-                                <echo level="info" message="Building GWT module..."/>
+                                <echo level="info" message="Building GWT module..." />
                                 <exec dir="../${tested.gwt.module}" executable="../../mvnw">
-                                    <arg value="package"/>
+                                    <arg value="package" />
                                 </exec>
-                                <echo level="info" message="Running Jetty on background..."/>
+                                <echo level="info" message="Running Jetty on background..." />
                                 <!-- jetty:start stops immediately (on MacOS?), so :run in background -->
                                 <exec dir="../${tested.gwt.module}" executable="../../mvnw" spawn="true">
-                                    <arg value="jetty:run"/>
+                                    <arg value="jetty:run" />
                                 </exec>
                             </target>
                         </configuration>
@@ -203,7 +202,7 @@
                         <configuration>
                             <target>
                                 <exec dir="../${tested.gwt.module}" executable="../../mvnw">
-                                    <arg value="jetty:stop"/>
+                                    <arg value="jetty:stop" />
                                 </exec>
                             </target>
                         </configuration>
