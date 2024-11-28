@@ -60,6 +60,20 @@ Paste the token in the `settings.xml` as
 </server>
 ```
 
+Make sure a variable pointing to a JDK 1.8 is defined in `settings.xml`, eg:
+```xml
+
+<profile>
+    <id>common</id>
+    <activation>
+        <activeByDefault>true</activeByDefault>
+    </activation>
+    <properties>
+        <jdk8>/Library/Java/JavaVirtualMachines/jdk-1.8.jdk/Contents/Home</jdk8>
+    </properties>
+</profile>
+```
+
 Finally, run the release plugin:
 ```shell
 ./mvnw -Darguments='-Dmaven.test.skip=true' release:prepare
