@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.antoniomacri</groupId>
         <artifactId>reactive-gwt</artifactId>
-        <version>1.6.2-SNAPSHOT</version>
+        <version>1.7.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>reactive-gwt-examples</artifactId>
@@ -39,5 +39,18 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.3</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

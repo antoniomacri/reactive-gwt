@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.antoniomacri</groupId>
         <artifactId>reactive-gwt-examples</artifactId>
-        <version>1.6.2-SNAPSHOT</version>
+        <version>1.7.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>reactive-gwt-example-gwt-2.7.0</artifactId>
