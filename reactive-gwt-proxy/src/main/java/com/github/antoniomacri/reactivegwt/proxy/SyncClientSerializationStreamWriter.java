@@ -298,7 +298,7 @@ public class SyncClientSerializationStreamWriter extends AbstractSerializationSt
     public void writeLong(long fieldValue) {
         if (getVersion() == SERIALIZATION_STREAM_MIN_VERSION) {
             double[] parts;
-            parts = makeLongComponents((int) (fieldValue >> 32), (int) fieldValue);
+            parts = makeLongComponents((int) fieldValue, (int) (fieldValue >> 32));
             assert parts.length == 2;
             writeDouble(parts[0]);
             writeDouble(parts[1]);
