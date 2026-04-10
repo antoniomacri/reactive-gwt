@@ -188,7 +188,13 @@
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>true</autoPublish>
                             <waitUntil>published</waitUntil>
-                            <excludeArtifacts>reactive-gwt-examples</excludeArtifacts>
+                            <excludeArtifacts>
+                                <excludeArtifact>reactive-gwt-examples</excludeArtifact>
+                                <excludeArtifact>reactive-gwt-example-gwt-2.0.3</excludeArtifact>
+                                <excludeArtifact>reactive-gwt-example-gwt-2.7.0</excludeArtifact>
+                                <excludeArtifact>reactive-gwt-example-gwt-2.8.2</excludeArtifact>
+                                <excludeArtifact>reactive-gwt-example-modern-client</excludeArtifact>
+                            </excludeArtifacts>
                         </configuration>
                     </plugin>
                 </plugins>
