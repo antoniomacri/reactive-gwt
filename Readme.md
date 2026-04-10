@@ -49,12 +49,12 @@ The latest [Release Notes](https://github.com/jcricket/gwt-syncproxy/wiki/Releas
 
 # Releasing
 
-Check the token is currently valid or issue a new token. Login to https://s01.oss.sonatype.org then go to https://s01.oss.sonatype.org/#profile;User%20Token and generate a new token.
+Check the token is currently valid or issue a new token. Login to https://central.sonatype.com then go to https://central.sonatype.com/usertoken and generate a new token.
 
 Paste the token in the `settings.xml` as
 ```xml
 <server>
-    <id>ossrh</id>
+    <id>central</id>
     <username>...</username>
     <password>...</password>
 </server>
