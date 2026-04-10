@@ -8,6 +8,7 @@
         <version>1.7.6-SNAPSHOT</version>
     </parent>
 
+    <name>Reactive GWT Processor</name>
     <artifactId>reactive-gwt-processor</artifactId>
     <packaging>jar</packaging>
 

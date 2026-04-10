@@ -8,6 +8,7 @@
         <version>1.7.6-SNAPSHOT</version>
     </parent>
 
+    <name>Reactive GWT Proxy</name>
     <artifactId>reactive-gwt-proxy</artifactId>
     <packaging>jar</packaging>
 
