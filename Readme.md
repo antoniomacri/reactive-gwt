@@ -1,6 +1,6 @@
 # Reactive GWT
 
-Call GWT RPC services from a plain JVM application — without GWT's client compiler, without JSNI, and without recompiling your existing GWT services.
+Call GWT RPC services from a plain JVM application — without GWT's client compiler, without JSNI, and without touching your existing GWT services.
 
 The library implements the GWT RPC wire protocol on top of `java.net.http.HttpClient` and exposes service interfaces through dynamic proxies, so any class annotated with `@RemoteServiceRelativePath` on the server can be invoked from a standard Java (or Android) client. An optional annotation processor generates both the `Async` interface and a reactive adapter that returns SmallRye Mutiny `Uni`s.
 
@@ -16,7 +16,7 @@ This project started as a fork of [GWT-SyncProxy](https://github.com/jcricket/gw
 
 ## Installation
 
-The artifacts are published to [Maven Central](https://central.sonatype.com/artifact/io.github.antoniomacri/reactive-gwt-proxy):
+The artifacts are published to [Maven Central](https://central.sonatype.com/artifact/io.github.antoniomacri/reactive-gwt-proxy).
 
 Add the following dependencies to your `pom.xml`:
 
@@ -47,12 +47,14 @@ public interface OrderService extends RemoteService {
 }
 ```
 
-You have two choices on how to use the library: directly with the Async style or with Mutiny.
+Copy this interface from the sources of the legacy GWT application to the sources of your new Java backend or Android app.
+
+You have two choices on how to use the library: directly following the Async style or via Mutiny.
 
 
 ### Async style (no extra dependency)
 
-From the `OrderService` interface, the annotation processor generates an `OrderServiceAsync` companion (the GWT-style callback-based interface):
+From the `OrderService` interface (copied on your new modern backend), the annotation processor generates an `OrderServiceAsync` companion (the GWT-style callback-based interface):
 
 ```java
 @Generated("com.github.antoniomacri.reactivegwt.processor.ReactiveGwtProcessor")
@@ -82,7 +84,7 @@ public class MyService {
 }
 ```
 
-You need to specify also the URL of the backend application which exposes services via GWT-RPC.
+You need to specify also the URL of the backend application which exposes services via GWT-RPC (`moduleBaseUrl`).
 
 The `service` variable holds an implementation of the Async interface which implements all the logic for communicating to the backend server via GWT-RPC.
 
