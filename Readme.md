@@ -1,50 +1,189 @@
-## Updates
+# Reactive GWT
 
-Work is currently in progress to support Android to GAE login support using OAuth2 Credentials, specifically the Cross Client Identification. See the (in progress) [OAuth 2.0 App Engine Authentication](https://github.com/jcricket/gwt-syncproxy/wiki/OAuth-2.0-App-Engine-Authentication) wiki for details. This work should resolve potential issues that may occur with the upcoming Google service shutdown of ClientLogin, which is utilized by GSP.
+Call GWT RPC services from a plain JVM application — without GWT's client compiler, without JSNI, and without recompiling your existing GWT services.
 
-# GWT-SyncProxy (GSP)
+The library implements the GWT RPC wire protocol on top of `java.net.http.HttpClient` and exposes service interfaces through dynamic proxies, so any class annotated with `@RemoteServiceRelativePath` on the server can be invoked from a standard Java (or Android) client. An optional annotation processor generates both the `Async` interface and a reactive adapter that returns SmallRye Mutiny `Uni`s.
 
-[Google-Web-Toolkit (GWT)](http://www.gwtproject.org/) uses asynchronous RPC's between client (e.g Browser) and RemoteService servlet. Written in Java, the client-side code is converted to JS when compiled. The client side uses dynamically created Proxy's to handle method calls and serialization back and forth with the server. As such, there is no library within the GWT project to make these method calls from Java that is not translated. GWT-SyncProxy fills that gap.
+This project started as a fork of [GWT-SyncProxy](https://github.com/jcricket/gwt-syncproxy) and has been modernized: JDK 17 baseline, the modern `HttpClient`, JUnit 5 + Arquillian test stack, Maven Central publishing, and reactive adapters.
 
-GWT-SyncProxy provides asynchronous and synchronous RPC between a Java client and RemoteService servlet. By using SyncProxy, we can invoke the GWT RemoteService methods from pure Java (no JSNI) code.
 
-The GWT SyncProxy Android library provides the same system for calling RPC's from Android in the same way the SyncProxy library allows calls to be made from pure Java. There are a few objects that can't yet be serialized properly, but aside from those the library allows GWT style access to GWT RPC servlets. Android API 14(Ice Cream Sandwich) and higher is required to utilize the Google App Engine Login Utilities.
+## Modules
 
-Both libraries also provide Utility methods for providing and using login credentials against App Engine hosted GWT services.
+- **`reactive-gwt-proxy`** — the runtime library
+- **`reactive-gwt-processor`** — an annotation processor that scans GWT interfaces (`@RemoteServiceRelativePath`) and generates the GWT `XxxAsync` companion interface and the `XxxMutiny` reactive adapter
+- **`examples/`** — integration examples against GWT 2.0.3, 2.7.0 and 2.8.2, plus a Quarkus-based modern client that wraps a GWT RPC backend and re-exposes it as a JAX-RS REST endpoint.
 
-## Status and Contribution
 
-This project is currently (0.5) working with GWT 2.7.0 as a base, and has some support back to GWT 2.2 with previous versions of SyncProxy.
+## Installation
 
-The primary repository is available at https://github.com/jcricket/gwt-syncproxy. This project is under new management (effective Feb 2014) and transferred from Google Code to GitHub effective Mar 2015. If you would like to contribute to this project, please open a new issue with label **Join Project** to get added on to this project or fork it.
+The artifacts are published to [Maven Central](https://central.sonatype.com/artifact/io.github.antoniomacri/reactive-gwt-proxy):
 
-## Usage Example
+Add the following dependencies to your `pom.xml`:
 
-GWT SyncProxy allows you to make both Synchronous and Asynchronous calls from a Java or Android application. While most will still prefer the Async style utilized in GWT for the majority of RPC calls, there is a specific scenario where the synchronized method comes in handy. This is for testing GWT services in unit tests. Please see [Sebastian Gurin's Blog](http://cancerberonia.blogspot.com/2012/10/testing-gwt-service-classes.html) for details and examples. Below is a quick example of what SyncProxy allows you to do from a Java or Android application (Android is slightly more complex as it needs to be run off the main thread: See Android wiki).
-```java
-SyncProxy.setBaseUrl("http://myapp.appspot.com/module");
-// Normal Async Call Handling
-GreetingServiceAsync greetingServiceAsync = SyncProxy.create(GreetingService.class);
-greetingServiceAsync.greet("Hello", new AsyncCallback<String>(){
-    void onFailure(Throwable throwable){
-        // TODO Handle exception
-    }
-    void onSuccess(String value){
-        // Handle return value
-    } 
-}
-// Synchronous calls
-GreetingService greetingService = SyncProxy.createSync(GreetingService.class);
-String value = greetingService.greet("Hello");
+```xml
+<dependency>
+    <groupId>io.github.antoniomacri</groupId>
+    <artifactId>reactive-gwt-processor</artifactId>
+    <version>1.7.6</version>
+    <scope>provided</scope>
+</dependency>
+<dependency>
+    <groupId>io.github.antoniomacri</groupId>
+    <artifactId>reactive-gwt-proxy</artifactId>
+    <version>1.7.6</version>
+</dependency>
 ```
 
-## Developers
 
-Are you using SyncProxy in your Project? Let us know so we can generate a list of projects utilizing the SyncProxy Project. Let us know which Library (Java/Android) you are using and a website if you have it!
+## Usage
 
-## Changes
+Suppose you have an existing GWT RPC service shared between client and server:
 
-The latest [Release Notes](https://github.com/jcricket/gwt-syncproxy/wiki/Release-Notes) are available up to version 0.5. The Roadmap is a work in progress and currently targeting version 0.6. Check the [Common Issues](https://github.com/jcricket/gwt-syncproxy/wiki/Common-Issues) wiki for a list of problems that may occur and how to resolve them before submitting a ticket. You may also post up to StackOverflow with the 'gwt-syncproxy' tag and we'll help you there.
+```java
+@RemoteServiceRelativePath("orders")
+public interface OrderService extends RemoteService {
+    OrderItem echo(OrderItem item);
+    int putList(List<OrderItem> list);
+}
+```
+
+You have two choices on how to use the library: directly with the Async style or with Mutiny.
+
+
+### Async style (no extra dependency)
+
+From the `OrderService` interface, the annotation processor generates an `OrderServiceAsync` companion (the GWT-style callback-based interface):
+
+```java
+@Generated("com.github.antoniomacri.reactivegwt.processor.ReactiveGwtProcessor")
+public interface OrderServiceAsync {
+    Request echo(OrderItem item, AsyncCallback<OrderItem> callback);
+    Request putList(List<OrderItem> list, AsyncCallback<Integer> callback);
+}
+```
+
+You can now use `ReactiveGWT.create` to make the library generate the client proxy for the Async interface:
+
+```java
+public class MyService {
+    String moduleBaseUrl = "http://localhost:8080/AppModule/";
+    OrderServiceAsync service = ReactiveGWT.create(OrderService.class, moduleBaseUrl);
+
+    public void addOrder() {
+        OrderItem item = new OrderItem();
+        service.echo(item, new AsyncCallback<OrderItem>() {
+            @Override
+            public void onSuccess(OrderItem result) { /* ... */ }
+
+            @Override
+            public void onFailure(Throwable caught) { /* ... */ }
+        });
+    }
+}
+```
+
+You need to specify also the URL of the backend application which exposes services via GWT-RPC.
+
+The `service` variable holds an implementation of the Async interface which implements all the logic for communicating to the backend server via GWT-RPC.
+
+
+### Reactive style with Mutiny
+
+When Mutiny is on the classpath, the annotation processor generates an `OrderServiceMutiny` adapter, alongside the async interface:
+
+```java
+@Generated("com.github.antoniomacri.reactivegwt.processor.ReactiveGwtProcessor")
+public class OrderServiceMutiny {
+    private final OrderServiceAsync async$;
+
+    public OrderServiceMutiny(OrderServiceAsync async) {
+        this.async$ = async;
+    }
+
+    private <T> AsyncCallback<T> createCallback(UniEmitter<? super T> em) {
+        return new AsyncCallback<T>() {
+            @Override public void onFailure(Throwable e) { em.fail(e); }
+            @Override public void onSuccess(T result) { em.complete(result); }
+        };
+    }
+
+    public Uni<OrderItem> echo(final OrderItem item) {
+        return Uni.createFrom().emitter(em -> async$.echo(item, createCallback(em)));
+    }
+
+    public Uni<Integer> putList(final List<OrderItem> list) {
+        return Uni.createFrom().emitter(em -> async$.putList(list, createCallback(em)));
+    }
+}
+```
+
+First, use `ReactiveGWT.create` to make the library generate the client proxy for the Async interface, and then instantiate the generated Mutiny service:
+
+```java
+OrderServiceAsync async = ReactiveGWT.create(OrderService.class, moduleBaseUrl);
+OrderServiceMutiny service = new OrderServiceMutiny(async);
+
+Uni<OrderItem> result = service.echo(item);
+```
+
+This composes naturally with reactive frameworks such as Quarkus. A typical setup uses a CDI producer to build the proxy and the Mutiny adapter once, and a JAX-RS resource to re-expose them as REST endpoints:
+
+```java
+@ApplicationScoped
+public class OrderServiceProducer {
+
+    @Produces
+    public OrderServiceAsync produce() {
+        String moduleBaseURL = "http://localhost:8090/AppModule/";
+        ProxySettings proxySettings = new ProxySettings(moduleBaseURL, OrderService.class.getName());
+        return ReactiveGWT.create(OrderService.class, proxySettings);
+    }
+
+    @Produces
+    public OrderServiceMutiny produce(OrderServiceAsync serviceAsync) {
+        return new OrderServiceMutiny(serviceAsync);
+    }
+}
+```
+
+```java
+@ApplicationScoped
+@Path("orders")
+public class OrderServiceRest {
+    @Inject
+    OrderServiceMutiny orderServiceMutiny;
+
+    @POST
+    @Path("echo")
+    public Uni<OrderItem> echo(OrderItem orderItem) {
+        return orderServiceMutiny.echo(orderItem);
+    }
+
+    @POST
+    @Path("putList")
+    public Uni<Integer> putList(List<OrderItem> list) {
+        return orderServiceMutiny.putList(list);
+    }
+}
+```
+
+
+### Configuring the proxy
+
+Use `ProxySettings` for finer control (custom headers, cookies, executor, OAuth tokens, RPC stream version, etc.):
+
+```java
+ProxySettings settings = new ProxySettings(moduleBaseUrl, OrderService.class.getName())
+        .setSerializationStreamVersion(5)            // match older servers (e.g. GWT 2.0/2.7)
+        .setExecutor(myExecutor);
+
+OrderServiceAsync service = ReactiveGWT.create(OrderService.class, settings);
+```
+
+
+## License
+
+Apache License 2.0 — see [`License.md`](License.md).
 
 
 # Releasing
